@@ -1,67 +1,49 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { Trophy } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
 import { LeaderboardTable, Podium } from '@/components/LeaderboardTable'
 import { PageLoader } from '@/components/LoadingScreen'
-import { apiRoutes } from '@/lib/api'
+import { apiRoutes, type LeaderboardEntry } from '@/lib/api'
 import { useAuth } from '@clerk/nextjs'
-import type { LeaderboardEntry } from '@/lib/api'
-import { Trophy } from 'lucide-react'
 
 export default function LeaderboardPage() {
   const { userId } = useAuth()
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const response = await apiRoutes.users.leaderboard()
-        setEntries(response.data)
-      } catch (error) {
-        console.error('Failed to fetch leaderboard:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchLeaderboard()
+    apiRoutes.users.leaderboard()
+      .then((response) => setEntries(response.data))
+      .catch((error) => console.error('Failed to load leaderboard:', error))
+      .finally(() => setLoading(false))
   }, [])
 
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      
       <main className="flex-1 p-6 lg:p-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Trophy className="w-8 h-8 text-accent" />
-            <h1 className="font-orbitron text-3xl font-bold text-white">Leaderboard</h1>
+        <div className="mx-auto max-w-7xl">
+          <div className="glass rounded-[36px] p-8">
+            <div className="flex items-center gap-3">
+              <Trophy className="h-8 w-8 text-amber-200" />
+              <div>
+                <p className="text-sm uppercase tracking-[0.24em] text-amber-200/75">Leaderboard</p>
+                <h1 className="font-orbitron text-4xl font-bold text-white">Top roasters in the arena</h1>
+              </div>
+            </div>
           </div>
-          <p className="text-white/60">Top roasters in the arena</p>
+
+          {loading ? (
+            <PageLoader message="Loading leaderboard" />
+          ) : (
+            <div className="mt-8 space-y-8">
+              <Podium topThree={entries.slice(0, 3)} />
+              <LeaderboardTable entries={entries} currentUserId={userId ?? undefined} />
+            </div>
+          )}
         </div>
-
-        {isLoading ? (
-          <PageLoader />
-        ) : (
-          <>
-            {entries.length >= 3 && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-12"
-              >
-                <Podium topThree={entries.slice(0, 3)} />
-              </motion.div>
-            )}
-
-            <LeaderboardTable
-              entries={entries}
-              currentUserId={userId}
-            />
-          </>
-        )}
       </main>
     </div>
   )

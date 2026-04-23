@@ -1,80 +1,109 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { use, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
-import { Swords, Users, Clock, Send, Trophy, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { MessageSquareText, Sparkles, Swords, Timer, Users } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
+import { PredictionPanel } from '@/components/PredictionPanel'
 import { PageLoader } from '@/components/LoadingScreen'
-import { apiRoutes } from '@/lib/api'
-import { getSocket, joinMatch, leaveMatch, submitRoast, castVote, onMatchResult, onSpectatorUpdate, removeAllListeners } from '@/lib/socket'
-import type { Battle, User } from '@/lib/api'
-import { cn } from '@/lib/utils'
+import { apiRoutes, type Battle, type User } from '@/lib/api'
+import {
+  castVote,
+  getSocket,
+  joinMatch,
+  leaveMatch,
+  makePrediction,
+  onMatchResult,
+  onRoastSubmitted,
+  onSpectatorUpdate,
+  removeAllListeners,
+  submitRoast,
+} from '@/lib/socket'
+import { cn, formatRelativeTime } from '@/lib/utils'
+import { useAuth } from '@clerk/nextjs'
+import { toast } from 'sonner'
 
 export default function BattleRoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const { userId } = useAuth()
   const router = useRouter()
+  const { userId } = useAuth()
   const [battle, setBattle] = useState<Battle | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [roast, setRoast] = useState('')
   const [spectators, setSpectators] = useState(0)
-  const [showWinner, setShowWinner] = useState(false)
   const [winner, setWinner] = useState<User | null>(null)
+  const [showWinner, setShowWinner] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchBattle = async () => {
-      try {
-        const response = await apiRoutes.battles.get(id)
+    apiRoutes.battles.get(id)
+      .then((response) => {
         setBattle(response.data)
-        if (userId) {
-          joinMatch(id, userId)
-        }
-      } catch (error) {
-        console.error('Failed to fetch battle:', error)
-        router.push('/battles')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchBattle()
+        setSpectators(response.data.spectators)
+      })
+      .catch((error) => {
+        console.error('Failed to load battle:', error)
+        router.replace('/battles')
+      })
+      .finally(() => setLoading(false))
 
     const socket = getSocket()
     socket.connect()
 
-    onMatchResult((data) => {
-      if (data.matchId === id) {
-        setShowWinner(true)
-        setWinner(data.winnerId === battle?.player1?.id ? battle?.player1 : battle?.player2)
-      }
+    if (userId) {
+      joinMatch(id, userId)
+    }
+
+    onSpectatorUpdate((event) => {
+      if (event.matchId === id) setSpectators(event.count)
     })
 
-    onSpectatorUpdate((data) => {
-      if (data.matchId === id) {
-        setSpectators(data.count)
-      }
+    onRoastSubmitted((event) => {
+      if (event.matchId !== id) return
+      setBattle((current) => {
+        if (!current) return current
+        return {
+          ...current,
+          player1Roast: current.player1?.id === event.userId ? event.roast : current.player1Roast,
+          player2Roast: current.player2?.id === event.userId ? event.roast : current.player2Roast,
+        }
+      })
+    })
+
+    onMatchResult((event) => {
+      if (event.matchId !== id) return
+      setBattle((current) => {
+        if (!current) return current
+        const nextWinner = current.player1?.id === event.winnerId ? current.player1 ?? null : current.player2 ?? null
+        setWinner(nextWinner)
+        setShowWinner(true)
+        return current
+      })
     })
 
     return () => {
-      if (userId) {
-        leaveMatch(id, userId)
-      }
+      if (userId) leaveMatch(id, userId)
       removeAllListeners()
     }
-  }, [id, userId, router, battle?.player1?.id, battle?.player2?.id])
+  }, [id, router, userId])
 
-  const handleSubmitRoast = async () => {
-    if (!roast.trim() || !userId) return
+  const isPlayer = useMemo(() => {
+    return battle?.player1?.clerkId === userId || battle?.player2?.clerkId === userId
+  }, [battle, userId])
+
+  const handleSubmitRoast = () => {
+    if (!roast.trim() || !battle || !userId) return
     submitRoast(id, userId, roast)
+    setBattle((current) => {
+      if (!current) return current
+      return {
+        ...current,
+        player1Roast: current.player1?.clerkId === userId ? roast : current.player1Roast,
+        player2Roast: current.player2?.clerkId === userId ? roast : current.player2Roast,
+      }
+    })
     setRoast('')
-    if (battle) {
-      setBattle({
-        ...battle,
-        player1Roast: battle.player1?.id === userId ? roast : battle.player1Roast,
-        player2Roast: battle.player2?.id === userId ? roast : battle.player2Roast,
-      })
-    }
+    toast.success('Roast submitted')
   }
 
   const handleVote = async (playerId: string) => {
@@ -83,26 +112,20 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
     try {
       const response = await apiRoutes.battles.vote(id, { playerId })
       setBattle(response.data)
+      toast.success('Vote recorded')
     } catch (error) {
       console.error('Failed to vote:', error)
+      toast.error('Vote failed')
     }
   }
 
-  if (isLoading) {
+  if (loading || !battle) {
     return (
       <div className="flex min-h-screen pt-16">
         <Sidebar />
         <main className="flex-1 p-6 lg:p-8">
-          <PageLoader />
+          <PageLoader message="Connecting to match room" />
         </main>
-      </div>
-    )
-  }
-
-  if (!battle) {
-    return (
-      <div className="flex min-h-screen pt-16 items-center justify-center">
-        <p className="text-white/60">Battle not found</p>
       </div>
     )
   }
@@ -110,88 +133,85 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      
       <main className="flex-1 p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <Swords className="w-6 h-6 text-primary" />
-              <h1 className="font-orbitron text-2xl font-bold text-white">{battle.topic}</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl glass">
-                <Users className="w-5 h-5 text-white/50" />
-                <span className="text-white/70">{spectators}</span>
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
+            <section className="space-y-8">
+              <div className="glass rounded-[36px] p-8">
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.24em] text-blue-200/75">Battle room</p>
+                    <h1 className="mt-3 font-orbitron text-4xl font-bold text-white">{battle.topic}</h1>
+                  </div>
+                  <div className="flex flex-wrap gap-3 text-sm text-white/70">
+                    <InfoPill icon={<Timer className="h-4 w-4 text-amber-200" />} label={`Ends ${formatRelativeTime(battle.expiresAt)}`} />
+                    <InfoPill icon={<Users className="h-4 w-4 text-blue-200" />} label={`${spectators} spectators`} />
+                    <InfoPill icon={<Sparkles className="h-4 w-4 text-violet-200" />} label={`${battle.player1Votes + battle.player2Votes} votes`} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <PlayerCard
+              <div className="grid gap-5 lg:grid-cols-2">
+                <PlayerPanel
                   player={battle.player1}
                   roast={battle.player1Roast}
                   votes={battle.player1Votes}
-                  isYou={battle.player1?.id === userId}
-                  onVote={() => handleVote(battle.player1?.id || '')}
-                  canVote={!battle.player1Roast && battle.status !== 'completed'}
+                  isCurrentUser={battle.player1?.clerkId === userId}
+                  onVote={() => battle.player1?.id && handleVote(battle.player1.id)}
                 />
-                <PlayerCard
+                <PlayerPanel
                   player={battle.player2}
                   roast={battle.player2Roast}
                   votes={battle.player2Votes}
-                  isYou={battle.player2?.id === userId}
-                  onVote={() => handleVote(battle.player2?.id || '')}
-                  canVote={!battle.player2Roast && battle.status !== 'completed'}
+                  isCurrentUser={battle.player2?.clerkId === userId}
+                  onVote={() => battle.player2?.id && handleVote(battle.player2.id)}
                 />
               </div>
 
-              {battle.status !== 'completed' && (
-                <div className="p-6 rounded-2xl glass">
-                  <h3 className="font-semibold text-white mb-4">Submit Your Roast</h3>
-                  <div className="space-y-4">
-                    <textarea
-                      value={roast}
-                      onChange={(e) => setRoast(e.target.value)}
-                      placeholder="Type your roast here..."
-                      className="w-full h-32 p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 resize-none focus:outline-none focus:border-primary/50 transition-colors"
-                    />
-                    <button
-                      onClick={handleSubmitRoast}
-                      disabled={!roast.trim()}
-                      className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
-                    >
-                      <Send className="w-5 h-5" />
-                      Submit Roast
-                    </button>
-                  </div>
+              <div className="glass rounded-[36px] p-6">
+                <div className="flex items-center gap-2">
+                  <MessageSquareText className="h-5 w-5 text-blue-200" />
+                  <h2 className="font-orbitron text-2xl text-white">Submit your roast</h2>
                 </div>
-              )}
-            </div>
-
-            <div>
-              <div className="p-6 rounded-2xl glass sticky top-24">
-                <h3 className="font-semibold text-white mb-4">Battle Info</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/50">Pot</span>
-                    <span className="font-orbitron font-bold text-accent">{battle.pot} XLM</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/50">Status</span>
-                    <span className={cn(
-                      'px-3 py-1 rounded-full text-xs font-medium',
-                      battle.status === 'open' ? 'bg-primary/20 text-primary' :
-                      battle.status === 'active' ? 'bg-secondary/20 text-secondary' :
-                      'bg-accent/20 text-accent'
-                    )}>
-                      {battle.status.toUpperCase()}
-                    </span>
-                  </div>
+                <textarea
+                  value={roast}
+                  onChange={(event) => setRoast(event.target.value)}
+                  placeholder={isPlayer ? 'Type something devastating...' : 'Spectators can watch and predict only.'}
+                  disabled={!isPlayer}
+                  className="mt-5 h-36 w-full rounded-[28px] border border-white/10 bg-white/[0.03] p-4 text-white outline-none placeholder:text-white/25 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={handleSubmitRoast}
+                    disabled={!isPlayer || !roast.trim()}
+                    className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    Submit Roast
+                  </button>
                 </div>
               </div>
-            </div>
+            </section>
+
+            <aside className="space-y-6">
+              <PredictionPanel
+                player1Name={battle.player1?.id ?? 'player-1'}
+                player2Name={battle.player2?.id ?? 'player-2'}
+                isSpectator={!isPlayer}
+                onPredict={(playerId, amount) => {
+                  makePrediction(id, playerId, amount)
+                  toast.success('Prediction placed')
+                }}
+              />
+
+              <div className="glass rounded-[28px] p-6">
+                <p className="text-sm uppercase tracking-[0.24em] text-white/35">Match pulse</p>
+                <div className="mt-5 space-y-3">
+                  <PulseRow label="Pot" value={`${battle.pot} XLM`} />
+                  <PulseRow label="Votes" value={`${battle.player1Votes + battle.player2Votes}`} />
+                  <PulseRow label="Status" value={battle.status} />
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
 
@@ -211,58 +231,55 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
   )
 }
 
-function PlayerCard({ player, roast, votes, isYou, onVote, canVote }: {
+function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">{icon}<span className="ml-2">{label}</span></div>
+}
+
+function PlayerPanel({
+  player,
+  roast,
+  votes,
+  isCurrentUser,
+  onVote,
+}: {
   player?: User
   roast?: string
   votes: number
-  isYou: boolean
+  isCurrentUser: boolean
   onVote: () => void
-  canVote: boolean
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        'p-6 rounded-2xl glass',
-        isYou && 'border-primary/30'
-      )}
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-          {player?.username?.[0]?.toUpperCase() || '?'}
-        </div>
-        <div>
-          <p className="font-semibold text-white">{player?.username || 'Waiting...'}</p>
-          {isYou && <span className="text-xs text-primary">You</span>}
-        </div>
-      </div>
-
-      {roast ? (
-        <div className="p-4 rounded-xl bg-white/5 mb-4">
-          <p className="text-white/90 italic">&ldquo;{roast}&rdquo;</p>
-        </div>
-      ) : (
-        <div className="p-4 rounded-xl bg-white/5 mb-4 text-center">
-          <p className="text-white/40">Waiting for roast...</p>
-        </div>
-      )}
-
+    <div className={cn('glass rounded-[32px] p-6', isCurrentUser && 'border-blue-400/18')}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-accent" />
-          <span className="font-orbitron font-bold text-white">{votes}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/8 font-bold text-white">
+            {player?.username?.[0]?.toUpperCase() ?? '?'}
+          </div>
+          <div>
+            <p className="font-semibold text-white">{player?.username ?? 'Awaiting player'}</p>
+            <p className="text-sm text-white/45">{isCurrentUser ? 'You' : 'Competitor'}</p>
+          </div>
         </div>
-        {!isYou && canVote && (
-          <button
-            onClick={onVote}
-            className="px-4 py-2 rounded-xl bg-accent/20 text-accent text-sm font-medium hover:bg-accent/30 transition-colors"
-          >
+        {!isCurrentUser && player?.id && (
+          <button onClick={onVote} className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/80">
             Vote
           </button>
         )}
       </div>
-    </motion.div>
+      <div className="mt-6 rounded-[24px] border border-white/8 bg-black/20 p-4 text-sm leading-7 text-white/72">
+        {roast ?? 'Waiting for roast submission...'}
+      </div>
+      <p className="mt-4 text-sm text-white/45">{votes} votes</p>
+    </div>
+  )
+}
+
+function PulseRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-[22px] border border-white/8 bg-white/[0.03] px-4 py-3">
+      <span className="text-white/45">{label}</span>
+      <span className="font-semibold text-white">{value}</span>
+    </div>
   )
 }
 
@@ -272,37 +289,23 @@ function WinnerModal({ winner, onClose }: { winner: User; onClose: () => void })
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0, rotate: -10 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', damping: 15 }}
-        onClick={(e) => e.stopPropagation()}
-        className="p-8 rounded-3xl glass max-w-md w-full text-center"
+        initial={{ scale: 0.92, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.92, y: 20 }}
+        onClick={(event) => event.stopPropagation()}
+        className="glass glow-primary w-full max-w-md rounded-[36px] p-8 text-center"
       >
-        <motion.div
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-          className="mb-6"
-        >
-          <Trophy className="w-16 h-16 text-accent mx-auto glow-gold" />
-        </motion.div>
-
-        <h2 className="font-orbitron text-3xl font-bold text-white mb-2">Winner!</h2>
-        <p className="text-white/60 mb-6">{winner.username} takes the pot!</p>
-
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Trophy className="w-5 h-5 text-accent" />
-          <span className="font-orbitron text-2xl font-bold text-accent">+Reward Won!</span>
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-300/12">
+          <Swords className="h-8 w-8 text-amber-200" />
         </div>
-
-        <button
-          onClick={onClose}
-          className="px-8 py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:opacity-90 transition-opacity"
-        >
-          Continue
+        <h2 className="mt-6 font-orbitron text-4xl text-white">Winner</h2>
+        <p className="mt-3 text-lg text-white/70">{winner.username} takes the room.</p>
+        <button onClick={onClose} className="mt-8 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950">
+          Back to battles
         </button>
       </motion.div>
     </motion.div>

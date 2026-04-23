@@ -7,111 +7,64 @@ interface LoadingScreenProps {
   message?: string
 }
 
-export function LoadingScreen({ message = 'Loading...' }: LoadingScreenProps) {
+export function LoadingScreen({ message = 'Booting the arena...' }: LoadingScreenProps) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_30%),radial-gradient(circle_at_bottom,_rgba(168,85,247,0.14),_transparent_24%)]" />
       <motion.div
-        animate={{
-          rotate: 360,
-          scale: [1, 1.2, 1],
-        }}
-        transition={{
-          rotate: { duration: 2, repeat: Infinity, ease: 'linear' },
-          scale: { duration: 1, repeat: Infinity, ease: 'easeInOut' },
-        }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
         className="relative"
       >
-        <Flame className="w-20 h-20 text-primary" />
-        <motion.div
-          animate={{
-            opacity: [0.5, 1, 0.5],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <Flame className="w-28 h-28 text-primary/30 blur-sm" />
-        </motion.div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-8"
-      >
-        <p className="font-orbitron text-lg text-white/80">{message}</p>
-        <div className="mt-4 flex gap-2 justify-center">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              animate={{
-                y: [0, -10, 0],
-                opacity: [0.5, 1, 0.5],
-              }}
-              transition={{
-                duration: 0.6,
-                repeat: Infinity,
-                delay: i * 0.1,
-              }}
-              className="w-2 h-2 rounded-full bg-primary"
-            />
-          ))}
+        <div className="absolute inset-0 rounded-full bg-blue-400/20 blur-3xl" />
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-blue-400/20 bg-white/8">
+          <Flame className="h-10 w-10 text-blue-300" />
         </div>
       </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="absolute bottom-8"
-      >
-        <p className="text-xs text-white/30">
-          Powered by Stellar
-        </p>
-      </motion.div>
+      <p className="mt-8 font-orbitron text-xl text-white">{message}</p>
+      <div className="mt-4 flex gap-2">
+        {[0, 1, 2].map((dot) => (
+          <motion.div
+            key={dot}
+            animate={{ y: [0, -8, 0], opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 0.75, repeat: Infinity, delay: dot * 0.14 }}
+            className="h-2.5 w-2.5 rounded-full bg-blue-300"
+          />
+        ))}
+      </div>
+      <p className="mt-8 text-xs uppercase tracking-[0.28em] text-white/35">Powered by Stellar testnet rails</p>
     </div>
   )
 }
 
-export function PageLoader() {
+export function PageLoader({ message = 'Loading data' }: { message?: string }) {
   return (
-    <div className="flex items-center justify-center py-20">
+    <div className="flex flex-col items-center justify-center py-20">
       <div className="flex gap-2">
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2].map((dot) => (
           <motion.div
-            key={i}
-            animate={{
-              y: [0, -8, 0],
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 0.6,
-              repeat: Infinity,
-              delay: i * 0.1,
-            }}
-            className="w-2 h-2 rounded-full bg-primary"
+            key={dot}
+            animate={{ y: [0, -8, 0], opacity: [0.35, 1, 0.35] }}
+            transition={{ duration: 0.7, repeat: Infinity, delay: dot * 0.12 }}
+            className="h-2.5 w-2.5 rounded-full bg-violet-300"
           />
         ))}
       </div>
+      <p className="mt-4 text-sm text-white/50">{message}</p>
     </div>
   )
 }
 
 export function SkeletonCard() {
   return (
-    <div className="p-6 rounded-2xl glass animate-pulse">
+    <div className="animate-pulse rounded-[28px] border border-white/8 bg-white/[0.04] p-6">
       <div className="space-y-4">
-        <div className="h-4 bg-white/10 rounded-lg w-3/4" />
-        <div className="h-3 bg-white/10 rounded-lg w-1/2" />
-        <div className="h-20 bg-white/10 rounded-xl" />
-        <div className="flex gap-2">
-          <div className="h-8 bg-white/10 rounded-lg w-20" />
-          <div className="h-8 bg-white/10 rounded-lg w-20" />
+        <div className="h-4 w-2/3 rounded-full bg-white/10" />
+        <div className="h-3 w-1/2 rounded-full bg-white/10" />
+        <div className="h-28 rounded-2xl bg-white/10" />
+        <div className="flex gap-3">
+          <div className="h-10 w-24 rounded-xl bg-white/10" />
+          <div className="h-10 w-24 rounded-xl bg-white/10" />
         </div>
       </div>
     </div>

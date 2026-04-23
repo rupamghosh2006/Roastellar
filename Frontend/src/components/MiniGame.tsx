@@ -22,7 +22,7 @@ interface MiniGameProps {
 export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'won'>('idle')
   const [score, setScore] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(GAME_CONFIG.flameDuration)
+  const [timeLeft, setTimeLeft] = useState<number>(GAME_CONFIG.flameDuration)
   const [flames, setFlames] = useState<FlamePosition[]>([])
   const [combo, setCombo] = useState(0)
   const [particles, setParticles] = useState<{ id: number; x: number; y: number }[]>([])

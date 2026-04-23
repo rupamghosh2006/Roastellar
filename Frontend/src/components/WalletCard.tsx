@@ -1,8 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Wallet as WalletIcon, Copy, ExternalLink, Sparkles } from 'lucide-react'
 import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
 
@@ -16,158 +16,93 @@ interface WalletCardProps {
 export function WalletCard({ address, balance, isLoading, variant = 'compact' }: WalletCardProps) {
   const [copied, setCopied] = useState(false)
 
-  const copyAddress = () => {
-    navigator.clipboard.writeText(address)
+  const copyAddress = async () => {
+    await navigator.clipboard.writeText(address)
     setCopied(true)
-    toast.success('Address copied to clipboard')
-    setTimeout(() => setCopied(false), 2000)
+    toast.success('Wallet address copied')
+    setTimeout(() => setCopied(false), 1800)
   }
 
   if (isLoading) {
     return (
-      <div className={cn(
-        'p-6 rounded-2xl glass animate-pulse',
-        variant === 'full' && 'max-w-md'
-      )}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-4 w-32 bg-white/10 rounded" />
-            <div className="h-3 w-24 bg-white/10 rounded" />
-          </div>
-        </div>
-        <div className="h-8 w-40 bg-white/10 rounded" />
+      <div className={cn('glass animate-pulse rounded-[28px] p-6', variant === 'full' && 'w-full')}>
+        <div className="h-5 w-32 rounded-full bg-white/10" />
+        <div className="mt-6 h-10 w-48 rounded-full bg-white/10" />
+        <div className="mt-8 h-28 rounded-[24px] bg-white/10" />
       </div>
     )
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'p-6 rounded-2xl glass border border-accent/20',
-        variant === 'full' && 'max-w-md'
-      )}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
-          <WalletIcon className="w-6 h-6 text-accent" />
-        </div>
+        'glass gradient-border rounded-[28px] p-6',
+        variant === 'full' && 'w-full'
+      )}
+    >
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs text-white/50 uppercase tracking-wider">Stellar Wallet</p>
-          <p className="font-orbitron font-bold text-white">{formatAddress(address)}</p>
-        </div>
-      </div>
-
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-xs text-white/50 mb-1">Balance</p>
-          <div className="flex items-baseline gap-2">
-            <span className="font-orbitron text-3xl font-bold text-white">
-              {formatXLM(balance)}
-            </span>
-            <span className="text-sm text-white/50">XLM</span>
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/40">
+            <WalletIcon className="h-4 w-4 text-amber-200" />
+            Stellar Wallet
+          </div>
+          <div className="mt-4 flex items-end gap-2">
+            <span className="font-orbitron text-4xl font-bold text-white">{formatXLM(balance)}</span>
+            <span className="pb-1 text-sm text-white/50">XLM</span>
           </div>
         </div>
-        <div className="flex gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={copyAddress}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-          >
-            <Copy className="w-4 h-4" />
-          </motion.button>
-          <motion.a
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href={getExplorerUrl(address)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
-          </motion.a>
+        <div className="rounded-2xl border border-blue-400/12 bg-blue-500/10 px-3 py-2 text-right">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/80">Status</p>
+          <p className="mt-1 text-sm font-semibold text-white">Funded</p>
         </div>
       </div>
+
+      <div className="mt-6 rounded-[24px] border border-white/10 bg-black/20 p-4">
+        <p className="text-xs uppercase tracking-[0.24em] text-white/35">Public Key</p>
+        <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <code className="truncate text-sm text-white/78">{variant === 'full' ? address : formatAddress(address, 6)}</code>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={copyAddress}
+              className="rounded-full border border-white/10 bg-white/5 p-2 text-white/65 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <Copy className="h-4 w-4" />
+            </button>
+            <a
+              href={getExplorerUrl(address)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-white/10 bg-white/5 p-2 text-white/65 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex items-center justify-between text-sm text-white/45">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-emerald-300" />
+          Secure testnet custody
+        </div>
+        {copied && <span className="text-blue-200">Copied</span>}
+      </div>
     </motion.div>
   )
 }
 
-interface WalletBalanceProps {
-  balance: number
-  label?: string
-  icon?: React.ReactNode
-}
-
-export function WalletBalance({ balance, label = 'Balance', icon }: WalletBalanceProps) {
+export function WalletBalance({ balance, label, icon }: { balance: number; label: string; icon?: React.ReactNode }) {
   return (
-    <div className="p-4 rounded-xl glass">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="glass rounded-[24px] p-5">
+      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
         {icon}
-        <span className="text-xs text-white/50 uppercase tracking-wider">{label}</span>
+        {label}
       </div>
-      <p className="font-orbitron text-2xl font-bold text-white">
-        {formatXLM(balance)} <span className="text-sm text-white/50">XLM</span>
+      <p className="mt-4 font-orbitron text-2xl font-bold text-white">
+        {formatXLM(balance)} <span className="text-sm text-white/45">XLM</span>
       </p>
     </div>
-  )
-}
-
-interface RewardChestProps {
-  onOpen?: () => void
-}
-
-export function RewardChest({ onOpen }: RewardChestProps) {
-  const [opened, setOpened] = useState(false)
-
-  const handleOpen = () => {
-    setOpened(true)
-    toast.success('Reward claimed!')
-    onOpen?.()
-  }
-
-  return (
-    <motion.div
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      className="relative"
-    >
-      <motion.button
-        whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-        whileTap={{ scale: 0.9 }}
-        onClick={handleOpen}
-        disabled={opened}
-        className={cn(
-          'relative w-32 h-32 rounded-2xl flex items-center justify-center',
-          'bg-gradient-to-br from-accent/30 to-amber-600/20',
-          'border-2 border-accent/40',
-          'hover:border-accent/60 transition-colors',
-          opened && 'opacity-50 cursor-not-allowed'
-        )}
-      >
-        <motion.div
-          animate={opened ? {} : { y: [0, -10, 0] }}
-          transition={{ duration: 1, repeat: Infinity }}
-        >
-          <Sparkles className={cn(
-            'w-12 h-12',
-            opened ? 'text-white/30' : 'text-accent animate-pulse-glow'
-          )} />
-        </motion.div>
-      </motion.button>
-
-      {opened && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="absolute -top-2 -right-2"
-        >
-          <span className="px-2 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold">
-            Claimed
-          </span>
-        </motion.div>
-      )}
-    </motion.div>
   )
 }

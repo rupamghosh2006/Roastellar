@@ -1,42 +1,36 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { ArrowUpDown, Clock3, ExternalLink, Wallet as WalletIcon } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
-import { WalletCard, WalletBalance } from '@/components/WalletCard'
+import { WalletBalance, WalletCard } from '@/components/WalletCard'
 import { PageLoader } from '@/components/LoadingScreen'
-import { apiRoutes } from '@/lib/api'
-import type { Wallet } from '@/lib/api'
-import { Wallet as WalletIcon, History, ArrowUpDown, Copy, ExternalLink } from 'lucide-react'
-import { toast } from 'sonner'
-import { getExplorerUrl, formatAddress } from '@/lib/utils'
+import { apiRoutes, type Wallet } from '@/lib/api'
+import { getExplorerUrl } from '@/lib/utils'
+
+const rewardHistory = [
+  'Starter reward credited during onboarding',
+  'Prediction payout from semifinal room',
+  'Community streak bonus queued',
+]
 
 export default function WalletPage() {
   const [wallet, setWallet] = useState<Wallet | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchWallet = async () => {
-      try {
-        const response = await apiRoutes.wallet.me()
-        setWallet(response.data)
-      } catch (error) {
-        console.error('Failed to fetch wallet:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchWallet()
+    apiRoutes.wallet.me()
+      .then((response) => setWallet(response.data))
+      .catch((error) => console.error('Failed to load wallet:', error))
+      .finally(() => setLoading(false))
   }, [])
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen pt-16">
         <Sidebar />
         <main className="flex-1 p-6 lg:p-8">
-          <div className="max-w-2xl">
-            <PageLoader />
-          </div>
+          <PageLoader message="Loading wallet" />
         </main>
       </div>
     )
@@ -45,94 +39,58 @@ export default function WalletPage() {
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      
       <main className="flex-1 p-6 lg:p-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <WalletIcon className="w-8 h-8 text-accent" />
-              <h1 className="font-orbitron text-3xl font-bold text-white">Wallet</h1>
+        <div className="mx-auto max-w-6xl space-y-8">
+          <div className="glass rounded-[36px] p-8">
+            <div className="flex items-center gap-3">
+              <WalletIcon className="h-8 w-8 text-amber-200" />
+              <div>
+                <p className="text-sm uppercase tracking-[0.24em] text-white/35">Wallet</p>
+                <h1 className="font-orbitron text-4xl font-bold text-white">Your Stellar vault</h1>
+              </div>
             </div>
-            <p className="text-white/60">Manage your Stellar wallet</p>
           </div>
 
-          {wallet && (
-            <>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
-              >
-                <WalletCard
-                  address={wallet.address}
-                  balance={wallet.balance}
-                  variant="full"
-                />
-              </motion.div>
+          <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
+            <WalletCard
+              address={wallet?.address ?? 'GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'}
+              balance={wallet?.balance ?? 0}
+              variant="full"
+            />
 
-              <div className="grid sm:grid-cols-3 gap-4 mb-6">
-                <WalletBalance
-                  balance={wallet.balance}
-                  label="Available"
-                  icon={<WalletIcon className="w-4 h-4 text-accent" />}
-                />
-                <WalletBalance
-                  balance={0}
-                  label="In Battles"
-                  icon={<ArrowUpDown className="w-4 h-4 text-secondary" />}
-                />
-                <WalletBalance
-                  balance={wallet.balance}
-                  label="Total Earned"
-                  icon={<History className="w-4 h-4 text-primary" />}
-                />
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
+              <WalletBalance label="Available" balance={wallet?.balance ?? 0} icon={<WalletIcon className="h-4 w-4 text-amber-200" />} />
+              <WalletBalance label="In Battles" balance={0} icon={<ArrowUpDown className="h-4 w-4 text-blue-200" />} />
+              <div className="glass rounded-[28px] p-5">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
+                  <ExternalLink className="h-4 w-4 text-violet-200" />
+                  Explorer
+                </div>
+                <a
+                  href={wallet ? getExplorerUrl(wallet.address) : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 block text-sm text-blue-200 underline-offset-4 hover:underline"
+                >
+                  Open wallet on Stellar Expert
+                </a>
               </div>
+            </div>
+          </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="p-6 rounded-2xl glass"
-              >
-                <h3 className="font-semibold text-white mb-4">Quick Actions</h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(wallet.address)
-                      toast.success('Address copied!')
-                    }}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                  >
-                    <Copy className="w-5 h-5 text-primary" />
-                    <span className="text-white">Copy Address</span>
-                  </button>
-                  <a
-                    href={getExplorerUrl(wallet.address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                  >
-                    <ExternalLink className="w-5 h-5 text-secondary" />
-                    <span className="text-white">View on Explorer</span>
-                  </a>
+          <div className="glass rounded-[36px] p-6">
+            <div className="flex items-center gap-2">
+              <Clock3 className="h-5 w-5 text-blue-200" />
+              <h2 className="font-orbitron text-2xl text-white">Reward history</h2>
+            </div>
+            <div className="mt-6 space-y-3">
+              {rewardHistory.map((item) => (
+                <div key={item} className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
+                  {item}
                 </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="p-6 rounded-2xl glass mt-6"
-              >
-                <h3 className="font-semibold text-white mb-4">Transaction History</h3>
-                <div className="text-center py-8">
-                  <History className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/50">No transactions yet</p>
-                  <p className="text-sm text-white/30 mt-1">Start a battle to see your activity</p>
-                </div>
-              </motion.div>
-            </>
-          )}
+              ))}
+            </div>
+          </div>
         </div>
       </main>
     </div>

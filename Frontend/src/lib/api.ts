@@ -4,34 +4,25 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrender.
 
 export const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/sign-in'
-      }
-    }
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
 export interface User {
   id: string
   clerkId: string
   username: string
-  avatar?: string
+  avatar?: string | null
   xp: number
   wins: number
   losses: number
-  walletAddress?: string
-  walletBalance?: number
+  walletAddress?: string | null
+  walletBalance?: number | null
   badges: string[]
   rank?: number
   createdAt: string
@@ -66,30 +57,17 @@ export interface LeaderboardEntry extends User {
   winRate: number
 }
 
-export interface Prediction {
-  battleId: string
-  playerId: string
-  amount: number
-  claimed: boolean
-}
-
-export interface MatchEvent {
-  type: 'join_match' | 'submit_roast' | 'cast_vote' | 'battle_result' | 'spectator_update' | 'chat_message'
-  payload: Record<string, unknown>
-  timestamp: string
-}
-
 export const apiRoutes = {
   users: {
     me: () => api.get<User>('/api/users/me'),
     leaderboard: () => api.get<LeaderboardEntry[]>('/api/users/leaderboard'),
-    updateProfile: (data: Partial<User>) => api.patch<User>('/api/users/me', data),
+    updateProfile: (payload: Partial<User>) => api.patch<User>('/api/users/me', payload),
   },
   battles: {
     open: () => api.get<Battle[]>('/api/battles/open'),
-    create: (data: { topic: string; stakeAmount?: number }) => api.post<Battle>('/api/battles/create', data),
+    create: (payload: { topic: string; stakeAmount?: number }) => api.post<Battle>('/api/battles/create', payload),
     join: (id: string) => api.post<Battle>(`/api/battles/join/${id}`),
-    vote: (id: string, data: { playerId: string }) => api.post<Battle>(`/api/battles/vote/${id}`, data),
+    vote: (id: string, payload: { playerId: string }) => api.post<Battle>(`/api/battles/vote/${id}`, payload),
     finalize: (id: string) => api.post<Battle>(`/api/battles/finalize/${id}`),
     get: (id: string) => api.get<Battle>(`/api/battles/${id}`),
   },

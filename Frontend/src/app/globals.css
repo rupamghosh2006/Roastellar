@@ -4,148 +4,160 @@
 
 @layer base {
   :root {
-    --background: 220 20% 4%;
+    --background: 230 26% 6%;
     --foreground: 210 40% 98%;
-    --card: 220 20% 8%;
+    --card: 228 25% 10%;
     --card-foreground: 210 40% 98%;
-    --popover: 220 20% 6%;
+    --popover: 228 25% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 263 70% 60%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217 91% 60%;
+    --primary: 220 100% 64%;
+    --primary-foreground: 220 30% 8%;
+    --secondary: 262 83% 67%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217 91% 60%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 43 96% 56%;
-    --accent-foreground: 220 20% 4%;
+    --muted: 228 16% 18%;
+    --muted-foreground: 220 14% 70%;
+    --accent: 44 96% 58%;
+    --accent-foreground: 220 30% 8%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 263 70% 60%;
-    --radius: 1rem;
-    --gold: 43 96% 56%;
-    --blue: 217 91% 60%;
-    --violet: 263 70% 60%;
+    --border: 223 19% 20%;
+    --input: 223 19% 20%;
+    --ring: 220 100% 64%;
+    --radius: 1.25rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply min-h-screen bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(88, 115, 255, 0.18), transparent 28%),
+      radial-gradient(circle at 80% 10%, rgba(151, 71, 255, 0.14), transparent 24%),
+      radial-gradient(circle at 50% 100%, rgba(255, 198, 64, 0.08), transparent 30%),
+      linear-gradient(180deg, #060816 0%, #090b14 45%, #070811 100%);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
+    opacity: 0.45;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_18px_60px_rgba(0,0,0,0.35)];
+  }
+
+  .glass {
+    @apply surface backdrop-blur-xl;
+  }
+
+  .glass-hover {
+    @apply transition-all duration-300 hover:border-white/20 hover:bg-white/[0.07] hover:shadow-[0_24px_80px_rgba(37,99,235,0.18)];
+  }
+
+  .panel-gradient {
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-400 via-violet-300 to-amber-200 bg-clip-text text-transparent;
+  }
+
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px rgba(96, 165, 250, 0.12),
+      0 0 30px rgba(59, 130, 246, 0.22),
+      0 0 72px rgba(124, 58, 237, 0.18);
+  }
+
+  .glow-gold {
+    box-shadow:
+      0 0 0 1px rgba(250, 204, 21, 0.14),
+      0 0 28px rgba(250, 204, 21, 0.18),
+      0 0 60px rgba(251, 191, 36, 0.14);
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.45), rgba(168, 85, 247, 0.28), rgba(250, 204, 21, 0.2));
+    opacity: 0.7;
   }
 }
 
 @layer utilities {
-  .glass {
-    @apply bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] shadow-xl;
-  }
-  .glass-hover {
-    @apply hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300;
-  }
-  .glow-primary {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.2);
-  }
-  .glow-gold {
-    box-shadow: 0 0 20px rgba(234, 179, 8, 0.3), 0 0 40px rgba(234, 179, 8, 0.2);
-  }
-  .glow-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.2);
-  }
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent;
-  }
   .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 6s ease-in-out infinite;
   }
+
   .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
+    animation: pulse-glow 2.2s ease-in-out infinite;
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-14px);
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    opacity: 1;
-    filter: brightness(1);
-  }
-  50% {
-    opacity: 0.8;
-    filter: brightness(1.2);
-  }
-}
-
-@keyframes fall {
-  0% {
-    transform: translateY(-100%) rotate(0deg);
-    opacity: 1;
-  }
+  0%,
   100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes sparkle {
-  0%, 100% {
-    opacity: 0;
-    transform: scale(0);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 0 rgba(96, 165, 250, 0));
   }
   50% {
     opacity: 1;
-    transform: scale(1);
+    filter: drop-shadow(0 0 14px rgba(96, 165, 250, 0.45));
   }
-}
-
-@keyframes confetti {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-.animate-fall {
-  animation: fall 3s linear forwards;
-}
-
-.animate-sparkle {
-  animation: sparkle 1s ease-in-out infinite;
-}
-
-.animate-confetti {
-  animation: confetti 3s ease-out forwards;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--background));
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+  background: rgba(148, 163, 184, 0.34);
 }

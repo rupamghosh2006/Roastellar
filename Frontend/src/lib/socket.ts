@@ -1,95 +1,93 @@
-'use client';
+import { io, Socket } from 'socket.io-client'
 
-import { useEffect, useState, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrender.com'
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+let socket: Socket | null = null
 
-let socket: Socket | null = null;
-
-export const useSocket = (token?: string) => {
-  const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-
+export function getSocket(): Socket {
+  if (!socket || !socket.connected) {
     socket = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket'],
+      autoConnect: false,
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
-    });
+    })
+  }
+  return socket
+}
 
-    socket.on('connect', () => {
-      console.log('Socket connected');
-      setIsConnected(true);
-    });
+export function connectSocket(token?: string) {
+  const s = getSocket()
+  if (token) {
+    s.auth = { token }
+  }
+  if (!s.connected) {
+    s.connect()
+  }
+  return s
+}
 
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-      setIsConnected(false);
-    });
+export function disconnectSocket() {
+  if (socket) {
+    socket.disconnect()
+    socket = null
+  }
+}
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-      setIsConnected(false);
-    });
+export interface MatchRoomEvents {
+  join_match: { matchId: string; userId: string }
+  leave_match: { matchId: string; userId: string }
+  submit_roast: { matchId: string; userId: string; roast: string }
+  cast_vote: { matchId: string; voterId: string; playerId: string }
+  battle_result: { matchId: string; winnerId: string; payout: number }
+  spectator_update: { matchId: string; count: number }
+  chat_message: { matchId: string; userId: string; message: string; timestamp: string }
+  prediction: { matchId: string; playerId: string; amount: number }
+}
 
-    return () => {
-      socket?.disconnect();
-    };
-  }, [token]);
+export function joinMatch(matchId: string, userId: string) {
+  getSocket().emit('join_match', { matchId, userId })
+}
 
-  return { socket, isConnected };
-};
+export function leaveMatch(matchId: string, userId: string) {
+  getSocket().emit('leave_match', { matchId, userId })
+}
 
-export const emitJoinLobby = () => socket?.emit('join_lobby');
-export const emitJoinMatch = (matchId: number) => socket?.emit('join_match', { matchId });
-export const emitLeaveMatch = (matchId: number) => socket?.emit('leave_match', { matchId });
-export const emitSubmitRoast = (matchId: number, roastCid: string) => 
-  socket?.emit('submit_roast', { matchId, roastCid });
-export const emitCastVote = (matchId: number, selectedPlayer: string) => 
-  socket?.emit('cast_vote', { matchId, selectedPlayer });
-export const emitPlacePrediction = (matchId: number, selectedPlayer: string, amount: number) =>
-  socket?.emit('place_prediction', { matchId, selectedPlayer, amount });
+export function submitRoast(matchId: string, userId: string, roast: string) {
+  getSocket().emit('submit_roast', { matchId, userId, roast })
+}
 
-export const onBattleUpdate = (callback: (battle: any) => void) => {
-  socket?.on('battle_updated', callback);
-  return () => socket?.off('battle_updated', callback);
-};
+export function castVote(matchId: string, voterId: string, playerId: string) {
+  getSocket().emit('cast_vote', { matchId, voterId, playerId })
+}
 
-export const onMatchJoined = (callback: (data: any) => void) => {
-  socket?.on('match_joined', callback);
-  return () => socket?.off('match_joined', callback);
-};
+export function makePrediction(matchId: string, playerId: string, amount: number) {
+  getSocket().emit('prediction', { matchId, playerId, amount })
+}
 
-export const onMatchStarted = (callback: (data: any) => void) => {
-  socket?.on('match_started', callback);
-  return () => socket?.off('match_started', callback);
-};
+export function sendChatMessage(matchId: string, userId: string, message: string) {
+  getSocket().emit('chat_message', { matchId, userId, message })
+}
 
-export const onRoastSubmitted = (callback: (data: any) => void) => {
-  socket?.on('roast_submitted', callback);
-  return () => socket?.off('roast_submitted', callback);
-};
+export function onMatchResult(callback: (data: MatchRoomEvents['battle_result']) => void) {
+  getSocket().on('battle_result', callback)
+}
 
-export const onVoteCast = (callback: (data: any) => void) => {
-  socket?.on('vote_cast', callback);
-  return () => socket?.off('vote_cast', callback);
-};
+export function onSpectatorUpdate(callback: (data: MatchRoomEvents['spectator_update']) => void) {
+  getSocket().on('spectator_update', callback)
+}
 
-export const onBattleResult = (callback: (data: any) => void) => {
-  socket?.on('battle_result', callback);
-  return () => socket?.off('battle_result', callback);
-};
+export function onChatMessage(callback: (data: MatchRoomEvents['chat_message']) => void) {
+  getSocket().on('chat_message', callback)
+}
 
-export const onUsersOnline = (callback: (data: { count: number }) => void) => {
-  socket?.on('users_online', callback);
-  return () => socket?.off('users_online', callback);
-};
+export function onRoastSubmitted(callback: (data: MatchRoomEvents['submit_roast']) => void) {
+  getSocket().on('submit_roast', callback)
+}
 
-export const onLeaderboard = (callback: (data: any) => void) => {
-  socket?.on('leaderboard', callback);
-  return () => socket?.off('leaderboard', callback);
-};
+export function removeAllListeners() {
+  if (socket) {
+    socket.removeAllListeners()
+  }
+}

@@ -1,226 +1,243 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Sidebar } from '@/components/Sidebar'
-import { Navbar } from '@/components/Navbar'
-import { StatCard } from '@/components/StatCard'
-import { BattleCard } from '@/components/BattleCard'
-import { useUserProfile, useOpenBattles, useWalletInfo } from '@/lib/hooks'
-import { Trophy, Zap, Target, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { toast } from 'sonner'
-import api from '@/lib/api'
+import { useAuth } from '@clerk/nextjs'
+import { 
+  Flame, Trophy, Wallet, Swords, TrendingUp, 
+  Plus, Zap, ArrowRight, Clock, Users
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Sidebar } from '@/components/Sidebar'
+import { BattleList } from '@/components/BattleCard'
+import { PageLoader, SkeletonCard } from '@/components/LoadingScreen'
+import { apiRoutes } from '@/lib/api'
+import type { User, Battle, LeaderboardEntry } from '@/lib/api'
 
 export default function DashboardPage() {
-  const { isSignedIn, isLoaded } = useUser()
-  const router = useRouter()
-  const { user, loading: userLoading, error: userError } = useUserProfile()
-  const { battles, loading: battlesLoading, error: battlesError } = useOpenBattles()
-  const { wallet, loading: walletLoading, error: walletError } = useWalletInfo()
+  const { userId } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
+  const [battles, setBattles] = useState<Battle[]>([])
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace('/')
-    }
-  }, [isLoaded, isSignedIn, router])
-
-  const handleCreateBattle = () => {
-    router.push('/battles?action=create')
-  }
-
-  const handleQuickMatch = async () => {
-    try {
-      if (battles.length === 0) {
-        toast.error('No open battles available. Create one instead!')
-        handleCreateBattle()
-        return
+    const fetchData = async () => {
+      try {
+        const [userRes, battlesRes, leaderboardRes] = await Promise.all([
+          apiRoutes.users.me(),
+          apiRoutes.battles.open(),
+          apiRoutes.users.leaderboard(),
+        ])
+        setUser(userRes.data)
+        setBattles(battlesRes.data)
+        setLeaderboard(leaderboardRes.data)
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error)
+      } finally {
+        setIsLoading(false)
       }
-      const firstBattle = battles[0]
-      router.push(`/battle/${firstBattle.matchId}`)
-    } catch (error) {
-      toast.error('Failed to join battle')
     }
-  }
+    fetchData()
+  }, [])
 
-  if (!isLoaded || !isSignedIn) {
-    return null
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="flex">
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen pt-16">
         <Sidebar />
-
-        {/* Main Content */}
-        <main className="flex-1 md:ml-0 p-6 pb-20 md:pb-6">
-          <div className="max-w-7xl mx-auto space-y-8">
-            {/* Welcome Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-                Welcome back, {user?.username || 'Champion'}!
-              </h1>
-              <p className="text-muted-foreground">
-                Ready to battle and earn rewards? Jump into the arena below.
-              </p>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-4"
-            >
-              <button
-                onClick={handleQuickMatch}
-                className="glass rounded-lg p-4 hover:border-primary/50 transition text-center"
-              >
-                <div className="text-2xl mb-2">⚡</div>
-                <p className="text-sm font-medium">Quick Match</p>
-              </button>
-              <button
-                onClick={handleCreateBattle}
-                className="glass rounded-lg p-4 hover:border-primary/50 transition text-center"
-              >
-                <div className="text-2xl mb-2">🔥</div>
-                <p className="text-sm font-medium">Create Battle</p>
-              </button>
-              <Link
-                href="/leaderboard"
-                className="glass rounded-lg p-4 hover:border-primary/50 transition text-center"
-              >
-                <div className="text-2xl mb-2">🏆</div>
-                <p className="text-sm font-medium">Leaderboard</p>
-              </Link>
-              <Link
-                href="/wallet"
-                className="glass rounded-lg p-4 hover:border-primary/50 transition text-center"
-              >
-                <div className="text-2xl mb-2">💰</div>
-                <p className="text-sm font-medium">Wallet</p>
-              </Link>
-            </motion.div>
-
-            {/* Stats Grid */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="grid md:grid-cols-4 gap-6"
-            >
-              <StatCard
-                icon={Trophy}
-                label="Rank"
-                value={`#${user?.rankPoints || 0}`}
-                trend="up"
-                trendValue="12"
-              />
-              <StatCard
-                icon={Zap}
-                label="XP"
-                value={user?.xp || 0}
-                trend="up"
-                trendValue="240"
-              />
-              <StatCard icon={Target} label="Wins" value={user?.wins || 0} />
-              <StatCard
-                icon={TrendingUp}
-                label="Balance"
-                value={`${wallet?.balance.toFixed(2) || 0} XLM`}
-              />
-            </motion.div>
-
-            {/* Active Battles Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Open Battles</h2>
-                <Link
-                  href="/battles"
-                  className="text-sm text-primary hover:underline"
-                >
-                  View All
-                </Link>
-              </div>
-
-              {battlesLoading ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="glass rounded-lg p-6 h-64 animate-pulse" />
-                  ))}
-                </div>
-              ) : battlesError ? (
-                <div className="glass rounded-lg p-6 text-center text-muted-foreground">
-                  Failed to load battles
-                </div>
-              ) : battles.length > 0 ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {battles.slice(0, 3).map((battle) => (
-                    <BattleCard key={battle.id} battle={battle} />
-                  ))}
-                </div>
-              ) : (
-                <div className="glass rounded-lg p-12 text-center">
-                  <div className="text-4xl mb-4">🏜️</div>
-                  <h3 className="text-lg font-semibold mb-2">No Open Battles</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Be the first to create a battle and start earning!
-                  </p>
-                  <button
-                    onClick={handleCreateBattle}
-                    className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition"
-                  >
-                    Create Battle
-                  </button>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Recent Activity */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
-              <div className="glass rounded-lg p-6 space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b">
-                  <div>
-                    <p className="font-medium">You joined Battle #42</p>
-                    <p className="text-sm text-muted-foreground">2 hours ago</p>
-                  </div>
-                  <span className="text-accent font-semibold">+50 XP</span>
-                </div>
-                <div className="flex items-center justify-between pb-4 border-b">
-                  <div>
-                    <p className="font-medium">You won a prediction</p>
-                    <p className="text-sm text-muted-foreground">5 hours ago</p>
-                  </div>
-                  <span className="text-accent font-semibold">+2.5 XLM</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">You created Battle #41</p>
-                    <p className="text-sm text-muted-foreground">1 day ago</p>
-                  </div>
-                  <span className="text-accent font-semibold">+100 XP</span>
-                </div>
-              </div>
-            </motion.div>
+        <main className="flex-1 p-6 lg:p-8">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+          <div className="mt-8">
+            <PageLoader />
           </div>
         </main>
       </div>
+    )
+  }
+
+  return (
+    <div className="flex min-h-screen pt-16">
+      <Sidebar />
+      
+      <main className="flex-1 p-6 lg:p-8">
+        <div className="mb-8">
+          <h1 className="font-orbitron text-3xl font-bold text-white mb-2">
+            Welcome back, {user?.username || 'Player'}
+          </h1>
+          <p className="text-white/60">Ready to battle?</p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <StatCard
+            icon={<Trophy className="w-5 h-5 text-accent" />}
+            label="Rank"
+            value={`#${user?.rank || '—'}`}
+            gradient="from-accent/20 to-amber-600/10"
+          />
+          <StatCard
+            icon={<TrendingUp className="w-5 h-5 text-primary" />}
+            label="XP"
+            value={user?.xp?.toLocaleString() || '0'}
+            gradient="from-primary/20 to-secondary/10"
+          />
+          <StatCard
+            icon={<Swords className="w-5 h-5 text-secondary" />}
+            label="Wins"
+            value={user?.wins?.toString() || '0'}
+            gradient="from-secondary/20 to-primary/10"
+          />
+          <StatCard
+            icon={<Wallet className="w-5 h-5 text-green-400" />}
+            label="Balance"
+            value={`${user?.walletBalance?.toFixed(2) || '0.00'} XLM`}
+            gradient="from-green-400/20 to-emerald-600/10"
+          />
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-orbitron text-xl font-bold text-white">Quick Actions</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <QuickActionCard
+                icon={<Swords className="w-6 h-6" />}
+                title="Quick Match"
+                description="Find a random battle opponent"
+                href="/battles"
+                color="primary"
+              />
+              <QuickActionCard
+                icon={<Plus className="w-6 h-6" />}
+                title="Create Contest"
+                description="Start your own battle"
+                href="/battles/create"
+                color="secondary"
+              />
+              <QuickActionCard
+                icon={<Trophy className="w-6 h-6" />}
+                title="Leaderboard"
+                description="View top players"
+                href="/leaderboard"
+                color="accent"
+              />
+              <QuickActionCard
+                icon={<Wallet className="w-6 h-6" />}
+                title="Wallet"
+                description="Manage your XLM"
+                href="/wallet"
+                color="green"
+              />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-orbitron text-xl font-bold text-white mb-6">Top Players</h2>
+            <div className="space-y-3">
+              {leaderboard.slice(0, 5).map((player, i) => (
+                <motion.div
+                  key={player.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center gap-3 p-3 rounded-xl glass"
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                    i === 0 ? 'bg-accent/20 text-accent' :
+                    i === 1 ? 'bg-white/10 text-white/70' :
+                    'bg-white/5 text-white/50'
+                  }`}>
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-white truncate">{player.username}</p>
+                    <p className="text-xs text-white/50">{player.xp.toLocaleString()} XP</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-orbitron text-xl font-bold text-white">Open Battles</h2>
+            <Link href="/battles" className="text-sm text-primary hover:text-primary/80 flex items-center gap-1">
+              View All <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <BattleList battles={battles} emptyMessage="No open battles right now" />
+        </div>
+
+        <div className="p-6 rounded-2xl glass border border-accent/20">
+          <div className="flex items-center gap-3 mb-4">
+            <Flame className="w-6 h-6 text-accent animate-pulse-glow" />
+            <h3 className="font-orbitron font-bold text-white">Daily Challenge</h3>
+          </div>
+          <p className="text-white/60 mb-4">
+            Complete 3 battles today to earn bonus XP and a special badge!
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="w-0 h-full bg-gradient-to-r from-accent to-amber-600 rounded-full transition-all" />
+            </div>
+            <span className="text-sm text-white/50">0/3</span>
+          </div>
+        </div>
+      </main>
     </div>
+  )
+}
+
+function StatCard({ icon, label, value, gradient }: { 
+  icon: React.ReactNode
+  label: string
+  value: string
+  gradient: string
+}) {
+  return (
+    <motion.div
+      whileHover={{ y: -4 }}
+      className={`p-6 rounded-2xl bg-gradient-to-br ${gradient} border border-white/5`}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        {icon}
+        <span className="text-xs text-white/50 uppercase tracking-wider">{label}</span>
+      </div>
+      <p className="font-orbitron text-2xl font-bold text-white">{value}</p>
+    </motion.div>
+  )
+}
+
+function QuickActionCard({ icon, title, description, href, color }: {
+  icon: React.ReactNode
+  title: string
+  description: string
+  href: string
+  color: 'primary' | 'secondary' | 'accent' | 'green'
+}) {
+  const colorClasses = {
+    primary: 'from-primary/20 to-primary/5 border-primary/20 hover:border-primary/40',
+    secondary: 'from-secondary/20 to-secondary/5 border-secondary/20 hover:border-secondary/40',
+    accent: 'from-accent/20 to-accent/5 border-accent/20 hover:border-accent/40',
+    green: 'from-green-400/20 to-green-400/5 border-green-400/20 hover:border-green-400/40',
+  }
+
+  return (
+    <Link href={href}>
+      <motion.div
+        whileHover={{ y: -4, scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className={`p-6 rounded-2xl glass border ${colorClasses[color]} transition-all`}
+      >
+        <div className="mb-4">{icon}</div>
+        <h3 className="font-semibold text-white mb-1">{title}</h3>
+        <p className="text-sm text-white/50">{description}</p>
+      </motion.div>
+    </Link>
   )
 }

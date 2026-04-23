@@ -1,272 +1,225 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { MiniGame } from '@/components/MiniGame'
-import api from '@/lib/api'
-import { toast } from 'sonner'
-import { Copy, ExternalLink, ChevronRight } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
+import { Flame, ArrowRight, Wallet, Sparkles, CheckCircle } from 'lucide-react'
+import { MiniGame, ChestRewardAnimation } from '@/components/MiniGame'
+import { WalletCard } from '@/components/WalletCard'
+import { apiRoutes } from '@/lib/api'
+import type { Wallet } from '@/lib/api'
 
-type OnboardingStep = 1 | 2 | 3
+type Step = 'welcome' | 'game' | 'reward' | 'complete'
 
 export default function OnboardingPage() {
-  const { isSignedIn, isLoaded } = useUser()
-  const router = useRouter()
-
-  const [step, setStep] = useState<OnboardingStep>(1)
+  const [step, setStep] = useState<Step>('welcome')
   const [gameScore, setGameScore] = useState(0)
-  const [walletAddress, setWalletAddress] = useState('')
-  const [walletBalance, setWalletBalance] = useState(0)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace('/')
-    }
-  }, [isLoaded, isSignedIn, router])
+  const [wallet, setWallet] = useState<Wallet | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const { userId } = useAuth()
+  const router = useRouter()
 
   const handleGameComplete = async (score: number) => {
     setGameScore(score)
-    setStep(2)
+    setStep('reward')
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    await fetchWallet()
+  }
 
-    // Fetch wallet info
-    setLoading(true)
+  const fetchWallet = async () => {
+    setIsLoading(true)
     try {
-      const response = await api.get('/wallet/me')
-      const walletData = response.data.data
-      setWalletAddress(walletData.publicKey)
-      setWalletBalance(walletData.balance)
+      const response = await apiRoutes.wallet.me()
+      setWallet(response.data)
+      setStep('complete')
     } catch (error) {
-      toast.error('Failed to fetch wallet info')
-      console.error(error)
+      console.error('Failed to fetch wallet:', error)
+      setStep('complete')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const handleEnterArena = () => {
+  const completeOnboarding = async () => {
+    try {
+      await apiRoutes.onboarding.complete()
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error)
+    }
     router.push('/dashboard')
   }
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(walletAddress)
-    toast.success('Wallet address copied!')
-  }
-
-  if (!isLoaded || !isSignedIn) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Progress indicators */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-card/50 backdrop-blur-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex gap-2">
-            {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                className={`h-1 flex-1 rounded-full transition-all ${
-                  s <= step ? 'bg-primary' : 'bg-card'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-20 pt-32">
-        {/* Step 1: Welcome & Game */}
-        {step === 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
-          >
-            <div className="text-center">
-              <motion.div
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="mb-8"
-              >
-                <div className="inline-block text-6xl mb-4">🎮</div>
-              </motion.div>
-
-              <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-                Welcome to Roastellar
-              </h1>
-
-              <p className="text-xl text-muted-foreground mb-8">
-                Before entering the arena, complete your first challenge. Tap the falling flames to earn your spot!
-              </p>
-            </div>
-
-            <MiniGame onComplete={handleGameComplete} targetScore={20} />
-          </motion.div>
-        )}
-
-        {/* Step 2: Victory & Wallet Reveal */}
-        {step === 2 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
-          >
-            {/* Chest animation placeholder */}
-            <div className="text-center">
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="text-6xl mb-6"
-              >
-                💎
-              </motion.div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                Challenge Complete!
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                Your wallet has been created on the Stellar network.
-              </p>
-            </div>
-
-            {/* Wallet Info Card */}
+    <main className="min-h-screen pt-16 flex items-center justify-center px-4">
+      <div className="w-full max-w-4xl">
+        <AnimatePresence mode="wait">
+          {step === 'welcome' && (
             <motion.div
+              key="welcome"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="glass rounded-lg p-8 space-y-6"
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="text-center py-12"
             >
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase">
-                  Wallet Created Successfully
-                </h3>
-                <div className="flex items-center justify-between gap-2 bg-card/50 p-4 rounded-lg">
-                  <code className="text-sm font-mono break-all">
-                    {walletAddress || 'Loading...'}
-                  </code>
-                  <button
-                    onClick={copyToClipboard}
-                    disabled={!walletAddress}
-                    className="flex-shrink-0 p-2 hover:bg-card/50 rounded transition disabled:opacity-50"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
+              <motion.div
+                animate={{ y: [0, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="inline-block mb-8"
+              >
+                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <Flame className="w-12 h-12 text-primary" />
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="pt-4 border-t">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase">
-                  Testnet XLM Balance
-                </h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-accent">
-                    {walletBalance.toFixed(2)}
-                  </span>
-                  <span className="text-muted-foreground">XLM</span>
-                </div>
-              </div>
+              <h1 className="font-orbitron text-4xl md:text-5xl font-bold text-white mb-4">
+                Welcome to <span className="text-gradient">Roastellar</span>
+              </h1>
 
-              <div className="pt-4 border-t">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Powered by Stellar
-                </p>
-                <a
-                  href={`https://stellar.expert/explorer/testnet/account/${walletAddress}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-primary hover:underline"
+              <p className="text-xl text-white/60 mb-8 max-w-lg mx-auto">
+                Before entering the arena, complete your first challenge
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={() => setStep('game')}
+                  className="group px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-lg hover:opacity-90 transition-all glow-primary flex items-center gap-2"
                 >
-                  View on Stellar Explorer
-                  <ExternalLink className="w-4 h-4" />
-                </a>
+                  Start Challenge
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+
+              <div className="mt-12 grid grid-cols-3 gap-6 max-w-md mx-auto text-center">
+                {[
+                  { label: 'Time', value: '15s' },
+                  { label: 'Target', value: '20 pts' },
+                  { label: 'Reward', value: '100 XLM' },
+                ].map((stat) => (
+                  <div key={stat.label} className="p-4 rounded-xl glass">
+                    <p className="font-orbitron text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-xs text-white/50 mt-1">{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </motion.div>
+          )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleEnterArena}
-                className="px-8 py-4 rounded-lg gradient-primary text-primary-foreground font-semibold"
-              >
-                Enter Arena
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStep(3)}
-                className="px-8 py-4 rounded-lg border border-primary/50 text-primary font-semibold hover:bg-primary/10 transition"
-              >
-                View Wallet Details
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Step 3: Wallet Details */}
-        {step === 3 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <h2 className="text-3xl font-bold">Your Stellar Wallet</h2>
-
-            <div className="glass rounded-lg p-8 space-y-6">
-              <div>
-                <label className="text-sm font-semibold text-muted-foreground block mb-2">
-                  Public Key
-                </label>
-                <div className="flex items-center justify-between gap-2 bg-card/50 p-4 rounded-lg">
-                  <code className="text-sm font-mono break-all">{walletAddress}</code>
-                  <button
-                    onClick={copyToClipboard}
-                    className="flex-shrink-0 p-2 hover:bg-card/50 rounded transition"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-muted-foreground block mb-2">
-                  Balance (Testnet)
-                </label>
-                <div className="flex items-baseline gap-2 bg-card/50 p-4 rounded-lg">
-                  <span className="text-2xl font-bold text-accent">
-                    {walletBalance.toFixed(2)}
-                  </span>
-                  <span className="text-muted-foreground">XLM</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <a
-                  href={`https://stellar.expert/explorer/testnet/account/${walletAddress}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-primary hover:underline"
-                >
-                  View on Stellar Explorer
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleEnterArena}
-              className="w-full py-4 rounded-lg gradient-primary text-primary-foreground font-semibold"
+          {step === 'game' && (
+            <motion.div
+              key="game"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-8"
             >
-              Let&apos;s Battle
-            </motion.button>
-          </motion.div>
-        )}
+              <div className="text-center mb-6">
+                <h2 className="font-orbitron text-2xl font-bold text-white mb-2">
+                  Tap the Falling Flame
+                </h2>
+                <p className="text-white/60">Catch 20 flames before time runs out!</p>
+              </div>
+              <MiniGame onComplete={handleGameComplete} />
+            </motion.div>
+          )}
+
+          {step === 'reward' && (
+            <motion.div
+              key="reward"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-12"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', damping: 15 }}
+                className="mb-8"
+              >
+                <ChestRewardAnimation />
+              </motion.div>
+
+              <h2 className="font-orbitron text-3xl font-bold text-white mb-4">
+                Challenge Complete!
+              </h2>
+
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl glass">
+                  <Sparkles className="w-5 h-5 text-accent" />
+                  <span className="font-orbitron text-xl font-bold text-accent">+100 XP</span>
+                </div>
+              </div>
+
+              <div className="animate-pulse">
+                <p className="text-white/60">Creating your wallet...</p>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 'complete' && (
+            <motion.div
+              key="complete"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center py-12"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', damping: 12 }}
+                className="inline-block mb-8"
+              >
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                  <CheckCircle className="w-10 h-10 text-accent" />
+                </div>
+              </motion.div>
+
+              <h2 className="font-orbitron text-3xl md:text-4xl font-bold text-white mb-4">
+                Wallet Created!
+              </h2>
+
+              <p className="text-white/60 mb-8 max-w-md mx-auto">
+                Your Stellar wallet has been created and funded with testnet XLM
+              </p>
+
+              {wallet && (
+                <div className="mb-8 flex justify-center">
+                  <WalletCard
+                    address={wallet.address}
+                    balance={wallet.balance}
+                    variant="full"
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={completeOnboarding}
+                  className="group px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-lg hover:opacity-90 transition-all glow-primary flex items-center gap-2"
+                >
+                  Enter Arena
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button
+                  onClick={() => router.push('/wallet')}
+                  className="px-8 py-4 rounded-xl glass text-white/80 font-medium text-lg hover:bg-white/5 transition-colors flex items-center gap-2"
+                >
+                  <Wallet className="w-5 h-5" />
+                  View Wallet
+                </button>
+              </div>
+
+              <div className="mt-12 p-4 rounded-xl glass max-w-md mx-auto">
+                <p className="text-sm text-white/50">
+                  Your wallet address is stored securely and can be accessed from the Wallet page
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </main>
   )
 }

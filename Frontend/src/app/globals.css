@@ -4,161 +4,148 @@
 
 @layer base {
   :root {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
-    --primary: 250 100% 50%;
-    --primary-foreground: 0 0% 6%;
-    --secondary: 270 100% 60%;
-    --secondary-foreground: 0 0% 6%;
-    --accent: 45 100% 55%;
-    --accent-foreground: 0 0% 6%;
-    --muted: 0 0% 35%;
-    --muted-foreground: 0 0% 75%;
+    --background: 220 20% 4%;
+    --foreground: 210 40% 98%;
+    --card: 220 20% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 20% 6%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 263 70% 60%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 91% 60%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 220 20% 4%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 250 100% 50%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 263 70% 60%;
     --radius: 1rem;
+    --gold: 43 96% 56%;
+    --blue: 217 91% 60%;
+    --violet: 263 70% 60%;
   }
+}
 
+@layer base {
+  * {
+    @apply border-border;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
-  * {
-    @apply border-border;
-  }
 }
 
-@layer components {
+@layer utilities {
   .glass {
-    @apply bg-card/40 backdrop-blur-md border border-white/10;
+    @apply bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] shadow-xl;
   }
-
-  .glass-strong {
-    @apply bg-card/60 backdrop-blur-xl border border-white/15;
+  .glass-hover {
+    @apply hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300;
   }
-
   .glow-primary {
-    @apply shadow-lg shadow-primary/30;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.2);
   }
-
-  .glow-secondary {
-    @apply shadow-lg shadow-secondary/30;
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.3), 0 0 40px rgba(234, 179, 8, 0.2);
   }
-
-  .glow-accent {
-    @apply shadow-lg shadow-accent/30;
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.2);
   }
-
-  .gradient-primary {
-    @apply bg-gradient-to-r from-primary to-secondary;
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent;
   }
-
-  .gradient-accent {
-    @apply bg-gradient-to-r from-accent to-primary;
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
   }
-
-  .text-balance-custom {
-    text-wrap: balance;
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 }
 
-/* Animations */
 @keyframes float {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0px);
   }
   50% {
     transform: translateY(-10px);
   }
 }
 
-@keyframes glow-pulse {
+@keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    opacity: 1;
+    filter: brightness(1);
   }
   50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
+    opacity: 0.8;
+    filter: brightness(1.2);
   }
 }
 
-@keyframes flame {
+@keyframes fall {
   0% {
-    transform: translateY(-100px) scale(1);
-    opacity: 1;
-  }
-  50% {
+    transform: translateY(-100%) rotate(0deg);
     opacity: 1;
   }
   100% {
-    transform: translateY(600px) scale(0.5);
+    transform: translateY(100vh) rotate(360deg);
     opacity: 0;
   }
 }
 
-@keyframes shimmer {
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes confetti {
   0% {
-    background-position: -200% 0;
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
   }
   100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  from {
+    transform: translateY(100vh) rotate(720deg);
     opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
 }
 
-.animate-slide-in {
-  animation: slide-in 0.5s ease-out;
+.animate-fall {
+  animation: fall 3s linear forwards;
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+.animate-sparkle {
+  animation: sparkle 1s ease-in-out infinite;
 }
 
-/* Clerk Customization */
-.cl-rootBox {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+.animate-confetti {
+  animation: confetti 3s ease-out forwards;
 }
 
-.cl-form_headerTitle {
-  color: hsl(var(--foreground));
-  font-size: 1.875rem;
-  font-weight: 700;
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.cl-formButtonPrimary {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
 }
 
-.cl-formButtonPrimary:hover {
-  background: hsl(250 100% 45%);
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }

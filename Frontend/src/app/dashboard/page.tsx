@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [battles, setBattles] = useState<Battle[]>([])
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [hasAuthWarning, setHasAuthWarning] = useState(false)
 
   useEffect(() => {
     if (!isOnboardingComplete()) {
@@ -30,17 +31,26 @@ export default function DashboardPage() {
       return
     }
 
-    Promise.all([
+    Promise.allSettled([
       apiRoutes.users.me(),
       apiRoutes.battles.open(),
       apiRoutes.users.leaderboard(),
     ])
-      .then(([userResponse, battlesResponse, leaderboardResponse]) => {
-        setUser(userResponse.data)
-        setBattles(battlesResponse.data)
-        setLeaderboard(leaderboardResponse.data)
+      .then(([userResult, battlesResult, leaderboardResult]) => {
+        if (userResult.status === 'fulfilled') {
+          setUser(userResult.value.data)
+        } else {
+          setHasAuthWarning(true)
+        }
+
+        if (battlesResult.status === 'fulfilled') {
+          setBattles(battlesResult.value.data)
+        }
+
+        if (leaderboardResult.status === 'fulfilled') {
+          setLeaderboard(leaderboardResult.value.data)
+        }
       })
-      .catch((error) => console.error('Failed to load dashboard:', error))
       .finally(() => setIsLoading(false))
   }, [router])
 
@@ -77,6 +87,12 @@ export default function DashboardPage() {
                 <p className="mt-2 text-sm text-white/72">Spectator predictions are trending 18% above yesterday.</p>
               </div>
             </div>
+
+            {hasAuthWarning && (
+              <div className="mt-6 rounded-[24px] border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100/85">
+                Account-only stats are unavailable right now because the backend is not accepting authenticated local requests yet. Public battle and leaderboard data can still load.
+              </div>
+            )}
 
             <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               <StatCard label="Rank" value={`#${user?.rank ?? '-'}`} icon={<Trophy className="h-5 w-5 text-amber-200" />} />

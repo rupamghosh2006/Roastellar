@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const battleController = require('../controllers/battle.controller');
-const { protect } = require('../../middlewares/clerk.middleware');
+const battleController = require('../../battles/controllers/battle.controller');
+const { protect } = require('../../../middlewares/clerk.middleware');
 
 router.post('/create', protect, battleController.create);
 router.post('/join/:matchId', protect, battleController.join);

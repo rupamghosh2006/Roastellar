@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const User = require('../users/models/user.model');
-const ApiResponse = require('../../utils/apiResponse');
-const logger = require('../../utils/logger');
+const User = require('../../users/models/user.model');
+const ApiResponse = require('../../../utils/apiResponse');
+const logger = require('../../../utils/logger');
 
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   try {

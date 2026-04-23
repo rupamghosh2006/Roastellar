@@ -26,6 +26,7 @@ Thumbs.db
 # Config
 .env
 .env.local
+.env.example
 *.local.toml
 
 # Stellar CLI

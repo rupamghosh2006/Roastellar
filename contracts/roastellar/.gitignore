@@ -1,0 +1,32 @@
+# Build artifacts
+/target/
+**/target/
+
+# Cargo
+Cargo.lock
+
+# Rust
+**/*.rs.bk
+*.rlib
+
+# WASM
+*.wasm
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config
+.env
+.env.local
+*.local.toml
+
+# Stellar CLI config
+.config/
+identity/

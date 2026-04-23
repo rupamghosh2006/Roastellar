@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 6%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+    --primary: 250 100% 50%;
+    --primary-foreground: 0 0% 6%;
+    --secondary: 270 100% 60%;
+    --secondary-foreground: 0 0% 6%;
+    --accent: 45 100% 55%;
+    --accent-foreground: 0 0% 6%;
+    --muted: 0 0% 35%;
+    --muted-foreground: 0 0% 75%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 250 100% 50%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --radius: 1rem;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  * {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-card/40 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-strong {
+    @apply bg-card/60 backdrop-blur-xl border border-white/15;
+  }
+
+  .glow-primary {
+    @apply shadow-lg shadow-primary/30;
+  }
+
+  .glow-secondary {
+    @apply shadow-lg shadow-secondary/30;
+  }
+
+  .glow-accent {
+    @apply shadow-lg shadow-accent/30;
+  }
+
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-r from-accent to-primary;
+  }
+
+  .text-balance-custom {
+    text-wrap: balance;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
+  }
+}
+
+@keyframes flame {
+  0% {
+    transform: translateY(-100px) scale(1);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(600px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Clerk Customization */
+.cl-rootBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.cl-form_headerTitle {
+  color: hsl(var(--foreground));
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.cl-formButtonPrimary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.cl-formButtonPrimary:hover {
+  background: hsl(250 100% 45%);
+}

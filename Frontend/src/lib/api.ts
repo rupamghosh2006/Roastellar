@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { auth } from '@clerk/nextjs/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -9,12 +10,15 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('clerk-token');
+api.interceptors.request.use(async (config) => {
+  try {
+    const { getToken } = await auth();
+    const token = await getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+  } catch (error) {
+    // Auth not available in this context
   }
   return config;
 });
@@ -24,7 +28,6 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('clerk-token');
         window.location.href = '/';
       }
     }

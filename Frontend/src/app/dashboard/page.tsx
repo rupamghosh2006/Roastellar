@@ -10,7 +10,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { BattleList } from '@/components/BattleCard'
 import { PageLoader, SkeletonCard } from '@/components/LoadingScreen'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User, type Wallet } from '@/lib/api'
-import { isOnboardingComplete } from '@/lib/utils'
+import { setOnboardingComplete } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
 const mockActivity = [
@@ -39,11 +39,6 @@ export default function DashboardPage() {
       return
     }
 
-    if (!isOnboardingComplete()) {
-      router.replace('/onboarding')
-      return
-    }
-
     getToken({ skipCache: true })
       .then((token) => {
         if (!token) {
@@ -51,15 +46,23 @@ export default function DashboardPage() {
         }
 
         return Promise.allSettled([
-        apiRoutes.users.me(token),
-        apiRoutes.wallet.me(token ?? undefined),
-        apiRoutes.battles.open(),
-        apiRoutes.users.leaderboard(),
-      ])
+          apiRoutes.users.me(token),
+          apiRoutes.wallet.me(token),
+          apiRoutes.battles.open(),
+          apiRoutes.users.leaderboard(),
+        ])
       })
       .then(([userResult, walletResult, battlesResult, leaderboardResult]) => {
         if (userResult.status === 'fulfilled') {
-          setUser(userResult.value.data)
+          const me = userResult.value.data
+          setUser(me)
+
+          if (me.onboardingCompleted) {
+            setOnboardingComplete()
+          } else {
+            router.replace('/onboarding')
+            return
+          }
         } else {
           setHasAuthWarning(true)
         }

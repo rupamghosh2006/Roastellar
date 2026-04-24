@@ -191,7 +191,7 @@ const clerk = {
         }
       }
 
-      const claims = verified?.claims || null;
+      const claims = verified?.claims || verified || null;
       if (!claims) {
         return null;
       }

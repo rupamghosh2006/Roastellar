@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { StellarSdk, rpcServer, NETWORK_PASSPHRASE } = require('../../../config/stellar');
 const logger = require('../../../utils/logger');
 
-const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CBSSWTY2IX3Y4UAE2S7FT4TX25FS65QFCKR4JYZVMNXIKTKCBF3TF3OJ';
+const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ';
 const CHAIN_SOURCE_SECRET = process.env.STELLAR_BATTLE_SECRET || process.env.STELLAR_SOURCE_SECRET || '';
 const CHAIN_SOURCE_PUBLIC = process.env.STELLAR_BATTLE_PUBLIC || process.env.STELLAR_SOURCE_PUBLIC || '';
 
@@ -12,6 +12,20 @@ function simulatedTx(prefix) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getSourceAddressFallback(fallback = '') {
+  if (CHAIN_SOURCE_PUBLIC) {
+    return CHAIN_SOURCE_PUBLIC;
+  }
+  if (!CHAIN_SOURCE_SECRET) {
+    return fallback;
+  }
+  try {
+    return StellarSdk.Keypair.fromSecret(CHAIN_SOURCE_SECRET).publicKey();
+  } catch (_) {
+    return fallback;
+  }
 }
 
 class BattleChainService {
@@ -79,11 +93,11 @@ class BattleChainService {
         entryFee,
       });
 
+      const sourceAddress = getSourceAddressFallback(player1Wallet || '');
       const args = [
-        StellarSdk.nativeToScVal(matchId, { type: 'u32' }),
-        StellarSdk.nativeToScVal(player1Wallet || '', { type: 'string' }),
-        StellarSdk.nativeToScVal(topicCid || '', { type: 'string' }),
         StellarSdk.nativeToScVal(Number(entryFee || 0), { type: 'i128' }),
+        StellarSdk.nativeToScVal(topicCid || '', { type: 'string' }),
+        StellarSdk.Address.fromString(sourceAddress).toScVal(),
       ];
       return this.invokeContract(process.env.STELLAR_CREATE_MATCH_FN || 'create_match', args);
     } catch (error) {
@@ -102,12 +116,7 @@ class BattleChainService {
         votesPlayer2,
       });
 
-      const args = [
-        StellarSdk.nativeToScVal(matchId, { type: 'u32' }),
-        StellarSdk.nativeToScVal(winnerWallet || '', { type: 'string' }),
-        StellarSdk.nativeToScVal(Number(votesPlayer1 || 0), { type: 'u32' }),
-        StellarSdk.nativeToScVal(Number(votesPlayer2 || 0), { type: 'u32' }),
-      ];
+      const args = [StellarSdk.nativeToScVal(matchId, { type: 'u32' })];
       return this.invokeContract(process.env.STELLAR_FINALIZE_MATCH_FN || 'finalize_match', args);
     } catch (error) {
       logger.error('finalizeMatchOnChain failed', { message: error?.message, matchId });
@@ -124,12 +133,8 @@ class BattleChainService {
         player2Wallet,
       });
 
-      const args = [
-        StellarSdk.nativeToScVal(matchId, { type: 'u32' }),
-        StellarSdk.nativeToScVal(player1Wallet || '', { type: 'string' }),
-        StellarSdk.nativeToScVal(player2Wallet || '', { type: 'string' }),
-      ];
-      return this.invokeContract(process.env.STELLAR_REFUND_DRAW_FN || 'refund_draw', args);
+      const args = [StellarSdk.nativeToScVal(matchId, { type: 'u32' })];
+      return this.invokeContract(process.env.STELLAR_REFUND_DRAW_FN || 'finalize_match', args);
     } catch (error) {
       logger.error('refundDrawOnChain failed', { message: error?.message, matchId });
       throw error;

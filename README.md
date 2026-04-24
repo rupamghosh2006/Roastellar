@@ -4,12 +4,27 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 ## Smart Contract
 
-**Contract ID (Testnet):** `CBSSWTY2IX3Y4UAE2S7FT4TX25FS65QFCKR4JYZVMNXIKTKCBF3TF3OJ`
+**Contract ID (Testnet):** `CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ`
 
 **Network:** Stellar Testnet  
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CBSSWTY2IX3Y4UAE2S7FT4TX25FS65QFCKR4JYZVMNXIKTKCBF3TF3OJ
+**Explorer:** https://stellar.expert/explorer/testnet/contract/CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ
 
 ## Quick Start
+
+### Backend Env For Real Soroban Tx
+
+Set these in Render backend env:
+
+```bash
+STELLAR_CONTRACT_ID=CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ
+STELLAR_BATTLE_SECRET=<deployer secret key>
+STELLAR_BATTLE_PUBLIC=GAYWZSX43WUBRHM3F2QCWBL6ZOYSH7V5EOQOYMG6SMTGMM24RFEFCMHC
+STELLAR_CREATE_MATCH_FN=create_match
+STELLAR_FINALIZE_MATCH_FN=finalize_match
+STELLAR_REFUND_DRAW_FN=finalize_match
+```
+
+Without `STELLAR_BATTLE_SECRET`, backend falls back to simulated tx ids.
 
 ### Build Contract
 

@@ -9,8 +9,25 @@ function canUseDevAuthFallback() {
   return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH_FALLBACK === 'true';
 }
 
+function normalizeEnvValue(value) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  const unquoted =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ? trimmed.slice(1, -1)
+      : trimmed;
+
+  return unquoted.replace(/\\n/g, '\n');
+}
+
 function getAuthorizedParties() {
-  const raw = process.env.CLERK_AUTHORIZED_PARTIES || process.env.CLIENT_URL || process.env.CORS_ORIGIN || '';
+  const raw = normalizeEnvValue(
+    process.env.CLERK_AUTHORIZED_PARTIES || process.env.CLIENT_URL || process.env.CORS_ORIGIN || ''
+  );
   const values = raw
     .split(',')
     .map((value) => value.trim())
@@ -28,7 +45,7 @@ function getVerifyOptions() {
   }
 
   if (process.env.CLERK_JWT_KEY) {
-    options.jwtKey = process.env.CLERK_JWT_KEY;
+    options.jwtKey = normalizeEnvValue(process.env.CLERK_JWT_KEY);
   }
 
   const authorizedParties = getAuthorizedParties();

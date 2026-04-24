@@ -1,6 +1,7 @@
 const User = require('../users/models/user.model');
 const ApiResponse = require('../../utils/apiResponse');
 const walletService = require('./wallet.service');
+const logger = require('../../utils/logger');
 
 function walletPayload(user, balance = 0) {
   return {
@@ -36,20 +37,35 @@ exports.createWallet = async (req, res, next) => {
     const { publicKey, secretKey } = walletService.createStellarWallet();
     const encryptedSecret = walletService.encryptSecret(secretKey);
 
-    await walletService.fundWithFriendbot(publicKey);
-    const balance = await walletService.getBalance(publicKey);
-
     user.walletPublicKey = publicKey;
     user.walletEncryptedSecret = encryptedSecret;
     user.walletCreatedAt = new Date();
-    user.walletFunded = true;
+    user.walletFunded = false;
     user.onboardingCompleted = true;
     await user.save();
 
+    let balance = 0;
+    let fundingPending = false;
+    try {
+      await walletService.fundWithFriendbot(publicKey);
+      user.walletFunded = true;
+      await user.save();
+      balance = await walletService.getBalance(publicKey);
+    } catch (fundingError) {
+      fundingPending = true;
+      logger.warn('Wallet created but Friendbot funding is pending', {
+        clerkId,
+        publicKey,
+        message: fundingError?.message,
+      });
+      balance = await walletService.getBalance(publicKey);
+    }
+
     return ApiResponse.created(res, {
       alreadyExists: false,
+      fundingPending,
       wallet: walletPayload(user, balance),
-    }, 'Wallet created');
+    }, fundingPending ? 'Wallet created. Funding is pending, retry shortly.' : 'Wallet created');
   } catch (error) {
     next(error);
   }

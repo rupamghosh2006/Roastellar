@@ -31,16 +31,35 @@ class WalletService {
   }
 
   async fundWithFriendbot(publicKey) {
-    try {
-      const response = await axios.get('https://friendbot.stellar.org', {
-        params: { addr: publicKey },
-        timeout: 15000,
-      });
+    const maxAttempts = Number(process.env.FRIENDBOT_MAX_RETRIES || 3);
+    const timeoutMs = Number(process.env.FRIENDBOT_TIMEOUT_MS || 15000);
+    const retryDelayMs = Number(process.env.FRIENDBOT_RETRY_DELAY_MS || 1200);
 
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.detail || error.message;
-      throw new Error(`Friendbot failed: ${message}`);
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const response = await axios.get('https://friendbot.stellar.org', {
+          params: { addr: publicKey },
+          timeout: timeoutMs,
+        });
+
+        return response.data;
+      } catch (error) {
+        const status = error?.response?.status;
+        const isTransient =
+          !status ||
+          status >= 500 ||
+          ['ECONNABORTED', 'ECONNRESET', 'ENOTFOUND', 'ETIMEDOUT'].includes(error?.code);
+
+        const isLastAttempt = attempt === maxAttempts;
+        if (!isTransient || isLastAttempt) {
+          const message = error.response?.data?.detail || error.message;
+          const friendbotError = new Error(`Friendbot failed: ${message}`);
+          friendbotError.code = 'FRIENDBOT_FAILED';
+          throw friendbotError;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * attempt));
+      }
     }
   }
 

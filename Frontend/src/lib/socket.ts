@@ -8,8 +8,9 @@ function ensureSocket(): Socket {
   if (!socket) {
     socket = io(SOCKET_URL, {
       autoConnect: false,
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
+      timeout: 12000,
     })
   }
   return socket

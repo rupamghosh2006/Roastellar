@@ -18,12 +18,32 @@ const walletRoutes = require('./modules/wallet/wallet.routes');
 const app = express();
 app.set('trust proxy', 1);
 
+function getAllowedOrigins() {
+  const raw = process.env.CLIENT_URL || process.env.CLIENT_ORIGINS || '';
+  return raw
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function isOriginAllowed(origin, allowedOrigins) {
+  if (!origin) return true;
+  if (allowedOrigins.length === 0) return true;
+  return allowedOrigins.includes(origin);
+}
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
+const allowedOrigins = getAllowedOrigins();
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin, allowedOrigins)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS blocked for this origin'));
+  },
   credentials: true,
 }));
 

@@ -49,16 +49,30 @@ export default function BattlesPage() {
           }
         })
 
-        const [meRes, walletRes, openRes] = await Promise.all([
+        const [meRes, walletRes, openRes] = await Promise.allSettled([
           apiRoutes.users.me(token),
           apiRoutes.wallet.me(token),
           apiRoutes.battles.open(),
         ])
 
         if (!active) return
-        setUser(meRes.data)
-        setWallet(walletRes.data)
-        setBattles(openRes.data)
+
+        const nextUser = meRes.status === 'fulfilled' ? meRes.value.data : null
+        const nextWallet = walletRes.status === 'fulfilled' ? walletRes.value.data : null
+        const openBattles = openRes.status === 'fulfilled' ? openRes.value.data : []
+
+        setUser(nextUser)
+        setWallet(nextWallet)
+        setBattles(openBattles)
+
+        if (!nextWallet?.publicKey && nextUser?.walletAddress) {
+          setWallet({
+            address: nextUser.walletAddress,
+            publicKey: nextUser.walletAddress,
+            balance: Number(nextUser.walletBalance || 0),
+            funded: true,
+          })
+        }
       } catch (error) {
         toast.error('Unable to load battles right now')
       } finally {
@@ -93,7 +107,8 @@ export default function BattlesPage() {
       return
     }
 
-    if (!wallet?.publicKey) {
+    const resolvedWallet = wallet?.publicKey || user?.walletAddress
+    if (!resolvedWallet) {
       toast.error('Create your wallet first')
       router.push('/onboarding')
       return
@@ -188,7 +203,7 @@ export default function BattlesPage() {
               </button>
             </div>
             <p className="mt-3 text-xs text-white/45">
-              Signed in as {user?.username ?? 'Player'} | Wallet {wallet?.publicKey ? 'ready' : 'missing'}
+              Signed in as {user?.username ?? 'Player'} | Wallet {(wallet?.publicKey || user?.walletAddress) ? 'ready' : 'missing'}
             </p>
           </section>
 

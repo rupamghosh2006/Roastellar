@@ -4,14 +4,34 @@ const { registerBattleSocketHandlers } = require('../sockets/battle.socket');
 
 let io = null;
 
+function getAllowedOrigins() {
+  const raw = process.env.CLIENT_URL || process.env.CLIENT_ORIGINS || '';
+  return raw
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function isOriginAllowed(origin, allowedOrigins) {
+  if (!origin) return true;
+  if (allowedOrigins.length === 0) return true;
+  return allowedOrigins.includes(origin);
+}
+
 const initializeSocket = (httpServer) => {
   const { Server } = require('socket.io');
   const { clerk } = require('./clerk');
   const User = require('../modules/users/models/user.model');
 
+  const allowedOrigins = getAllowedOrigins();
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || '*',
+      origin: (origin, callback) => {
+        if (isOriginAllowed(origin, allowedOrigins)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Socket CORS blocked'));
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -24,7 +44,11 @@ const initializeSocket = (httpServer) => {
         return next(new Error('Authentication required'));
       }
 
-      const claims = await clerk.verifyToken(token);
+      const claims = await clerk.verifyToken(token, {
+        origin: socket.handshake.headers.origin,
+        referer: socket.handshake.headers.referer,
+        host: socket.handshake.headers.host,
+      });
       if (!claims?.sub) {
         return next(new Error('Invalid token'));
       }

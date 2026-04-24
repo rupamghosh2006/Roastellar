@@ -14,6 +14,7 @@ const clerkRoutes = require('./modules/auth/routes/clerk.routes');
 const walletRoutes = require('./modules/wallet/wallet.routes');
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },

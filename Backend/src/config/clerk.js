@@ -24,7 +24,7 @@ function normalizeEnvValue(value) {
   return unquoted.replace(/\\n/g, '\n');
 }
 
-function getAuthorizedParties() {
+function getAllowedOrigins() {
   const raw = normalizeEnvValue(
     process.env.CLERK_AUTHORIZED_PARTIES || process.env.CLIENT_URL || process.env.CORS_ORIGIN || ''
   );
@@ -35,6 +35,24 @@ function getAuthorizedParties() {
     .filter((value) => value !== '*');
 
   return values.length > 0 ? values : undefined;
+}
+
+function normalizeOrigin(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  try {
+    const url = new URL(trimmed);
+    return `${url.protocol}//${url.host}`;
+  } catch (error) {
+    return trimmed.replace(/\/+$/, '');
+  }
 }
 
 function getVerifyOptions() {
@@ -48,12 +66,50 @@ function getVerifyOptions() {
     options.jwtKey = normalizeEnvValue(process.env.CLERK_JWT_KEY);
   }
 
-  const authorizedParties = getAuthorizedParties();
-  if (authorizedParties) {
-    options.authorizedParties = authorizedParties;
+  return options;
+}
+
+function validateAuthorizedParty(claims, requestContext = {}) {
+  const allowedOrigins = (getAllowedOrigins() || []).map(normalizeOrigin);
+  if (allowedOrigins.length === 0) {
+    return { valid: true };
   }
 
-  return options;
+  const tokenAzp = normalizeOrigin(claims?.azp);
+  if (!tokenAzp) {
+    return { valid: true };
+  }
+
+  if (!allowedOrigins.includes(tokenAzp)) {
+    return {
+      valid: false,
+      reason: 'Token azp is not in allowed origins',
+      details: {
+        tokenAzp,
+        allowedOrigins,
+      },
+    };
+  }
+
+  const requestOrigin = normalizeOrigin(
+    requestContext.origin ||
+    requestContext.referer ||
+    requestContext.host
+  );
+
+  if (requestOrigin && requestOrigin !== tokenAzp) {
+    return {
+      valid: false,
+      reason: 'Request origin does not match token azp',
+      details: {
+        requestOrigin,
+        tokenAzp,
+        allowedOrigins,
+      },
+    };
+  }
+
+  return { valid: true };
 }
 
 const clerk = {
@@ -78,7 +134,7 @@ const clerk = {
     }
   },
 
-  async verifyToken(token) {
+  async verifyToken(token, requestContext = {}) {
     if (canUseDevAuthFallback()) {
       try {
         const decoded = decodeJwt(token);
@@ -106,8 +162,18 @@ const clerk = {
 
     try {
       const verified = await verifyToken(token, getVerifyOptions());
+      const claims = verified?.claims || null;
+      if (!claims) {
+        return null;
+      }
 
-      return verified?.claims || null;
+      const azpValidation = validateAuthorizedParty(claims, requestContext);
+      if (!azpValidation.valid) {
+        console.error('Clerk azp validation error:', azpValidation.details);
+        return null;
+      }
+
+      return claims;
     } catch (error) {
       try {
         const decoded = decodeJwt(token);
@@ -119,7 +185,7 @@ const clerk = {
           aud: payload.aud,
           iss: payload.iss,
           sub: payload.sub,
-          authorizedParties: getAuthorizedParties(),
+          allowedOrigins: getAllowedOrigins(),
           usingJwtKey: Boolean(process.env.CLERK_JWT_KEY),
         });
       } catch (decodeError) {

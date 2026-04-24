@@ -74,7 +74,11 @@ exports.protect = async (req, res, next) => {
       return ApiResponse.unauthorized(res, 'Authentication required. No token provided.');
     }
 
-    const claims = await clerk.verifyToken(token);
+    const claims = await clerk.verifyToken(token, {
+      origin: req.headers.origin,
+      referer: req.headers.referer,
+      host: req.headers.host ? `${req.protocol}://${req.headers.host}` : '',
+    });
 
     if (!claims || !claims.sub) {
       logger.warn('Auth rejected: invalid or expired Clerk token', {
@@ -160,7 +164,11 @@ exports.optionalAuth = async (req, res, next) => {
       return next();
     }
 
-    const claims = await clerk.verifyToken(token);
+    const claims = await clerk.verifyToken(token, {
+      origin: req.headers.origin,
+      referer: req.headers.referer,
+      host: req.headers.host ? `${req.protocol}://${req.headers.host}` : '',
+    });
 
     if (!claims || !claims.sub) {
       return next();

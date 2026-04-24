@@ -73,9 +73,20 @@ class BattleChainService {
     }
 
     const prepared = assemble(tx, simulated, NETWORK_PASSPHRASE);
-    prepared.sign(keypair);
 
-    const sent = await rpcServer.sendTransaction(prepared);
+    let signedTx = null;
+    if (prepared && typeof prepared.sign === 'function') {
+      prepared.sign(keypair);
+      signedTx = prepared;
+    } else if (prepared && typeof prepared.build === 'function') {
+      const built = prepared.build();
+      built.sign(keypair);
+      signedTx = built;
+    } else {
+      throw new Error('Prepared Soroban transaction has unsupported shape');
+    }
+
+    const sent = await rpcServer.sendTransaction(signedTx);
     if (sent.status === 'ERROR') {
       throw new Error(`Soroban send failed: ${sent.errorResultXdr || 'unknown error'}`);
     }

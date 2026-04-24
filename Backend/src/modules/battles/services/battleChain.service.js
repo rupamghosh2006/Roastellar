@@ -1,47 +1,53 @@
-const crypto = require('crypto');
 const { StellarSdk, rpcServer, NETWORK_PASSPHRASE } = require('../../../config/stellar');
 const logger = require('../../../utils/logger');
 
 const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ';
-const CHAIN_SOURCE_SECRET = process.env.STELLAR_BATTLE_SECRET || process.env.STELLAR_SOURCE_SECRET || '';
-const CHAIN_SOURCE_PUBLIC = process.env.STELLAR_BATTLE_PUBLIC || process.env.STELLAR_SOURCE_PUBLIC || '';
-
-function simulatedTx(prefix) {
-  return `sim_${prefix}_${crypto.randomBytes(8).toString('hex')}`;
-}
+const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET || '';
+const ESCROW_PUBLIC = process.env.STELLAR_ESCROW_PUBLIC || '';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function getSourceAddressFallback(fallback = '') {
-  if (CHAIN_SOURCE_PUBLIC) {
-    return CHAIN_SOURCE_PUBLIC;
-  }
-  if (!CHAIN_SOURCE_SECRET) {
-    return fallback;
-  }
+function resolvePublicKey(secret, fallback = '') {
+  if (!secret) return fallback;
   try {
-    return StellarSdk.Keypair.fromSecret(CHAIN_SOURCE_SECRET).publicKey();
+    return StellarSdk.Keypair.fromSecret(secret).publicKey();
   } catch (_) {
     return fallback;
   }
 }
 
+function parseReturnValue(returnValue) {
+  if (!returnValue) return null;
+  try {
+    if (typeof StellarSdk.scValToNative === 'function') {
+      return StellarSdk.scValToNative(returnValue);
+    }
+  } catch (_) {}
+  return null;
+}
+
 class BattleChainService {
-  get canSubmitOnChain() {
-    return Boolean(CHAIN_SOURCE_SECRET);
+  getEscrowSecret() {
+    if (!ESCROW_SECRET) {
+      throw new Error('STELLAR_ESCROW_SECRET (or TREASURY_SECRET) is required');
+    }
+    return ESCROW_SECRET;
   }
 
-  async invokeContract(method, args = []) {
-    if (!this.canSubmitOnChain) {
-      logger.warn('Soroban invoke fallback: STELLAR_BATTLE_SECRET/STELLAR_SOURCE_SECRET is missing');
-      return simulatedTx(method);
+  getEscrowPublic() {
+    return ESCROW_PUBLIC || resolvePublicKey(this.getEscrowSecret(), '');
+  }
+
+  async invokeContract({ method, args = [], sourceSecret, sourcePublic }) {
+    if (!sourceSecret) {
+      throw new Error(`Missing source secret for ${method}`);
     }
 
-    const keypair = StellarSdk.Keypair.fromSecret(CHAIN_SOURCE_SECRET);
-    const sourcePublic = CHAIN_SOURCE_PUBLIC || keypair.publicKey();
-    const account = await rpcServer.getAccount(sourcePublic);
+    const keypair = StellarSdk.Keypair.fromSecret(sourceSecret);
+    const accountPublic = sourcePublic || keypair.publicKey();
+    const account = await rpcServer.getAccount(accountPublic);
 
     const contract = new StellarSdk.Contract(CONTRACT_ID);
     const tx = new StellarSdk.TransactionBuilder(account, {
@@ -57,7 +63,16 @@ class BattleChainService {
       throw new Error(`Soroban simulate failed: ${simulated.error}`);
     }
 
-    const prepared = StellarSdk.assembleTransaction(tx, simulated, NETWORK_PASSPHRASE);
+    const assemble =
+      StellarSdk?.SorobanRpc?.assembleTransaction ||
+      StellarSdk?.rpc?.assembleTransaction ||
+      StellarSdk?.assembleTransaction;
+
+    if (typeof assemble !== 'function') {
+      throw new Error('No compatible Soroban assembleTransaction function found in stellar-sdk');
+    }
+
+    const prepared = assemble(tx, simulated, NETWORK_PASSPHRASE);
     prepared.sign(keypair);
 
     const sent = await rpcServer.sendTransaction(prepared);
@@ -66,13 +81,17 @@ class BattleChainService {
     }
 
     const hash = sent.hash;
-    const maxAttempts = Number(process.env.STELLAR_TX_POLL_ATTEMPTS || 20);
-    const pollIntervalMs = Number(process.env.STELLAR_TX_POLL_INTERVAL_MS || 1500);
+    const maxAttempts = Number(process.env.STELLAR_TX_POLL_ATTEMPTS || 25);
+    const pollIntervalMs = Number(process.env.STELLAR_TX_POLL_INTERVAL_MS || 1200);
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       const txResult = await rpcServer.getTransaction(hash);
       if (txResult?.status === 'SUCCESS') {
-        return hash;
+        return {
+          txHash: hash,
+          returnValue: parseReturnValue(txResult.returnValue),
+          raw: txResult,
+        };
       }
       if (txResult?.status === 'FAILED') {
         throw new Error(`Soroban tx failed: ${hash}`);
@@ -80,65 +99,110 @@ class BattleChainService {
       await sleep(pollIntervalMs);
     }
 
-    return hash;
+    return { txHash: hash, returnValue: null, raw: null };
   }
 
-  async createMatchOnChain({ matchId, player1Wallet, topicCid, entryFee }) {
-    try {
-      logger.info('createMatchOnChain', {
-        contractId: CONTRACT_ID,
-        matchId,
-        player1Wallet,
-        topicCid,
-        entryFee,
-      });
-
-      const sourceAddress = getSourceAddressFallback(player1Wallet || '');
-      const args = [
+  async createMatchOnChain({ entryFee, topicCid, sourceSecret, sourcePublic }) {
+    logger.info('createMatchOnChain', { contractId: CONTRACT_ID, sourcePublic, entryFee });
+    const userAddress = sourcePublic || resolvePublicKey(sourceSecret, '');
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_CREATE_MATCH_FN || 'create_match',
+      args: [
         StellarSdk.nativeToScVal(Number(entryFee || 0), { type: 'i128' }),
         StellarSdk.nativeToScVal(topicCid || '', { type: 'string' }),
-        StellarSdk.Address.fromString(sourceAddress).toScVal(),
-      ];
-      return this.invokeContract(process.env.STELLAR_CREATE_MATCH_FN || 'create_match', args);
-    } catch (error) {
-      logger.error('createMatchOnChain failed', { message: error?.message, matchId });
-      throw error;
+        StellarSdk.Address.fromString(userAddress).toScVal(),
+      ],
+      sourceSecret,
+      sourcePublic: userAddress,
+    });
+
+    const onChainMatchId = Number(result.returnValue);
+    if (!Number.isFinite(onChainMatchId) || onChainMatchId <= 0) {
+      throw new Error('Unable to parse on-chain match id from create_match response');
     }
+
+    return {
+      txHash: result.txHash,
+      onChainMatchId,
+    };
   }
 
-  async finalizeMatchOnChain({ matchId, winnerWallet, votesPlayer1, votesPlayer2 }) {
-    try {
-      logger.info('finalizeMatchOnChain', {
-        contractId: CONTRACT_ID,
-        matchId,
-        winnerWallet,
-        votesPlayer1,
-        votesPlayer2,
-      });
-
-      const args = [StellarSdk.nativeToScVal(matchId, { type: 'u32' })];
-      return this.invokeContract(process.env.STELLAR_FINALIZE_MATCH_FN || 'finalize_match', args);
-    } catch (error) {
-      logger.error('finalizeMatchOnChain failed', { message: error?.message, matchId });
-      throw error;
-    }
+  async joinMatchOnChain({ onChainMatchId, playerPublic, sourceSecret }) {
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_JOIN_MATCH_FN || 'join_match',
+      args: [
+        StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
+        StellarSdk.Address.fromString(playerPublic).toScVal(),
+      ],
+      sourceSecret,
+      sourcePublic: playerPublic,
+    });
+    return result.txHash;
   }
 
-  async refundDrawOnChain({ matchId, player1Wallet, player2Wallet }) {
-    try {
-      logger.info('refundDrawOnChain', {
-        contractId: CONTRACT_ID,
-        matchId,
-        player1Wallet,
-        player2Wallet,
-      });
+  async submitRoastOnChain({ onChainMatchId, roastCid, playerPublic, sourceSecret }) {
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_SUBMIT_ROAST_FN || 'submit_roast',
+      args: [
+        StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
+        StellarSdk.nativeToScVal(roastCid || '', { type: 'string' }),
+        StellarSdk.Address.fromString(playerPublic).toScVal(),
+      ],
+      sourceSecret,
+      sourcePublic: playerPublic,
+    });
+    return result.txHash;
+  }
 
-      const args = [StellarSdk.nativeToScVal(matchId, { type: 'u32' })];
-      return this.invokeContract(process.env.STELLAR_REFUND_DRAW_FN || 'finalize_match', args);
-    } catch (error) {
-      logger.error('refundDrawOnChain failed', { message: error?.message, matchId });
-      throw error;
-    }
+  async voteOnChain({ onChainMatchId, selectedPlayerPublic, voterPublic, sourceSecret }) {
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_VOTE_FN || 'vote',
+      args: [
+        StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
+        StellarSdk.Address.fromString(selectedPlayerPublic).toScVal(),
+        StellarSdk.Address.fromString(voterPublic).toScVal(),
+      ],
+      sourceSecret,
+      sourcePublic: voterPublic,
+    });
+    return result.txHash;
+  }
+
+  async predictOnChain({ onChainMatchId, selectedPlayerPublic, amount, predictorPublic, sourceSecret }) {
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_PREDICT_FN || 'predict',
+      args: [
+        StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
+        StellarSdk.Address.fromString(selectedPlayerPublic).toScVal(),
+        StellarSdk.nativeToScVal(Number(amount || 0), { type: 'i128' }),
+        StellarSdk.Address.fromString(predictorPublic).toScVal(),
+      ],
+      sourceSecret,
+      sourcePublic: predictorPublic,
+    });
+    return result.txHash;
+  }
+
+  async finalizeMatchOnChain({ onChainMatchId }) {
+    const sourceSecret = this.getEscrowSecret();
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_FINALIZE_MATCH_FN || 'finalize_match',
+      args: [StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' })],
+      sourceSecret,
+      sourcePublic: this.getEscrowPublic(),
+    });
+    return result.txHash;
+  }
+
+  async refundDrawOnChain({ onChainMatchId }) {
+    const sourceSecret = this.getEscrowSecret();
+    const result = await this.invokeContract({
+      method: process.env.STELLAR_REFUND_DRAW_FN || 'finalize_match',
+      args: [StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' })],
+      sourceSecret,
+      sourcePublic: this.getEscrowPublic(),
+    });
+    return result.txHash;
   }
 }
 

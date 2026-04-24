@@ -93,6 +93,14 @@ const battleSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  chain: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
+  finance: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
 }, {
   timestamps: true,
 });
@@ -121,6 +129,8 @@ battleSchema.methods.toJSON = function() {
     startedAt: this.startedAt,
     endedAt: this.endedAt,
     txHash: this.txHash,
+    chain: this.chain || {},
+    finance: this.finance || {},
     createdAt: this.createdAt,
   };
 };

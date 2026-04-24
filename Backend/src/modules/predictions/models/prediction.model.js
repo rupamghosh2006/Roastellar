@@ -32,6 +32,18 @@ const predictionSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  escrowTxHash: {
+    type: String,
+    default: '',
+  },
+  chainTxHash: {
+    type: String,
+    default: '',
+  },
+  payoutTxHash: {
+    type: String,
+    default: '',
+  },
 }, {
   timestamps: true,
 });

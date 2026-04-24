@@ -19,12 +19,19 @@ Set these in Render backend env:
 STELLAR_CONTRACT_ID=CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ
 STELLAR_BATTLE_SECRET=<deployer secret key>
 STELLAR_BATTLE_PUBLIC=GAYWZSX43WUBRHM3F2QCWBL6ZOYSH7V5EOQOYMG6SMTGMM24RFEFCMHC
+STELLAR_ESCROW_SECRET=<escrow secret key>
+STELLAR_ESCROW_PUBLIC=<escrow public key>
 STELLAR_CREATE_MATCH_FN=create_match
+STELLAR_JOIN_MATCH_FN=join_match
+STELLAR_SUBMIT_ROAST_FN=submit_roast
+STELLAR_VOTE_FN=vote
+STELLAR_PREDICT_FN=predict
 STELLAR_FINALIZE_MATCH_FN=finalize_match
 STELLAR_REFUND_DRAW_FN=finalize_match
+BATTLE_VOTE_STAKE_XLM=0
 ```
 
-Without `STELLAR_BATTLE_SECRET`, backend falls back to simulated tx ids.
+Without these keys, backend cannot execute full mirrored on-chain lifecycle + XLM escrow transfers.
 
 ### Build Contract
 

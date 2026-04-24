@@ -32,7 +32,6 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
     }
 
     onPredict(selectedPlayer, parsed)
-    toast.success('Prediction submitted')
   }
 
   if (!isSpectator) {

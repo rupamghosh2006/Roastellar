@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { BattleList } from '@/components/BattleCard'
 import { PageLoader } from '@/components/LoadingScreen'
-import { apiRoutes, type Battle, type User, type Wallet } from '@/lib/api'
+import { apiRoutes, normalizeBattleList, type Battle, type User, type Wallet } from '@/lib/api'
 import { connectSocket, joinLobby, onOpenBattlesUpdated, removeAllSocketListeners } from '@/lib/socket'
 
 export default function BattlesPage() {
@@ -45,7 +45,7 @@ export default function BattlesPage() {
         onOpenBattlesUpdated((payload) => {
           if (!active) return
           if (Array.isArray(payload)) {
-            setBattles(payload)
+            setBattles(normalizeBattleList(payload))
           }
         })
 
@@ -188,7 +188,7 @@ export default function BattlesPage() {
               </button>
             </div>
             <p className="mt-3 text-xs text-white/45">
-              Signed in as {user?.username ?? 'Player'} · Wallet {wallet?.publicKey ? 'ready' : 'missing'}
+              Signed in as {user?.username ?? 'Player'} | Wallet {wallet?.publicKey ? 'ready' : 'missing'}
             </p>
           </section>
 

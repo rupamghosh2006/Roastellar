@@ -15,6 +15,7 @@ const VOTING_PHASE_SECONDS = Number(process.env.BATTLE_VOTING_SECONDS || 30);
 
 function sanitizeText(value, max = 280) {
   const text = String(value || '')
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   return text.slice(0, max);
@@ -59,6 +60,10 @@ function winnerPayload(battle) {
 }
 
 class BattleService {
+  normalizeBattle(battleDoc) {
+    return battleDoc?.toJSON ? battleDoc.toJSON() : battleDoc;
+  }
+
   async serializeByMatchId(matchId) {
     const battle = await Battle.findOne({ matchId })
       .populate('creator', 'username avatar imageUrl clerkId xp wins losses rankPoints badges')
@@ -170,30 +175,46 @@ class BattleService {
       throw new Error('Cannot join your own battle');
     }
 
-    battle.player2 = user._id;
-    battle.player2Wallet = user.walletPublicKey;
-    battle.status = 'active';
-    battle.startedAt = new Date();
-    await battle.save();
+    const now = new Date();
+    const updated = await Battle.findOneAndUpdate(
+      {
+        _id: battle._id,
+        status: 'open',
+        player2: null,
+      },
+      {
+        $set: {
+          player2: user._id,
+          player2Wallet: user.walletPublicKey,
+          status: 'active',
+          startedAt: now,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      throw new Error('Battle was already joined by another player');
+    }
 
     await trackEvent('battle_joined', user._id, { matchId });
 
-    this.startRoastTimer(battle.matchId);
+    this.startRoastTimer(updated.matchId);
 
     const io = getIO();
     if (io) {
-      io.to(`battle_${battle.matchId}`).emit('player_joined', {
-        matchId: battle.matchId,
+      io.to(`battle_${updated.matchId}`).emit('player_joined', {
+        matchId: updated.matchId,
         playerId: String(user._id),
       });
-      io.to(`battle_${battle.matchId}`).emit('battle_started', {
-        matchId: battle.matchId,
+      io.to(`battle_${updated.matchId}`).emit('battle_started', {
+        matchId: updated.matchId,
         durationSec: ROAST_PHASE_SECONDS,
       });
       io.to('lobby').emit('open_battles_updated', await this.getOpenBattles());
     }
 
-    return this.getBattleByMatchId(battle.matchId);
+    return this.getBattleByMatchId(updated.matchId);
   }
 
   startRoastTimer(matchId) {
@@ -220,6 +241,7 @@ class BattleService {
 
         battle.status = 'voting';
         await battle.save();
+        timerService.clear(`roast_${matchId}`);
         this.startVotingTimer(matchId);
         io?.to(`battle_${matchId}`).emit('voting_started', {
           matchId,
@@ -257,7 +279,7 @@ class BattleService {
       throw new Error('Battle not found');
     }
 
-    if (!['active', 'voting'].includes(battle.status)) {
+    if (battle.status !== 'active') {
       throw new Error('Battle is not accepting roast submissions');
     }
 
@@ -309,6 +331,7 @@ class BattleService {
     }
 
     if (bothReady) {
+      timerService.clear(`roast_${matchId}`);
       this.startVotingTimer(matchId);
       io?.to(`battle_${matchId}`).emit('voting_started', {
         matchId,
@@ -325,7 +348,7 @@ class BattleService {
       throw new Error('Battle not found');
     }
 
-    if (!['active', 'voting'].includes(battle.status)) {
+    if (battle.status !== 'voting') {
       throw new Error('Battle is not in voting window');
     }
 
@@ -488,6 +511,26 @@ class BattleService {
     }
 
     await battle.save();
+
+    const serializedBattle = this.normalizeBattle(await Battle.findById(battle._id));
+    if (serializedBattle) {
+      const resultCid = await ipfsService.uploadJSON(
+        {
+          matchId,
+          status: serializedBattle.status,
+          winner: serializedBattle.winner || null,
+          votesPlayer1: serializedBattle.votesPlayer1,
+          votesPlayer2: serializedBattle.votesPlayer2,
+          entryFee: serializedBattle.entryFee,
+          txHash: serializedBattle.txHash || '',
+          endedAt: serializedBattle.endedAt,
+        },
+        `battle-result-${matchId}`
+      );
+      if (resultCid) {
+        await trackEvent('battle_result_metadata_uploaded', actorUserId, { matchId, resultCid });
+      }
+    }
 
     const player1 = await User.findById(battle.player1);
     const player2 = battle.player2 ? await User.findById(battle.player2) : null;

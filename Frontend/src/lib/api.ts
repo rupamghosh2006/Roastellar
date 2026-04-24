@@ -197,7 +197,7 @@ function authConfig(token?: string): AxiosRequestConfig {
   return token ? { headers: { Authorization: `Bearer ${token}` } } : {}
 }
 
-function normalizeUser(user: BackendUser | null | undefined): User {
+export function normalizeUser(user: BackendUser | null | undefined): User {
   return {
     id: user?.id ?? user?._id ?? '',
     clerkId: user?.clerkId ?? '',
@@ -219,7 +219,7 @@ function normalizeUser(user: BackendUser | null | undefined): User {
   }
 }
 
-function normalizeWallet(wallet: BackendWallet | null | undefined): Wallet {
+export function normalizeWallet(wallet: BackendWallet | null | undefined): Wallet {
   const publicKey = wallet?.publicKey ?? wallet?.address ?? ''
   return {
     address: publicKey,
@@ -247,7 +247,7 @@ function normalizeWalletSecretExport(payload: BackendWalletSecretExport | null |
   }
 }
 
-function normalizeLeaderboard(entries: BackendUser[] | null | undefined): LeaderboardEntry[] {
+export function normalizeLeaderboard(entries: BackendUser[] | null | undefined): LeaderboardEntry[] {
   const safe = Array.isArray(entries) ? entries : []
   return safe.map((entry, index) => {
     const user = normalizeUser(entry)
@@ -260,7 +260,7 @@ function normalizeLeaderboard(entries: BackendUser[] | null | undefined): Leader
   })
 }
 
-function normalizeBattle(battle: BackendBattle | null | undefined): Battle {
+export function normalizeBattle(battle: BackendBattle | null | undefined): Battle {
   const winnerId = typeof battle?.winner === 'string'
     ? battle?.winner
     : battle?.winner && typeof battle.winner === 'object'
@@ -300,7 +300,11 @@ function normalizeBattle(battle: BackendBattle | null | undefined): Battle {
   }
 }
 
-function normalizePrediction(prediction: BackendPrediction | null | undefined): Prediction {
+export function normalizeBattleList(battles: BackendBattle[] | null | undefined): Battle[] {
+  return Array.isArray(battles) ? battles.map(normalizeBattle) : []
+}
+
+export function normalizePrediction(prediction: BackendPrediction | null | undefined): Prediction {
   const predictorId = typeof prediction?.predictor === 'string'
     ? prediction.predictor
     : prediction?.predictor?.id ?? prediction?.predictor?._id ?? ''
@@ -339,9 +343,7 @@ export const apiRoutes = {
   },
   battles: {
     open: () =>
-      getAndNormalize(api.get<BackendBattle[]>('/api/battles/open'), (items) =>
-        (Array.isArray(items) ? items.map(normalizeBattle) : [])
-      ),
+      getAndNormalize(api.get<BackendBattle[]>('/api/battles/open'), normalizeBattleList),
     create: (payload: { topic: string; entryFee: number }, token?: string) =>
       getAndNormalize(api.post<BackendBattle>('/api/battles/create', payload, authConfig(token)), normalizeBattle),
     join: (matchId: number | string, token?: string) =>

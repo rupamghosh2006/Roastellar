@@ -1,175 +1,139 @@
-const jwt = require('jsonwebtoken');
-const authService = require('../modules/auth/services/auth.service');
 const battleService = require('../modules/battles/services/battle.service');
-const UserService = require('../modules/users/services/user.service');
-const logger = require('../utils/logger');
+const Battle = require('../modules/battles/models/battle.model');
 
-module.exports = (io, socket) => {
-  let currentUser = null;
-  let currentRoom = null;
+function userPayload(user) {
+  return {
+    id: String(user._id),
+    clerkId: user.clerkId,
+    username: user.username,
+    avatar: user.avatar || user.imageUrl || '',
+  };
+}
 
-  socket.on('authenticate', async (data, callback) => {
-    try {
-      const { token } = data;
-      if (!token) {
-        return callback({ error: 'No token provided' });
-      }
+async function emitSpectatorCount(io, matchId) {
+  try {
+    const room = `battle_${matchId}`;
+    const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
+    await Battle.updateOne({ matchId: Number(matchId) }, { spectatorsCount: roomSize });
+    io.to(room).emit('spectator_count', { matchId: Number(matchId), count: roomSize });
+  } catch (_) {
+    // Ignore room metric updates if Mongo write fails.
+  }
+}
 
-      const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
-      currentUser = await authService.getUserByFirebaseUid(decoded.uid);
+function registerBattleSocketHandlers(io, socket) {
+  const user = socket.data.user;
+  const joinedBattleRooms = new Set();
 
-      if (!currentUser) {
-        return callback({ error: 'User not found' });
-      }
-
-      socket.data.user = currentUser;
-      socket.join('lobby');
-
-      io.emit('users_online', { count: io.sockets.size });
-
-      callback({ success: true, user: currentUser.toPublicJSON() });
-    } catch (error) {
-      logger.error('Socket auth error:', error);
-      callback({ error: error.message });
-    }
+  socket.on('join_lobby', async () => {
+    socket.join('lobby');
+    io.to('lobby').emit('open_battles_updated', await battleService.getOpenBattles());
   });
 
-  socket.on('join_lobby', async (data, callback) => {
-    try {
-      if (currentRoom) {
-        socket.leave(currentRoom);
-      }
-      socket.join('lobby');
-      currentRoom = 'lobby';
-
-      const leaderboard = await UserService.getLeaderboard();
-      io.emit('leaderboard_updated', leaderboard);
-
-      callback({ success: true });
-    } catch (error) {
-      logger.error('Join lobby error:', error);
-      callback({ error: error.message });
+  socket.on('join_battle', async ({ matchId }) => {
+    const numericMatchId = Number(matchId);
+    if (!Number.isFinite(numericMatchId) || numericMatchId <= 0) {
+      socket.emit('error_message', { message: 'Invalid matchId' });
+      return;
     }
+
+    const room = `battle_${numericMatchId}`;
+    socket.join(room);
+    joinedBattleRooms.add(room);
+    await emitSpectatorCount(io, numericMatchId);
+    io.to(room).emit('player_joined', {
+      matchId: numericMatchId,
+      user: userPayload(user),
+    });
   });
 
-  socket.on('join_match', async (data, callback) => {
+  socket.on('leave_battle', async ({ matchId }) => {
+    const numericMatchId = Number(matchId);
+    if (!Number.isFinite(numericMatchId) || numericMatchId <= 0) {
+      return;
+    }
+
+    const room = `battle_${numericMatchId}`;
+    socket.leave(room);
+    joinedBattleRooms.delete(room);
+    await emitSpectatorCount(io, numericMatchId);
+  });
+
+  socket.on('start_match', async ({ matchId }) => {
     try {
-      const { matchId } = data;
-      const battle = await battleService.getMatch(matchId);
-
-      if (!battle) {
-        return callback({ error: 'Match not found' });
-      }
-
-      if (currentRoom && currentRoom !== 'lobby') {
-        socket.leave(currentRoom);
-      }
-
-      socket.join(`match_${matchId}`);
-      currentRoom = `match_${matchId}`;
-
-      io.to(`match_${matchId}`).emit('match_joined', {
-        matchId,
-        user: currentUser?.toPublicJSON(),
+      const numericMatchId = Number(matchId);
+      const battle = await battleService.joinBattle({
+        user,
+        matchId: numericMatchId,
       });
-
-      callback({ success: true, battle: battle.toJSON() });
-    } catch (error) {
-      logger.error('Join match error:', error);
-      callback({ error: error.message });
-    }
-  });
-
-  socket.on('leave_match', async (data, callback) => {
-    try {
-      const { matchId } = data;
-      socket.leave(`match_${matchId}`);
-      currentRoom = currentRoom === `match_${matchId}` ? 'lobby' : currentRoom;
-
-      callback({ success: true });
-    } catch (error) {
-      logger.error('Leave match error:', error);
-      callback({ error: error.message });
-    }
-  });
-
-  socket.on('submit_roast', async (data, callback) => {
-    try {
-      const { matchId, roastCid } = data;
-
-      if (!currentUser) {
-        return callback({ error: 'Not authenticated' });
-      }
-
-      await battleService.submitRoast(matchId, currentUser._id, roastCid);
-
-      callback({ success: true });
-    } catch (error) {
-      logger.error('Submit roast error:', error);
-      callback({ error: error.message });
-    }
-  });
-
-  socket.on('cast_vote', async (data, callback) => {
-    try {
-      const { matchId, selectedPlayer } = data;
-
-      if (!currentUser) {
-        return callback({ error: 'Not authenticated' });
-      }
-
-      await battleService.vote(matchId, currentUser._id, selectedPlayer);
-
-      callback({ success: true });
-    } catch (error) {
-      logger.error('Cast vote error:', error);
-      callback({ error: error.message });
-    }
-  });
-
-  socket.on('place_prediction', async (data, callback) => {
-    try {
-      const { matchId, selectedPlayer, amount } = data;
-
-      if (!currentUser) {
-        return callback({ error: 'Not authenticated' });
-      }
-
-      await PredictionService.place(currentUser._id, matchId, selectedPlayer, amount);
-
-      callback({ success: true });
-    } catch (error) {
-      logger.error('Place prediction error:', error);
-      callback({ error: error.message });
-    }
-  });
-
-  socket.on('start_match', async (data, callback) => {
-    try {
-      const { matchId } = data;
-      const battle = await battleService.finalize(matchId);
-
-      io.to(`match_${matchId}`).emit('battle_result', {
-        matchId,
-        status: battle.status,
-        winner: battle.winner?.toString(),
+      io.to(`battle_${numericMatchId}`).emit('battle_started', {
+        matchId: numericMatchId,
+        battle,
       });
-
-      callback({ success: true });
     } catch (error) {
-      logger.error('Start match error:', error);
-      callback({ error: error.message });
+      socket.emit('error_message', { message: error.message || 'Failed to start match' });
     }
   });
 
-  socket.on('disconnect', () => {
-    if (currentRoom && currentRoom !== 'lobby') {
-      io.to(currentRoom).emit('user_left', {
-        user: currentUser?.toPublicJSON(),
+  socket.on('submit_roast', async ({ matchId, text }) => {
+    try {
+      const numericMatchId = Number(matchId);
+      const battle = await battleService.submitRoast({
+        user,
+        matchId: numericMatchId,
+        text,
       });
+      io.to(`battle_${numericMatchId}`).emit('roast_submitted', {
+        matchId: numericMatchId,
+        battle,
+      });
+    } catch (error) {
+      socket.emit('error_message', { message: error.message || 'Failed to submit roast' });
     }
-    io.emit('users_online', { count: io.sockets.size - 1 });
   });
+
+  socket.on('cast_vote', async ({ matchId, selectedPlayer }) => {
+    try {
+      const numericMatchId = Number(matchId);
+      const battle = await battleService.castVote({
+        user,
+        matchId: numericMatchId,
+        selectedPlayer,
+      });
+      io.to(`battle_${numericMatchId}`).emit('vote_update', {
+        matchId: numericMatchId,
+        votesPlayer1: battle.votesPlayer1,
+        votesPlayer2: battle.votesPlayer2,
+      });
+    } catch (error) {
+      socket.emit('error_message', { message: error.message || 'Failed to cast vote' });
+    }
+  });
+
+  socket.on('place_prediction', async ({ matchId, selectedPlayer, amount }) => {
+    try {
+      await battleService.placePrediction({
+        user,
+        matchId: Number(matchId),
+        selectedPlayer,
+        amount,
+      });
+    } catch (error) {
+      socket.emit('error_message', { message: error.message || 'Failed to place prediction' });
+    }
+  });
+
+  socket.on('disconnect', async () => {
+    const rooms = Array.from(joinedBattleRooms);
+    for (const room of rooms) {
+      const matchId = Number(room.replace('battle_', ''));
+      if (Number.isFinite(matchId) && matchId > 0) {
+        await emitSpectatorCount(io, matchId);
+      }
+    }
+  });
+}
+
+module.exports = {
+  registerBattleSocketHandlers,
 };
-
-const PredictionService = require('../modules/predictions/services/prediction.service');

@@ -166,7 +166,7 @@ export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
             <p className="mt-4 break-all font-orbitron text-xl text-white sm:text-2xl">{entry.username}</p>
             <p className="mt-2 text-sm text-white/50">{entry.xp.toLocaleString()} XP</p>
             <div className="mt-4 rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-white/60 sm:text-sm">
-              {entry.wins} wins • {entry.winRate.toFixed(1)}% win rate
+              {entry.wins} wins | {entry.winRate.toFixed(1)}% win rate
             </div>
           </motion.div>
         )

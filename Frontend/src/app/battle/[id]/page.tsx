@@ -1,7 +1,7 @@
 'use client'
 
-import { use, useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@clerk/nextjs'
 import { Coins, MessageSquareText, Sparkles, Swords, Timer, Trophy, Users } from 'lucide-react'
@@ -9,10 +9,11 @@ import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { PredictionPanel } from '@/components/PredictionPanel'
 import { PageLoader } from '@/components/LoadingScreen'
-import { apiRoutes, type Battle, type PredictionSummary, type User } from '@/lib/api'
+import { apiRoutes, normalizeBattle, type Battle, type PredictionSummary, type User } from '@/lib/api'
 import {
   connectSocket,
   joinBattle,
+  onBattleStarted,
   leaveBattle,
   onBattleResult,
   onCountdownTick,
@@ -30,9 +31,9 @@ type TimerState = {
   remaining: number
 }
 
-export default function BattleRoomPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
-  const matchId = Number(id)
+export default function BattleRoomPage() {
+  const params = useParams<{ id: string }>()
+  const matchId = Number(params?.id || 0)
   const router = useRouter()
   const { getToken, isLoaded, isSignedIn, userId } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -45,6 +46,11 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
   const [showResult, setShowResult] = useState(false)
   const [spectators, setSpectators] = useState(0)
   const [me, setMe] = useState<User | null>(null)
+  const [activity, setActivity] = useState<string[]>([])
+
+  const pushActivity = useCallback((line: string) => {
+    setActivity((current) => [line, ...current].slice(0, 10))
+  }, [])
 
   useEffect(() => {
     if (!Number.isFinite(matchId) || matchId <= 0) {
@@ -84,10 +90,12 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
         setBattle(battleRes.data)
         setPredictionSummary(predictionRes.data.summary)
         setSpectators(battleRes.data.spectators ?? 0)
+        pushActivity(`Battle room connected for match #${matchId}`)
 
         onSpectatorCount((event) => {
           if (Number(event?.matchId) !== matchId) return
           setSpectators(Number(event?.count ?? 0))
+          pushActivity(`Spectators online: ${Number(event?.count ?? 0)}`)
         })
 
         onCountdownTick((event) => {
@@ -98,10 +106,26 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
           })
         })
 
+        onBattleStarted((event) => {
+          if (Number(event?.matchId) !== matchId) return
+          if (event?.battle) {
+            setBattle(normalizeBattle(event.battle))
+          } else {
+            setBattle((current) => (current ? { ...current, status: 'active' } : current))
+          }
+          setTimer({
+            phase: 'active',
+            remaining: Number(event?.durationSec || 60),
+          })
+          pushActivity('Battle started')
+        })
+
         onRoastSubmitted((event) => {
           if (Number(event?.matchId) !== matchId) return
           if (event?.battle) {
-            setBattle(event.battle)
+            const normalized = normalizeBattle(event.battle)
+            setBattle(normalized)
+            pushActivity('A roast was submitted')
           } else if (event?.userId && event?.roast) {
             setBattle((current) => {
               if (!current) return current
@@ -111,6 +135,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
                 roast2: String(current.player2?.id) === String(event.userId) ? event.roast : current.roast2,
               }
             })
+            pushActivity('A roast was submitted')
           }
         })
 
@@ -121,6 +146,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
             phase: 'voting',
             remaining: Number(event?.durationSec || 0),
           })
+          pushActivity('Voting phase started')
         })
 
         onVoteUpdate((event) => {
@@ -133,6 +159,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
               player2Votes: Number(event?.votesPlayer2 ?? current.player2Votes),
             }
           })
+          pushActivity('A spectator vote was cast')
         })
 
         onBattleResult((event) => {
@@ -154,6 +181,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
               : null
             setResultWinner(winner)
             setShowResult(true)
+            pushActivity(`Battle finished with status: ${event?.status || next.status}`)
             return next
           })
         })
@@ -178,7 +206,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
       leaveBattle(matchId)
       removeAllSocketListeners()
     }
-  }, [getToken, isLoaded, isSignedIn, matchId, router])
+  }, [getToken, isLoaded, isSignedIn, matchId, pushActivity, router])
 
   const currentUserInBattle = useMemo(() => {
     if (!battle) return { isPlayer1: false, isPlayer2: false }
@@ -283,8 +311,8 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
   }
 
   const isSpectator = !currentUserInBattle.isPlayer1 && !currentUserInBattle.isPlayer2
-  const canRoast = (currentUserInBattle.isPlayer1 || currentUserInBattle.isPlayer2) && ['active', 'voting'].includes(battle.status)
-  const canVote = isSpectator && ['active', 'voting'].includes(battle.status)
+  const canRoast = (currentUserInBattle.isPlayer1 || currentUserInBattle.isPlayer2) && battle.status === 'active'
+  const canVote = isSpectator && battle.status === 'voting'
 
   return (
     <div className="flex min-h-screen pt-16">
@@ -381,6 +409,27 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
                 </div>
               </div>
             </aside>
+          </section>
+
+          <section className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6">
+            <div className="flex items-center gap-2">
+              <Swords className="h-5 w-5 text-blue-200" />
+              <h2 className="font-orbitron text-xl text-white sm:text-2xl">Live Activity Feed</h2>
+            </div>
+            <div className="mt-4 space-y-2">
+              {activity.length === 0 ? (
+                <p className="text-sm text-white/45">No activity yet.</p>
+              ) : (
+                activity.map((line, index) => (
+                  <div
+                    key={`${line}-${index}`}
+                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/70"
+                  >
+                    {line}
+                  </div>
+                ))
+              )}
+            </div>
           </section>
         </div>
 
@@ -491,6 +540,16 @@ function ResultModal({
           <InfoRow label="Prize" value={`${battle.pot} XLM`} />
           <InfoRow label="Tx Hash" value={battle.txHash ? `${battle.txHash.slice(0, 12)}...` : 'Pending'} />
         </div>
+        {battle.txHash && (
+          <a
+            href={`https://stellar.expert/explorer/testnet/tx/${battle.txHash}`}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 inline-flex text-sm text-blue-200 hover:text-blue-100"
+          >
+            View transaction on Stellar Expert
+          </a>
+        )}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button

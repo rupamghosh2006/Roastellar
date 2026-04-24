@@ -7,5 +7,6 @@ const router = express.Router();
 router.post('/create', protect, walletController.createWallet);
 router.get('/me', protect, walletController.getMyWallet);
 router.post('/refund-test', protect, walletController.refundTestWallet);
+router.post('/export-secret', protect, walletController.exportWalletSecret);
 
 module.exports = router;

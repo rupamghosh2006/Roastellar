@@ -124,3 +124,44 @@ exports.refundTestWallet = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.exportWalletSecret = async (req, res, next) => {
+  try {
+    const clerkId = req.auth?.user?.clerkId || req.auth?.claims?.sub;
+
+    if (!clerkId) {
+      return ApiResponse.unauthorized(res, 'Authentication required');
+    }
+
+    if (String(process.env.STELLAR_NETWORK || 'testnet').toLowerCase() === 'mainnet') {
+      return ApiResponse.forbidden(res, 'Wallet secret export is disabled on mainnet');
+    }
+
+    const user = await User.findOne({ clerkId });
+    if (!user) {
+      return ApiResponse.notFound(res, 'User not found');
+    }
+
+    if (!user.walletPublicKey || !user.walletEncryptedSecret) {
+      return ApiResponse.notFound(res, 'Wallet not created yet');
+    }
+
+    const secretKey = walletService.decryptSecret(user.walletEncryptedSecret);
+    if (!secretKey) {
+      return ApiResponse.error(res, 'Unable to decrypt wallet secret');
+    }
+
+    logger.warn('Wallet secret exported for Freighter import', {
+      clerkId,
+      publicKey: user.walletPublicKey,
+    });
+
+    return ApiResponse.success(res, {
+      publicKey: user.walletPublicKey,
+      secretKey,
+      network: String(process.env.STELLAR_NETWORK || 'testnet').toUpperCase(),
+    }, 'Wallet secret exported');
+  } catch (error) {
+    next(error);
+  }
+};

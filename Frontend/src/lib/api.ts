@@ -56,6 +56,12 @@ export interface WalletCreateResult {
   wallet: Wallet
 }
 
+export interface WalletSecretExport {
+  publicKey: string
+  secretKey: string
+  network: string
+}
+
 export interface LeaderboardEntry extends User {
   rank: number
   winRate: number
@@ -120,6 +126,12 @@ type BackendWallet = {
   createdAt?: string | null
 }
 
+type BackendWalletSecretExport = {
+  publicKey?: string
+  secretKey?: string
+  network?: string
+}
+
 function unwrapData<T>(payload: T | ApiEnvelope<T>): T {
   if (payload && typeof payload === 'object' && 'data' in (payload as ApiEnvelope<T>)) {
     return (payload as ApiEnvelope<T>).data as T
@@ -166,6 +178,14 @@ function normalizeWalletCreateResult(payload: { alreadyExists?: boolean; wallet?
   return {
     alreadyExists: Boolean(payload?.alreadyExists),
     wallet: normalizeWallet(payload?.wallet),
+  }
+}
+
+function normalizeWalletSecretExport(payload: BackendWalletSecretExport | null | undefined): WalletSecretExport {
+  return {
+    publicKey: payload?.publicKey ?? '',
+    secretKey: payload?.secretKey ?? '',
+    network: payload?.network ?? 'TESTNET',
   }
 }
 
@@ -244,5 +264,7 @@ export const apiRoutes = {
       getAndNormalize(api.post<{ alreadyExists?: boolean; wallet?: BackendWallet }>('/api/wallet/create', undefined, authConfig(token)), normalizeWalletCreateResult),
     me: (token?: string) => getAndNormalize(api.get<BackendWallet>('/api/wallet/me', authConfig(token)), normalizeWallet),
     refundTest: (token?: string) => getAndNormalize(api.post<BackendWallet>('/api/wallet/refund-test', undefined, authConfig(token)), normalizeWallet),
+    exportSecret: (token?: string) =>
+      getAndNormalize(api.post<BackendWalletSecretExport>('/api/wallet/export-secret', undefined, authConfig(token)), normalizeWalletSecretExport),
   },
 }

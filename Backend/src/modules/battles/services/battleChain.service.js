@@ -21,6 +21,13 @@ function resolvePublicKey(secret, fallback = '') {
 function parseReturnValue(returnValue) {
   if (!returnValue) return null;
   try {
+    if (typeof returnValue === 'string' && StellarSdk?.xdr?.ScVal?.fromXDR) {
+      const scVal = StellarSdk.xdr.ScVal.fromXDR(returnValue, 'base64');
+      if (typeof StellarSdk.scValToNative === 'function') {
+        return StellarSdk.scValToNative(scVal);
+      }
+      return scVal;
+    }
     if (typeof StellarSdk.scValToNative === 'function') {
       return StellarSdk.scValToNative(returnValue);
     }
@@ -121,7 +128,7 @@ class BattleChainService {
       args: [
         StellarSdk.nativeToScVal(Number(entryFee || 0), { type: 'i128' }),
         StellarSdk.nativeToScVal(topicCid || '', { type: 'string' }),
-        StellarSdk.Address.fromString(userAddress).toScVal(),
+        StellarSdk.nativeToScVal(userAddress, { type: 'address' }),
       ],
       sourceSecret,
       sourcePublic: userAddress,
@@ -143,7 +150,7 @@ class BattleChainService {
       method: process.env.STELLAR_JOIN_MATCH_FN || 'join_match',
       args: [
         StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
-        StellarSdk.Address.fromString(playerPublic).toScVal(),
+        StellarSdk.nativeToScVal(playerPublic, { type: 'address' }),
       ],
       sourceSecret,
       sourcePublic: playerPublic,
@@ -157,7 +164,7 @@ class BattleChainService {
       args: [
         StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
         StellarSdk.nativeToScVal(roastCid || '', { type: 'string' }),
-        StellarSdk.Address.fromString(playerPublic).toScVal(),
+        StellarSdk.nativeToScVal(playerPublic, { type: 'address' }),
       ],
       sourceSecret,
       sourcePublic: playerPublic,
@@ -170,8 +177,8 @@ class BattleChainService {
       method: process.env.STELLAR_VOTE_FN || 'vote',
       args: [
         StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
-        StellarSdk.Address.fromString(selectedPlayerPublic).toScVal(),
-        StellarSdk.Address.fromString(voterPublic).toScVal(),
+        StellarSdk.nativeToScVal(selectedPlayerPublic, { type: 'address' }),
+        StellarSdk.nativeToScVal(voterPublic, { type: 'address' }),
       ],
       sourceSecret,
       sourcePublic: voterPublic,
@@ -184,9 +191,9 @@ class BattleChainService {
       method: process.env.STELLAR_PREDICT_FN || 'predict',
       args: [
         StellarSdk.nativeToScVal(Number(onChainMatchId), { type: 'u32' }),
-        StellarSdk.Address.fromString(selectedPlayerPublic).toScVal(),
+        StellarSdk.nativeToScVal(selectedPlayerPublic, { type: 'address' }),
         StellarSdk.nativeToScVal(Number(amount || 0), { type: 'i128' }),
-        StellarSdk.Address.fromString(predictorPublic).toScVal(),
+        StellarSdk.nativeToScVal(predictorPublic, { type: 'address' }),
       ],
       sourceSecret,
       sourcePublic: predictorPublic,

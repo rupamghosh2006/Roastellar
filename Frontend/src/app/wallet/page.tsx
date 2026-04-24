@@ -57,7 +57,7 @@ export default function WalletPage() {
     return (
       <div className="flex min-h-screen pt-16">
         <Sidebar />
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           <PageLoader message="Loading wallet" />
         </main>
       </div>
@@ -100,7 +100,7 @@ export default function WalletPage() {
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+      <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-6xl space-y-8">
           <div className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[36px] md:p-8">
             <div className="flex items-center gap-3">

@@ -123,6 +123,16 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .mobile-nav-offset {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+
+  @screen lg {
+    .mobile-nav-offset {
+      padding-bottom: 0;
+    }
+  }
 }
 
 @keyframes float {

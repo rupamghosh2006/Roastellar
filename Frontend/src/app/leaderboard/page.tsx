@@ -23,7 +23,7 @@ export default function LeaderboardPage() {
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      <main className="flex-1 p-6 lg:p-8">
+      <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
           <div className="glass rounded-[36px] p-8">
             <div className="flex items-center gap-3">

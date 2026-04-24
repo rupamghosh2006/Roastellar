@@ -87,7 +87,7 @@ export default function DashboardPage() {
     return (
       <div className="flex min-h-screen pt-16">
         <Sidebar />
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {[0, 1, 2, 3].map((item) => <SkeletonCard key={item} />)}
           </div>
@@ -100,7 +100,7 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+      <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
           <div className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[36px] md:p-8">
             <div className="flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">

@@ -123,7 +123,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
     return (
       <div className="flex min-h-screen pt-16">
         <Sidebar />
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
           <PageLoader message="Connecting to match room" />
         </main>
       </div>
@@ -133,7 +133,7 @@ export default function BattleRoomPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="flex min-h-screen pt-16">
       <Sidebar />
-      <main className="flex-1 p-6 lg:p-8">
+      <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
             <section className="space-y-8">

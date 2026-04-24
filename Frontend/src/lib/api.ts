@@ -12,6 +12,9 @@ export interface User {
   id: string
   clerkId: string
   username: string
+  email?: string | null
+  firstName?: string | null
+  lastName?: string | null
   avatar?: string | null
   xp: number
   wins: number
@@ -78,6 +81,9 @@ type BackendUser = {
   _id?: string
   clerkId?: string
   username?: string
+  email?: string
+  firstName?: string
+  lastName?: string
   imageUrl?: string
   avatar?: string
   xp?: number
@@ -150,6 +156,9 @@ function normalizeUser(user: BackendUser | null | undefined): User {
     id: user?.id ?? user?._id ?? '',
     clerkId: user?.clerkId ?? '',
     username: user?.username ?? 'Player',
+    email: user?.email ?? null,
+    firstName: user?.firstName ?? null,
+    lastName: user?.lastName ?? null,
     avatar: user?.avatar ?? user?.imageUrl ?? null,
     xp: user?.xp ?? 0,
     wins: user?.wins ?? 0,

@@ -11,11 +11,11 @@ const HORIZON_URL = process.env.STELLAR_NETWORK === 'mainnet'
 
 const RPC_URL = process.env.STELLAR_RPC_URL || 'https://soroban-testnet.stellar.org';
 
-const server = new StellarSdk.HorizonServer(HORIZON_URL, {
+const server = new StellarSdk.Horizon.Server(HORIZON_URL, {
   allowHttp: true,
 });
 
-const rpcServer = new StellarSdk.RpcServer(RPC_URL, {
+const rpcServer = new StellarSdk.SorobanRpc.Server(RPC_URL, {
   allowHttp: true,
 });
 

@@ -11,6 +11,7 @@ const logger = require('./utils/logger');
 const userRoutes = require('./modules/users/routes/user.routes');
 const battleRoutes = require('./modules/battles/routes/battle.routes');
 const clerkRoutes = require('./modules/auth/routes/clerk.routes');
+const walletRoutes = require('./modules/wallet/wallet.routes');
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.get('/health', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/battles', battleRoutes);
 app.use('/api/clerk', clerkRoutes);
+app.use('/api/wallet', walletRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

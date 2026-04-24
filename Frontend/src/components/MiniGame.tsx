@@ -28,6 +28,7 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
   const [particles, setParticles] = useState<{ id: number; x: number; y: number }[]>([])
   const flameIdRef = useRef(0)
   const particleIdRef = useRef(0)
+  const hasCompletedRef = useRef(false)
 
   const spawnFlame = useCallback(() => {
     const newFlame: FlamePosition = {
@@ -49,7 +50,9 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
     event.stopPropagation()
     if (gameState !== 'playing') return
 
-    setScore((prev) => prev + 1)
+    const nextScore = score + 1
+
+    setScore(nextScore)
     setCombo((prev) => prev + 1)
 
     const newParticles = Array.from({ length: 8 }, () => ({
@@ -65,11 +68,10 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
 
     removeFlame(flame.id)
 
-    if (score + 1 >= GAME_CONFIG.flameTarget) {
+    if (nextScore >= GAME_CONFIG.flameTarget) {
       setGameState('won')
-      onComplete(score + 1)
     }
-  }, [gameState, score, onComplete, removeFlame])
+  }, [gameState, score, removeFlame])
 
   useEffect(() => {
     if (gameState !== 'playing') return
@@ -91,7 +93,6 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
         if (prev <= 1) {
           clearInterval(timer)
           setGameState('won')
-          onComplete(score)
           return 0
         }
         return prev - 1
@@ -99,10 +100,23 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [gameState, score, onComplete])
+  }, [gameState])
+
+  useEffect(() => {
+    if (gameState === 'playing') {
+      hasCompletedRef.current = false
+      return
+    }
+
+    if (gameState === 'won' && !hasCompletedRef.current) {
+      hasCompletedRef.current = true
+      onComplete(score)
+    }
+  }, [gameState, onComplete, score])
 
   const startGame = () => {
     setGameState('playing')
+    hasCompletedRef.current = false
     setScore(0)
     setTimeLeft(GAME_CONFIG.flameDuration)
     setCombo(0)

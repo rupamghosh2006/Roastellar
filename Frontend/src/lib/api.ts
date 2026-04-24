@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { type AxiosRequestConfig } from 'axios'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrender.com'
 
@@ -7,16 +7,6 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
   withCredentials: false,
 })
-
-api.interceptors.response.use(
-  (response) => {
-    if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-      response.data = response.data.data
-    }
-    return response
-  },
-  (error) => Promise.reject(error)
-)
 
 export interface User {
   id: string
@@ -30,6 +20,7 @@ export interface User {
   walletBalance?: number | null
   badges: string[]
   rank?: number
+  onboardingCompleted?: boolean
   createdAt: string
 }
 
@@ -53,8 +44,16 @@ export interface Battle {
 
 export interface Wallet {
   address: string
+  publicKey: string
   balance: number
-  isNew: boolean
+  funded: boolean
+  createdAt?: string | null
+  isNew?: boolean
+}
+
+export interface WalletCreateResult {
+  alreadyExists: boolean
+  wallet: Wallet
 }
 
 export interface LeaderboardEntry extends User {
@@ -81,6 +80,8 @@ type BackendUser = {
   badges?: string[]
   walletPublicKey?: string
   walletAddress?: string
+  walletFunded?: boolean
+  onboardingCompleted?: boolean
   createdAt?: string
 }
 
@@ -111,6 +112,27 @@ type BackendBattle = {
   spectators?: number
 }
 
+type BackendWallet = {
+  publicKey?: string
+  address?: string
+  funded?: boolean
+  balance?: number
+  createdAt?: string | null
+}
+
+function unwrapData<T>(payload: T | ApiEnvelope<T>): T {
+  if (payload && typeof payload === 'object' && 'data' in (payload as ApiEnvelope<T>)) {
+    return (payload as ApiEnvelope<T>).data as T
+  }
+  return payload as T
+}
+
+function authConfig(token?: string): AxiosRequestConfig {
+  return token
+    ? { headers: { Authorization: `Bearer ${token}` } }
+    : {}
+}
+
 function normalizeUser(user: BackendUser | null | undefined): User {
   return {
     id: user?.id ?? user?._id ?? '',
@@ -123,7 +145,27 @@ function normalizeUser(user: BackendUser | null | undefined): User {
     walletAddress: user?.walletAddress ?? user?.walletPublicKey ?? null,
     walletBalance: null,
     badges: user?.badges ?? [],
+    onboardingCompleted: user?.onboardingCompleted ?? false,
     createdAt: user?.createdAt ?? new Date(0).toISOString(),
+  }
+}
+
+function normalizeWallet(wallet: BackendWallet | null | undefined): Wallet {
+  const publicKey = wallet?.publicKey ?? wallet?.address ?? ''
+  return {
+    address: publicKey,
+    publicKey,
+    balance: wallet?.balance ?? 0,
+    funded: Boolean(wallet?.funded),
+    createdAt: wallet?.createdAt ?? null,
+    isNew: false,
+  }
+}
+
+function normalizeWalletCreateResult(payload: { alreadyExists?: boolean; wallet?: BackendWallet } | null | undefined): WalletCreateResult {
+  return {
+    alreadyExists: Boolean(payload?.alreadyExists),
+    wallet: normalizeWallet(payload?.wallet),
   }
 }
 
@@ -141,7 +183,10 @@ function normalizeLeaderboard(entries: BackendUser[] | null | undefined): Leader
 }
 
 function normalizeBattle(battle: BackendBattle | null | undefined): Battle {
-  const status = battle?.status === 'ended' ? 'completed' : battle?.status === 'draw' ? 'completed' : (battle?.status as Battle['status'] | undefined)
+  const status = battle?.status === 'ended' || battle?.status === 'draw'
+    ? 'completed'
+    : (battle?.status as Battle['status'] | undefined)
+
   const pot = typeof battle?.pot === 'number'
     ? battle.pot
     : typeof battle?.entryFee === 'number'
@@ -167,13 +212,6 @@ function normalizeBattle(battle: BackendBattle | null | undefined): Battle {
   }
 }
 
-function unwrapData<T>(payload: T | ApiEnvelope<T>): T {
-  if (payload && typeof payload === 'object' && 'data' in (payload as ApiEnvelope<T>)) {
-    return (payload as ApiEnvelope<T>).data as T
-  }
-  return payload as T
-}
-
 async function getAndNormalize<TOutput, TInput = TOutput>(
   request: Promise<{ data: TInput | ApiEnvelope<TInput> }>,
   normalize: (value: TInput) => TOutput
@@ -184,22 +222,27 @@ async function getAndNormalize<TOutput, TInput = TOutput>(
 
 export const apiRoutes = {
   users: {
-    me: () => getAndNormalize(api.get<BackendUser>('/api/users/me'), normalizeUser),
+    me: (token?: string) => getAndNormalize(api.get<BackendUser>('/api/users/me', authConfig(token)), normalizeUser),
     leaderboard: () => getAndNormalize(api.get<BackendUser[]>('/api/users/leaderboard'), normalizeLeaderboard),
-    updateProfile: (payload: Partial<User>) => getAndNormalize(api.patch<BackendUser>('/api/users/me', payload), normalizeUser),
+    updateProfile: (payload: Partial<User>, token?: string) =>
+      getAndNormalize(api.patch<BackendUser>('/api/users/me', payload, authConfig(token)), normalizeUser),
   },
   battles: {
     open: () => getAndNormalize(api.get<BackendBattle[]>('/api/battles/open'), (battles) => (Array.isArray(battles) ? battles.map(normalizeBattle) : [])),
-    create: (payload: { topic: string; stakeAmount?: number }) => getAndNormalize(api.post<BackendBattle>('/api/battles/create', payload), normalizeBattle),
-    join: (id: string) => getAndNormalize(api.post<BackendBattle>(`/api/battles/join/${id}`), normalizeBattle),
-    vote: (id: string, payload: { playerId: string }) => getAndNormalize(api.post<BackendBattle>(`/api/battles/vote/${id}`, payload), normalizeBattle),
-    finalize: (id: string) => getAndNormalize(api.post<BackendBattle>(`/api/battles/finalize/${id}`), normalizeBattle),
+    create: (payload: { topic: string; stakeAmount?: number }, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>('/api/battles/create', payload, authConfig(token)), normalizeBattle),
+    join: (id: string, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/join/${id}`, undefined, authConfig(token)), normalizeBattle),
+    vote: (id: string, payload: { playerId: string }, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/vote/${id}`, payload, authConfig(token)), normalizeBattle),
+    finalize: (id: string, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/finalize/${id}`, undefined, authConfig(token)), normalizeBattle),
     get: (id: string) => getAndNormalize(api.get<BackendBattle>(`/api/battles/${id}`), normalizeBattle),
   },
   wallet: {
-    me: () => api.get<Wallet>('/api/wallet/me'),
-  },
-  onboarding: {
-    complete: () => api.post('/api/users/onboarding-complete'),
+    create: (token?: string) =>
+      getAndNormalize(api.post<{ alreadyExists?: boolean; wallet?: BackendWallet }>('/api/wallet/create', undefined, authConfig(token)), normalizeWalletCreateResult),
+    me: (token?: string) => getAndNormalize(api.get<BackendWallet>('/api/wallet/me', authConfig(token)), normalizeWallet),
+    refundTest: (token?: string) => getAndNormalize(api.post<BackendWallet>('/api/wallet/refund-test', undefined, authConfig(token)), normalizeWallet),
   },
 }

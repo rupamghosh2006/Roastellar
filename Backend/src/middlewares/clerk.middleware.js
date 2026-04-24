@@ -3,6 +3,56 @@ const User = require('../modules/users/models/user.model');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 
+function canUseDevFallback() {
+  return process.env.NODE_ENV !== 'production';
+}
+
+function buildUserSeed(claims, clerkUser) {
+  const emailFromClaims =
+    claims?.email ||
+    claims?.email_address ||
+    claims?.primary_email_address ||
+    '';
+
+  const firstName =
+    clerkUser?.firstName ||
+    claims?.given_name ||
+    claims?.first_name ||
+    '';
+
+  const lastName =
+    clerkUser?.lastName ||
+    claims?.family_name ||
+    claims?.last_name ||
+    '';
+
+  const imageUrl =
+    clerkUser?.imageUrl ||
+    claims?.picture ||
+    claims?.image_url ||
+    '';
+
+  const username =
+    clerkUser?.username ||
+    claims?.username ||
+    (claims?.sub ? `user_${claims.sub.slice(0, 8)}` : 'player');
+
+  const email =
+    clerkUser?.emailAddresses?.[0]?.emailAddress ||
+    emailFromClaims ||
+    `${username}@local.roastellar.dev`;
+
+  return {
+    email,
+    firstName,
+    lastName,
+    imageUrl,
+    avatar: imageUrl,
+    name: [firstName, lastName].filter(Boolean).join(' ') || username,
+    username,
+  };
+}
+
 exports.protect = async (req, res, next) => {
   try {
     let token = null;
@@ -17,34 +67,61 @@ exports.protect = async (req, res, next) => {
     }
 
     if (!token) {
+      logger.warn('Auth rejected: no token provided', {
+        path: req.originalUrl,
+        method: req.method,
+      });
       return ApiResponse.unauthorized(res, 'Authentication required. No token provided.');
     }
 
     const claims = await clerk.verifyToken(token);
 
     if (!claims || !claims.sub) {
+      logger.warn('Auth rejected: invalid or expired Clerk token', {
+        path: req.originalUrl,
+        method: req.method,
+        tokenPreview: `${token.slice(0, 12)}...`,
+      });
       return ApiResponse.unauthorized(res, 'Invalid or expired token.');
     }
 
-    const clerkUser = await clerk.getUser(claims.sub);
+    let clerkUser = await clerk.getUser(claims.sub);
 
-    if (!clerkUser) {
+    if (!clerkUser && !canUseDevFallback()) {
+      logger.warn('Auth rejected: Clerk user not found', {
+        path: req.originalUrl,
+        method: req.method,
+        clerkUserId: claims.sub,
+      });
       return ApiResponse.unauthorized(res, 'User not found in Clerk.');
+    }
+
+    if (!clerkUser && canUseDevFallback()) {
+      logger.warn('Auth fallback: using decoded Clerk claims without Clerk user lookup', {
+        path: req.originalUrl,
+        method: req.method,
+        clerkUserId: claims.sub,
+      });
     }
 
     let user = await User.findOne({ clerkId: claims.sub });
 
     const isNewUser = !user;
+    const userSeed = buildUserSeed(claims, clerkUser);
 
     if (!user) {
       user = await User.create({
         clerkId: claims.sub,
-        email: clerkUser.emailAddresses?.[0]?.emailAddress || '',
-        firstName: clerkUser.firstName || '',
-        lastName: clerkUser.lastName || '',
-        imageUrl: clerkUser.imageUrl || '',
-        username: clerkUser.username || `user_${claims.sub.slice(0, 8)}`,
+        ...userSeed,
       });
+    } else if (canUseDevFallback()) {
+      user.email = user.email || userSeed.email;
+      user.firstName = user.firstName || userSeed.firstName;
+      user.lastName = user.lastName || userSeed.lastName;
+      user.imageUrl = user.imageUrl || userSeed.imageUrl;
+      user.avatar = user.avatar || userSeed.avatar;
+      user.name = user.name || userSeed.name;
+      user.username = user.username || userSeed.username;
     }
 
     user.lastLoginAt = new Date();
@@ -59,7 +136,11 @@ exports.protect = async (req, res, next) => {
 
     next();
   } catch (error) {
-    logger.error('Auth middleware error:', error);
+    logger.error('Auth middleware error:', {
+      message: error?.message,
+      path: req.originalUrl,
+      method: req.method,
+    });
     return ApiResponse.unauthorized(res, 'Authentication failed.');
   }
 };

@@ -31,9 +31,33 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  avatar: {
+    type: String,
+    default: '',
+  },
+  name: {
+    type: String,
+    default: '',
+  },
   walletPublicKey: {
     type: String,
     sparse: true,
+  },
+  walletEncryptedSecret: {
+    type: String,
+    default: '',
+  },
+  walletCreatedAt: {
+    type: Date,
+    default: null,
+  },
+  walletFunded: {
+    type: Boolean,
+    default: false,
+  },
+  onboardingCompleted: {
+    type: Boolean,
+    default: false,
   },
   xp: {
     type: Number,
@@ -80,13 +104,17 @@ userSchema.methods.toPublicJSON = function() {
     clerkId: this.clerkId,
     username: this.username,
     email: this.email,
+    avatar: this.avatar || this.imageUrl,
     name: this.firstName && this.lastName 
       ? `${this.firstName} ${this.lastName}` 
-      : this.firstName || this.username,
+      : this.name || this.firstName || this.username,
     firstName: this.firstName,
     lastName: this.lastName,
     imageUrl: this.imageUrl,
     walletPublicKey: this.walletPublicKey,
+    walletCreatedAt: this.walletCreatedAt,
+    walletFunded: this.walletFunded,
+    onboardingCompleted: this.onboardingCompleted,
     xp: this.xp,
     wins: this.wins,
     losses: this.losses,

@@ -171,7 +171,26 @@ const clerk = {
     }
 
     try {
-      const verified = await verifyToken(token, getVerifyOptions());
+      const verifyOptions = getVerifyOptions();
+      let verified;
+
+      try {
+        verified = await verifyToken(token, verifyOptions);
+      } catch (primaryError) {
+        // If a pinned JWT key is stale/mismatched, retry using Clerk JWKS.
+        if (verifyOptions.jwtKey) {
+          const { jwtKey, ...fallbackOptions } = verifyOptions;
+          try {
+            verified = await verifyToken(token, fallbackOptions);
+            console.warn('Clerk verifyToken: jwtKey verification failed, fallback JWKS verification succeeded');
+          } catch (fallbackError) {
+            throw fallbackError;
+          }
+        } else {
+          throw primaryError;
+        }
+      }
+
       const claims = verified?.claims || null;
       if (!claims) {
         return null;

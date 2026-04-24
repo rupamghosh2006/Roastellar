@@ -34,7 +34,7 @@ export default function WalletPage() {
       return
     }
 
-    getToken()
+    getToken({ skipCache: true })
       .then((token) => {
         if (!token) {
           throw new Error('Missing Clerk session token')

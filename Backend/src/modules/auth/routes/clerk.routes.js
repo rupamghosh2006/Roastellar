@@ -14,15 +14,25 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       return ApiResponse.badRequest(res, 'Webhook not configured');
     }
 
-    const signature = req.headers['clerk-webhook-signature'];
-    const timestamp = req.headers['clerk-timestamp'];
+    const svixId = req.headers['svix-id'];
+    const timestamp = req.headers['svix-timestamp'];
+    const signature = req.headers['svix-signature'];
 
-    if (!signature || !timestamp) {
-      logger.warn('Missing webhook headers');
+    if (!svixId || !signature || !timestamp) {
+      logger.warn('Missing webhook headers', {
+        hasSvixId: Boolean(svixId),
+        hasSvixTimestamp: Boolean(timestamp),
+        hasSvixSignature: Boolean(signature),
+      });
       return ApiResponse.badRequest(res, 'Missing webhook signature');
     }
 
-    const isValid = verifyWebhookSignature(req.body, webhookSecret, timestamp, signature);
+    if (!Buffer.isBuffer(req.body)) {
+      logger.warn('Webhook body is not raw bytes; signature cannot be verified safely');
+      return ApiResponse.badRequest(res, 'Invalid webhook payload format');
+    }
+
+    const isValid = verifyWebhookSignature(req.body, webhookSecret, svixId, timestamp, signature);
     
     if (!isValid) {
       logger.warn('Invalid webhook signature');
@@ -67,22 +77,41 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   }
 });
 
-function verifyWebhookSignature(body, secret, timestamp, signature) {
+function verifyWebhookSignature(bodyBuffer, secret, svixId, timestamp, signatureHeader) {
   try {
-    const payload = `${timestamp}.${body}`;
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex');
+    const key = secret.startsWith('whsec_')
+      ? Buffer.from(secret.slice(6), 'base64')
+      : Buffer.from(secret, 'utf8');
+    const payload = Buffer.from(`${svixId}.${timestamp}.${bodyBuffer.toString('utf8')}`, 'utf8');
+    const expected = crypto.createHmac('sha256', key).update(payload).digest('base64');
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
+    const signatures = String(signatureHeader)
+      .split(' ')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .filter((entry) => entry.startsWith('v1,'))
+      .map((entry) => entry.slice(3));
+
+    if (signatures.length === 0) {
+      return false;
+    }
+
+    return signatures.some((signature) => safeCompareBase64(signature, expected));
   } catch (error) {
     logger.error('Signature verification error:', error);
     return false;
   }
+}
+
+function safeCompareBase64(a, b) {
+  const left = Buffer.from(String(a), 'base64');
+  const right = Buffer.from(String(b), 'base64');
+
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(left, right);
 }
 
 async function handleUserCreated(data) {

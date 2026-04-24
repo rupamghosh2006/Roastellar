@@ -29,7 +29,7 @@ export default function OnboardingPage() {
 
     setStep('minting')
     try {
-      const token = await getToken()
+      const token = await getToken({ skipCache: true })
 
       if (!token) {
         throw new Error('Missing Clerk session token')

@@ -44,7 +44,7 @@ export default function DashboardPage() {
       return
     }
 
-    getToken()
+    getToken({ skipCache: true })
       .then((token) => {
         if (!token) {
           throw new Error('Missing Clerk session token')

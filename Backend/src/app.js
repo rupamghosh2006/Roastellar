@@ -26,6 +26,10 @@ app.use(cors({
 }));
 
 app.use(morgan('dev'));
+
+// Clerk webhook needs the raw request body for Svix signature verification.
+app.use('/api/clerk', clerkRoutes);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,7 +47,6 @@ app.get('/health', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/battles', battleRoutes);
-app.use('/api/clerk', clerkRoutes);
 app.use('/api/wallet', walletRoutes);
 
 app.use(notFound);

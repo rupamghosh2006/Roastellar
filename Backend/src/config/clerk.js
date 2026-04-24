@@ -66,6 +66,16 @@ function getVerifyOptions() {
     options.jwtKey = normalizeEnvValue(process.env.CLERK_JWT_KEY);
   }
 
+  const clockSkewMs = Number(process.env.CLERK_TOKEN_CLOCK_SKEW_MS || 15000);
+  if (Number.isFinite(clockSkewMs) && clockSkewMs >= 0) {
+    options.clockSkewInMs = clockSkewMs;
+  }
+
+  const allowedOrigins = getAllowedOrigins();
+  if (allowedOrigins?.length) {
+    options.authorizedParties = allowedOrigins;
+  }
+
   return options;
 }
 

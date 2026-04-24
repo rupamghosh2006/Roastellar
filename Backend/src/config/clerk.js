@@ -9,6 +9,36 @@ function canUseDevAuthFallback() {
   return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH_FALLBACK === 'true';
 }
 
+function getAuthorizedParties() {
+  const raw = process.env.CLERK_AUTHORIZED_PARTIES || process.env.CLIENT_URL || process.env.CORS_ORIGIN || '';
+  const values = raw
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .filter((value) => value !== '*');
+
+  return values.length > 0 ? values : undefined;
+}
+
+function getVerifyOptions() {
+  const options = {};
+
+  if (process.env.CLERK_SECRET_KEY) {
+    options.secretKey = process.env.CLERK_SECRET_KEY;
+  }
+
+  if (process.env.CLERK_JWT_KEY) {
+    options.jwtKey = process.env.CLERK_JWT_KEY;
+  }
+
+  const authorizedParties = getAuthorizedParties();
+  if (authorizedParties) {
+    options.authorizedParties = authorizedParties;
+  }
+
+  return options;
+}
+
 const clerk = {
   client: clerkClient,
   
@@ -58,9 +88,7 @@ const clerk = {
     }
 
     try {
-      const verified = await verifyToken(token, {
-        secretKey: process.env.CLERK_SECRET_KEY,
-      });
+      const verified = await verifyToken(token, getVerifyOptions());
 
       return verified?.claims || null;
     } catch (error) {
@@ -74,6 +102,8 @@ const clerk = {
           aud: payload.aud,
           iss: payload.iss,
           sub: payload.sub,
+          authorizedParties: getAuthorizedParties(),
+          usingJwtKey: Boolean(process.env.CLERK_JWT_KEY),
         });
       } catch (decodeError) {
         console.error(`Clerk verifyToken error: ${error.message}`);

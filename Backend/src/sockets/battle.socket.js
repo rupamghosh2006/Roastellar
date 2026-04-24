@@ -1,5 +1,8 @@
-const battleService = require('../modules/battles/services/battle.service');
 const Battle = require('../modules/battles/models/battle.model');
+
+function getBattleService() {
+  return require('../modules/battles/services/battle.service');
+}
 
 function userPayload(user) {
   return {
@@ -27,7 +30,7 @@ function registerBattleSocketHandlers(io, socket) {
 
   socket.on('join_lobby', async () => {
     socket.join('lobby');
-    io.to('lobby').emit('open_battles_updated', await battleService.getOpenBattles());
+    io.to('lobby').emit('open_battles_updated', await getBattleService().getOpenBattles());
   });
 
   socket.on('join_battle', async ({ matchId }) => {
@@ -62,7 +65,7 @@ function registerBattleSocketHandlers(io, socket) {
   socket.on('start_match', async ({ matchId }) => {
     try {
       const numericMatchId = Number(matchId);
-      const battle = await battleService.joinBattle({
+      const battle = await getBattleService().joinBattle({
         user,
         matchId: numericMatchId,
       });
@@ -78,7 +81,7 @@ function registerBattleSocketHandlers(io, socket) {
   socket.on('submit_roast', async ({ matchId, text }) => {
     try {
       const numericMatchId = Number(matchId);
-      const battle = await battleService.submitRoast({
+      const battle = await getBattleService().submitRoast({
         user,
         matchId: numericMatchId,
         text,
@@ -95,7 +98,7 @@ function registerBattleSocketHandlers(io, socket) {
   socket.on('cast_vote', async ({ matchId, selectedPlayer }) => {
     try {
       const numericMatchId = Number(matchId);
-      const battle = await battleService.castVote({
+      const battle = await getBattleService().castVote({
         user,
         matchId: numericMatchId,
         selectedPlayer,
@@ -112,7 +115,7 @@ function registerBattleSocketHandlers(io, socket) {
 
   socket.on('place_prediction', async ({ matchId, selectedPlayer, amount }) => {
     try {
-      await battleService.placePrediction({
+      await getBattleService().placePrediction({
         user,
         matchId: Number(matchId),
         selectedPlayer,

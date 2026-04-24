@@ -19,6 +19,8 @@ export interface User {
   xp: number
   wins: number
   losses: number
+  rankPoints?: number
+  totalBattles?: number
   walletAddress?: string | null
   walletBalance?: number | null
   badges: string[]
@@ -27,22 +29,52 @@ export interface User {
   createdAt: string
 }
 
+export type BattleStatus = 'open' | 'active' | 'voting' | 'ended' | 'draw' | 'cancelled'
+
 export interface Battle {
   id: string
+  matchId: number
   topic: string
-  status: 'open' | 'active' | 'completed'
+  topicCid?: string
+  status: BattleStatus
+  creator?: User
   player1?: User
   player2?: User
-  player1Roast?: string
-  player2Roast?: string
+  player1Wallet?: string
+  player2Wallet?: string
+  roast1?: string
+  roast2?: string
+  roast1Cid?: string
+  roast2Cid?: string
   player1Votes: number
   player2Votes: number
-  winnerId?: string
-  pot: number
-  fee: number
+  spectators: number
+  entryFee: number
+  winnerId?: string | null
+  txHash?: string
+  startedAt?: string
+  endedAt?: string
   createdAt: string
   expiresAt: string
-  spectators: number
+  pot: number
+}
+
+export interface Prediction {
+  id: string
+  battleId: string
+  predictorId: string
+  selectedPlayer: string
+  amount: number
+  settled: boolean
+  won: boolean
+}
+
+export interface PredictionSummary {
+  matchId: number
+  totalPredictions: number
+  totalAmount: number
+  onPlayer1: number
+  onPlayer2: number
 }
 
 export interface Wallet {
@@ -56,6 +88,7 @@ export interface Wallet {
 
 export interface WalletCreateResult {
   alreadyExists: boolean
+  fundingPending?: boolean
   wallet: Wallet
 }
 
@@ -89,6 +122,8 @@ type BackendUser = {
   xp?: number
   wins?: number
   losses?: number
+  rankPoints?: number
+  totalBattles?: number
   badges?: string[]
   walletPublicKey?: string
   walletAddress?: string
@@ -102,26 +137,29 @@ type BackendBattle = {
   _id?: string
   matchId?: number
   topic?: string
-  status?: string
+  topicCid?: string
+  status?: BattleStatus
+  creator?: BackendUser
   player1?: BackendUser
   player2?: BackendUser
+  player1Wallet?: string
+  player2Wallet?: string
+  roast1?: string
+  roast2?: string
   roast1Cid?: string
   roast2Cid?: string
-  player1Roast?: string
-  player2Roast?: string
   votesPlayer1?: number
   votesPlayer2?: number
   player1Votes?: number
   player2Votes?: number
-  winner?: string
-  winnerId?: string
-  entryFee?: number
-  pot?: number
-  fee?: number
-  createdAt?: string
-  expiresAt?: string
-  endedAt?: string
   spectators?: number
+  spectatorsCount?: number
+  entryFee?: number
+  winner?: string | BackendUser
+  txHash?: string
+  startedAt?: string
+  endedAt?: string
+  createdAt?: string
 }
 
 type BackendWallet = {
@@ -130,6 +168,16 @@ type BackendWallet = {
   funded?: boolean
   balance?: number
   createdAt?: string | null
+}
+
+type BackendPrediction = {
+  _id?: string
+  battleId?: string
+  predictor?: BackendUser | string
+  selectedPlayer?: BackendUser | string
+  amount?: number
+  settled?: boolean
+  won?: boolean
 }
 
 type BackendWalletSecretExport = {
@@ -146,9 +194,7 @@ function unwrapData<T>(payload: T | ApiEnvelope<T>): T {
 }
 
 function authConfig(token?: string): AxiosRequestConfig {
-  return token
-    ? { headers: { Authorization: `Bearer ${token}` } }
-    : {}
+  return token ? { headers: { Authorization: `Bearer ${token}` } } : {}
 }
 
 function normalizeUser(user: BackendUser | null | undefined): User {
@@ -163,6 +209,8 @@ function normalizeUser(user: BackendUser | null | undefined): User {
     xp: user?.xp ?? 0,
     wins: user?.wins ?? 0,
     losses: user?.losses ?? 0,
+    rankPoints: user?.rankPoints ?? 0,
+    totalBattles: user?.totalBattles ?? 0,
     walletAddress: user?.walletAddress ?? user?.walletPublicKey ?? null,
     walletBalance: null,
     badges: user?.badges ?? [],
@@ -183,9 +231,10 @@ function normalizeWallet(wallet: BackendWallet | null | undefined): Wallet {
   }
 }
 
-function normalizeWalletCreateResult(payload: { alreadyExists?: boolean; wallet?: BackendWallet } | null | undefined): WalletCreateResult {
+function normalizeWalletCreateResult(payload: { alreadyExists?: boolean; fundingPending?: boolean; wallet?: BackendWallet } | null | undefined): WalletCreateResult {
   return {
     alreadyExists: Boolean(payload?.alreadyExists),
+    fundingPending: Boolean(payload?.fundingPending),
     wallet: normalizeWallet(payload?.wallet),
   }
 }
@@ -199,45 +248,74 @@ function normalizeWalletSecretExport(payload: BackendWalletSecretExport | null |
 }
 
 function normalizeLeaderboard(entries: BackendUser[] | null | undefined): LeaderboardEntry[] {
-  const safeEntries = Array.isArray(entries) ? entries : []
-  return safeEntries.map((entry, index) => {
+  const safe = Array.isArray(entries) ? entries : []
+  return safe.map((entry, index) => {
     const user = normalizeUser(entry)
-    const matches = user.wins + user.losses
+    const total = user.wins + user.losses
     return {
       ...user,
-      rank: index + 1,
-      winRate: matches > 0 ? (user.wins / matches) * 100 : 0,
+      rank: user.rank ?? index + 1,
+      winRate: total > 0 ? (user.wins / total) * 100 : 0,
     }
   })
 }
 
 function normalizeBattle(battle: BackendBattle | null | undefined): Battle {
-  const status = battle?.status === 'ended' || battle?.status === 'draw'
-    ? 'completed'
-    : (battle?.status as Battle['status'] | undefined)
+  const winnerId = typeof battle?.winner === 'string'
+    ? battle?.winner
+    : battle?.winner && typeof battle.winner === 'object'
+    ? (battle.winner.id ?? battle.winner._id ?? null)
+    : null
 
-  const pot = typeof battle?.pot === 'number'
-    ? battle.pot
-    : typeof battle?.entryFee === 'number'
-    ? battle.entryFee * (battle?.player2 ? 2 : 1)
-    : 0
+  const entryFee = Number(battle?.entryFee ?? 0)
+  const hasSecondPlayer = Boolean(battle?.player2)
+  const pot = entryFee > 0 ? entryFee * (hasSecondPlayer ? 2 : 1) : 0
 
   return {
-    id: battle?.id ?? battle?._id ?? String(battle?.matchId ?? ''),
+    id: String(battle?.id ?? battle?._id ?? battle?.matchId ?? ''),
+    matchId: Number(battle?.matchId ?? 0),
     topic: battle?.topic ?? 'Roast Battle',
-    status: status ?? 'open',
+    topicCid: battle?.topicCid ?? '',
+    status: battle?.status ?? 'open',
+    creator: battle?.creator ? normalizeUser(battle.creator) : undefined,
     player1: battle?.player1 ? normalizeUser(battle.player1) : undefined,
     player2: battle?.player2 ? normalizeUser(battle.player2) : undefined,
-    player1Roast: battle?.player1Roast ?? battle?.roast1Cid,
-    player2Roast: battle?.player2Roast ?? battle?.roast2Cid,
-    player1Votes: battle?.player1Votes ?? battle?.votesPlayer1 ?? 0,
-    player2Votes: battle?.player2Votes ?? battle?.votesPlayer2 ?? 0,
-    winnerId: battle?.winnerId ?? battle?.winner,
-    pot,
-    fee: battle?.fee ?? 0,
+    player1Wallet: battle?.player1Wallet ?? '',
+    player2Wallet: battle?.player2Wallet ?? '',
+    roast1: battle?.roast1 ?? '',
+    roast2: battle?.roast2 ?? '',
+    roast1Cid: battle?.roast1Cid ?? '',
+    roast2Cid: battle?.roast2Cid ?? '',
+    player1Votes: Number(battle?.player1Votes ?? battle?.votesPlayer1 ?? 0),
+    player2Votes: Number(battle?.player2Votes ?? battle?.votesPlayer2 ?? 0),
+    spectators: Number(battle?.spectators ?? battle?.spectatorsCount ?? 0),
+    entryFee,
+    winnerId,
+    txHash: battle?.txHash ?? '',
+    startedAt: battle?.startedAt,
+    endedAt: battle?.endedAt,
     createdAt: battle?.createdAt ?? new Date(0).toISOString(),
-    expiresAt: battle?.expiresAt ?? battle?.endedAt ?? battle?.createdAt ?? new Date(0).toISOString(),
-    spectators: battle?.spectators ?? 0,
+    expiresAt: battle?.endedAt ?? battle?.startedAt ?? battle?.createdAt ?? new Date(0).toISOString(),
+    pot,
+  }
+}
+
+function normalizePrediction(prediction: BackendPrediction | null | undefined): Prediction {
+  const predictorId = typeof prediction?.predictor === 'string'
+    ? prediction.predictor
+    : prediction?.predictor?.id ?? prediction?.predictor?._id ?? ''
+  const selectedPlayer = typeof prediction?.selectedPlayer === 'string'
+    ? prediction.selectedPlayer
+    : prediction?.selectedPlayer?.id ?? prediction?.selectedPlayer?._id ?? ''
+
+  return {
+    id: String(prediction?._id ?? ''),
+    battleId: String(prediction?.battleId ?? ''),
+    predictorId,
+    selectedPlayer,
+    amount: Number(prediction?.amount ?? 0),
+    settled: Boolean(prediction?.settled),
+    won: Boolean(prediction?.won),
   }
 }
 
@@ -252,25 +330,55 @@ async function getAndNormalize<TOutput, TInput = TOutput>(
 export const apiRoutes = {
   users: {
     me: (token?: string) => getAndNormalize(api.get<BackendUser>('/api/users/me', authConfig(token)), normalizeUser),
-    leaderboard: () => getAndNormalize(api.get<BackendUser[]>('/api/users/leaderboard'), normalizeLeaderboard),
+    leaderboard: () => getAndNormalize(api.get<BackendUser[]>('/api/leaderboard'), normalizeLeaderboard),
     updateProfile: (payload: Partial<User>, token?: string) =>
       getAndNormalize(api.patch<BackendUser>('/api/users/me', payload, authConfig(token)), normalizeUser),
   },
+  leaderboard: {
+    list: () => getAndNormalize(api.get<BackendUser[]>('/api/leaderboard'), normalizeLeaderboard),
+  },
   battles: {
-    open: () => getAndNormalize(api.get<BackendBattle[]>('/api/battles/open'), (battles) => (Array.isArray(battles) ? battles.map(normalizeBattle) : [])),
-    create: (payload: { topic: string; stakeAmount?: number }, token?: string) =>
+    open: () =>
+      getAndNormalize(api.get<BackendBattle[]>('/api/battles/open'), (items) =>
+        (Array.isArray(items) ? items.map(normalizeBattle) : [])
+      ),
+    create: (payload: { topic: string; entryFee: number }, token?: string) =>
       getAndNormalize(api.post<BackendBattle>('/api/battles/create', payload, authConfig(token)), normalizeBattle),
-    join: (id: string, token?: string) =>
-      getAndNormalize(api.post<BackendBattle>(`/api/battles/join/${id}`, undefined, authConfig(token)), normalizeBattle),
-    vote: (id: string, payload: { playerId: string }, token?: string) =>
-      getAndNormalize(api.post<BackendBattle>(`/api/battles/vote/${id}`, payload, authConfig(token)), normalizeBattle),
-    finalize: (id: string, token?: string) =>
-      getAndNormalize(api.post<BackendBattle>(`/api/battles/finalize/${id}`, undefined, authConfig(token)), normalizeBattle),
-    get: (id: string) => getAndNormalize(api.get<BackendBattle>(`/api/battles/${id}`), normalizeBattle),
+    join: (matchId: number | string, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/join/${matchId}`, undefined, authConfig(token)), normalizeBattle),
+    submitRoast: (matchId: number | string, text: string, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/submit-roast/${matchId}`, { text }, authConfig(token)), normalizeBattle),
+    vote: (matchId: number | string, payload: { selectedPlayer: string }, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/vote/${matchId}`, payload, authConfig(token)), normalizeBattle),
+    finalize: (matchId: number | string, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/finalize/${matchId}`, undefined, authConfig(token)), normalizeBattle),
+    cancel: (matchId: number | string, token?: string) =>
+      getAndNormalize(api.post<BackendBattle>(`/api/battles/cancel/${matchId}`, undefined, authConfig(token)), normalizeBattle),
+    get: (matchId: number | string) =>
+      getAndNormalize(api.get<BackendBattle>(`/api/battles/${matchId}`), normalizeBattle),
+  },
+  predictions: {
+    place: (matchId: number | string, payload: { selectedPlayer: string; amount: number }, token?: string) =>
+      getAndNormalize(api.post<BackendPrediction>(`/api/predictions/place/${matchId}`, payload, authConfig(token)), normalizePrediction),
+    summary: (matchId: number | string) =>
+      getAndNormalize(
+        api.get<{ summary: PredictionSummary; predictions: BackendPrediction[] }>(`/api/predictions/${matchId}`),
+        (payload) => ({
+          summary: payload?.summary || { matchId: Number(matchId), totalPredictions: 0, totalAmount: 0, onPlayer1: 0, onPlayer2: 0 },
+          predictions: Array.isArray(payload?.predictions) ? payload.predictions.map(normalizePrediction) : [],
+        })
+      ),
   },
   wallet: {
     create: (token?: string) =>
-      getAndNormalize(api.post<{ alreadyExists?: boolean; wallet?: BackendWallet }>('/api/wallet/create', undefined, authConfig(token)), normalizeWalletCreateResult),
+      getAndNormalize(
+        api.post<{ alreadyExists?: boolean; fundingPending?: boolean; wallet?: BackendWallet }>(
+          '/api/wallet/create',
+          undefined,
+          authConfig(token)
+        ),
+        normalizeWalletCreateResult
+      ),
     me: (token?: string) => getAndNormalize(api.get<BackendWallet>('/api/wallet/me', authConfig(token)), normalizeWallet),
     refundTest: (token?: string) => getAndNormalize(api.post<BackendWallet>('/api/wallet/refund-test', undefined, authConfig(token)), normalizeWallet),
     exportSecret: (token?: string) =>

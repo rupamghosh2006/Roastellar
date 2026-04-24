@@ -4,28 +4,28 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrend
 
 let socket: Socket | null = null
 
-export function getSocket(): Socket {
-  if (!socket || !socket.connected) {
+function ensureSocket(): Socket {
+  if (!socket) {
     socket = io(SOCKET_URL, {
       autoConnect: false,
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
     })
   }
   return socket
 }
 
-export function connectSocket(token?: string) {
-  const s = getSocket()
-  if (token) {
-    s.auth = { token }
-  }
+export function connectSocket(token: string) {
+  const s = ensureSocket()
+  s.auth = { token }
   if (!s.connected) {
     s.connect()
   }
   return s
+}
+
+export function getSocket() {
+  return ensureSocket()
 }
 
 export function disconnectSocket() {
@@ -35,58 +35,79 @@ export function disconnectSocket() {
   }
 }
 
-export interface MatchRoomEvents {
-  join_match: { matchId: string; userId: string }
-  leave_match: { matchId: string; userId: string }
-  submit_roast: { matchId: string; userId: string; roast: string }
-  cast_vote: { matchId: string; voterId: string; playerId: string }
-  battle_result: { matchId: string; winnerId: string; payout: number }
-  spectator_update: { matchId: string; count: number }
-  chat_message: { matchId: string; userId: string; message: string; timestamp: string }
-  prediction: { matchId: string; playerId: string; amount: number }
+export function joinLobby() {
+  ensureSocket().emit('join_lobby')
 }
 
-export function joinMatch(matchId: string, userId: string) {
-  getSocket().emit('join_match', { matchId, userId })
+export function joinBattle(matchId: number) {
+  ensureSocket().emit('join_battle', { matchId })
 }
 
-export function leaveMatch(matchId: string, userId: string) {
-  getSocket().emit('leave_match', { matchId, userId })
+export function leaveBattle(matchId: number) {
+  ensureSocket().emit('leave_battle', { matchId })
 }
 
-export function submitRoast(matchId: string, userId: string, roast: string) {
-  getSocket().emit('submit_roast', { matchId, userId, roast })
+export function emitStartMatch(matchId: number) {
+  ensureSocket().emit('start_match', { matchId })
 }
 
-export function castVote(matchId: string, voterId: string, playerId: string) {
-  getSocket().emit('cast_vote', { matchId, voterId, playerId })
+export function emitSubmitRoast(matchId: number, text: string) {
+  ensureSocket().emit('submit_roast', { matchId, text })
 }
 
-export function makePrediction(matchId: string, playerId: string, amount: number) {
-  getSocket().emit('prediction', { matchId, playerId, amount })
+export function emitCastVote(matchId: number, selectedPlayer: string) {
+  ensureSocket().emit('cast_vote', { matchId, selectedPlayer })
 }
 
-export function sendChatMessage(matchId: string, userId: string, message: string) {
-  getSocket().emit('chat_message', { matchId, userId, message })
+export function emitPlacePrediction(matchId: number, selectedPlayer: string, amount: number) {
+  ensureSocket().emit('place_prediction', { matchId, selectedPlayer, amount })
 }
 
-export function onMatchResult(callback: (data: MatchRoomEvents['battle_result']) => void) {
-  getSocket().on('battle_result', callback)
+export function onOpenBattlesUpdated(handler: (payload: any) => void) {
+  ensureSocket().on('open_battles_updated', handler)
 }
 
-export function onSpectatorUpdate(callback: (data: MatchRoomEvents['spectator_update']) => void) {
-  getSocket().on('spectator_update', callback)
+export function onPlayerJoined(handler: (payload: any) => void) {
+  ensureSocket().on('player_joined', handler)
 }
 
-export function onChatMessage(callback: (data: MatchRoomEvents['chat_message']) => void) {
-  getSocket().on('chat_message', callback)
+export function onBattleStarted(handler: (payload: any) => void) {
+  ensureSocket().on('battle_started', handler)
 }
 
-export function onRoastSubmitted(callback: (data: MatchRoomEvents['submit_roast']) => void) {
-  getSocket().on('submit_roast', callback)
+export function onRoastSubmitted(handler: (payload: any) => void) {
+  ensureSocket().on('roast_submitted', handler)
 }
 
-export function removeAllListeners() {
+export function onVotingStarted(handler: (payload: any) => void) {
+  ensureSocket().on('voting_started', handler)
+}
+
+export function onVoteUpdate(handler: (payload: any) => void) {
+  ensureSocket().on('vote_update', handler)
+}
+
+export function onSpectatorCount(handler: (payload: any) => void) {
+  ensureSocket().on('spectator_count', handler)
+}
+
+export function onCountdownTick(handler: (payload: any) => void) {
+  ensureSocket().on('countdown_tick', handler)
+}
+
+export function onBattleResult(handler: (payload: any) => void) {
+  ensureSocket().on('battle_result', handler)
+}
+
+export function onLeaderboardUpdated(handler: (payload: any) => void) {
+  ensureSocket().on('leaderboard_updated', handler)
+}
+
+export function onErrorMessage(handler: (payload: any) => void) {
+  ensureSocket().on('error_message', handler)
+}
+
+export function removeAllSocketListeners() {
   if (socket) {
     socket.removeAllListeners()
   }

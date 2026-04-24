@@ -1,48 +1,50 @@
 require('dotenv').config();
 
+const battleService = require('../modules/battles/services/battle.service');
+
 let io = null;
+
+function userPayload(user) {
+  return {
+    id: String(user._id),
+    clerkId: user.clerkId,
+    username: user.username,
+    avatar: user.avatar || user.imageUrl || '',
+  };
+}
 
 const initializeSocket = (httpServer) => {
   const { Server } = require('socket.io');
-  
+  const { clerk } = require('./clerk');
+  const User = require('../modules/users/models/user.model');
+  const Battle = require('../modules/battles/models/battle.model');
+
   io = new Server(httpServer, {
     cors: {
       origin: process.env.CLIENT_URL || '*',
       methods: ['GET', 'POST'],
       credentials: true,
     },
-    pingTimeout: 60000,
-    pingInterval: 25000,
   });
 
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
-      
+      const token = socket.handshake.auth?.token || socket.handshake.headers.authorization?.split(' ')[1];
       if (!token) {
         return next(new Error('Authentication required'));
       }
 
-      const { clerk } = require('./config/clerk');
       const claims = await clerk.verifyToken(token);
-      
-      if (!claims || !claims.sub) {
+      if (!claims?.sub) {
         return next(new Error('Invalid token'));
       }
 
-      const { User } = require('./modules/users/models/user.model');
       const user = await User.findOne({ clerkId: claims.sub });
-
       if (!user) {
         return next(new Error('User not found'));
       }
 
-      if (user.isBanned) {
-        return next(new Error('Account banned'));
-      }
-
       socket.data.user = user;
-      socket.data.claims = claims;
       next();
     } catch (error) {
       next(new Error('Authentication failed'));
@@ -51,161 +53,102 @@ const initializeSocket = (httpServer) => {
 
   io.on('connection', (socket) => {
     const user = socket.data.user;
-    console.log(`User connected: ${user.username} (${socket.id})`);
 
-    socket.on('join_lobby', () => {
+    socket.on('join_lobby', async () => {
       socket.join('lobby');
-      io.emit('users_online', { count: io.sockets.size });
+      io.to('lobby').emit('open_battles_updated', await battleService.getOpenBattles());
     });
 
-    socket.on('leave_lobby', () => {
-      socket.leave('lobby');
-    });
-
-    socket.on('join_match', (data) => {
-      const { matchId } = data;
-      socket.join(`match_${matchId}`);
-      socket.data.currentRoom = `match_${matchId}`;
-      
-      socket.to(`match_${matchId}`).emit('player_joined', {
-        user: user.toPublicJSON(),
-        matchId,
+    socket.on('join_battle', async ({ matchId }) => {
+      const room = `battle_${matchId}`;
+      socket.join(room);
+      const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
+      await Battle.updateOne({ matchId: Number(matchId) }, { spectatorsCount: roomSize });
+      io.to(room).emit('spectator_count', { matchId: Number(matchId), count: roomSize });
+      io.to(room).emit('player_joined', {
+        matchId: Number(matchId),
+        user: userPayload(user),
       });
     });
 
-    socket.on('leave_match', (data) => {
-      const { matchId } = data;
-      socket.leave(`match_${matchId}`);
-      
-      if (socket.data.currentRoom === `match_${matchId}`) {
-        socket.to(`match_${matchId}`).emit('player_left', {
-          user: user.toPublicJSON(),
-          matchId,
+    socket.on('leave_battle', ({ matchId }) => {
+      const room = `battle_${matchId}`;
+      socket.leave(room);
+      const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
+      Battle.updateOne({ matchId: Number(matchId) }, { spectatorsCount: roomSize }).catch(() => {});
+      io.to(room).emit('spectator_count', { matchId: Number(matchId), count: roomSize });
+    });
+
+    socket.on('start_match', async ({ matchId }) => {
+      try {
+        const battle = await battleService.joinBattle({
+          user,
+          matchId: Number(matchId),
         });
-        socket.data.currentRoom = null;
+        io.to(`battle_${matchId}`).emit('battle_started', {
+          matchId: Number(matchId),
+          battle,
+        });
+      } catch (error) {
+        socket.emit('error_message', { message: error.message || 'Failed to start match' });
       }
     });
 
-    socket.on('submit_roast', (data) => {
-      const { matchId, roastCid } = data;
-      
-      io.to(`match_${matchId}`).emit('roast_submitted', {
-        user: user.toPublicJSON(),
-        matchId,
-        roastCid,
-        timestamp: new Date().toISOString(),
-      });
-    });
-
-    socket.on('cast_vote', (data) => {
-      const { matchId, selectedPlayer } = data;
-      
-      io.to(`match_${matchId}`).emit('vote_cast', {
-        user: user.toPublicJSON(),
-        matchId,
-        selectedPlayer,
-        timestamp: new Date().toISOString(),
-      });
-    });
-
-    socket.on('place_prediction', (data) => {
-      const { matchId, selectedPlayer, amount } = data;
-      
-      io.to(`match_${matchId}`).emit('prediction_placed', {
-        user: user.toPublicJSON(),
-        matchId,
-        selectedPlayer,
-        amount,
-        timestamp: new Date().toISOString(),
-      });
-    });
-
-    socket.on('start_match', (data) => {
-      const { matchId } = data;
-      
-      io.to(`match_${matchId}`).emit('match_started', {
-        matchId,
-        startedAt: new Date().toISOString(),
-      });
-    });
-
-    socket.on('typing', (data) => {
-      const { matchId } = data;
-      
-      socket.to(`match_${matchId}`).emit('user_typing', {
-        user: user.toPublicJSON(),
-        matchId,
-      });
-    });
-
-    socket.on('disconnect', () => {
-      console.log(`User disconnected: ${user.username} (${socket.id})`);
-      
-      if (socket.data.currentRoom) {
-        io.to(socket.data.currentRoom).emit('player_left', {
-          user: user.toPublicJSON(),
-          matchId: socket.data.currentRoom.replace('match_', ''),
+    socket.on('submit_roast', async ({ matchId, text }) => {
+      try {
+        const battle = await battleService.submitRoast({
+          user,
+          matchId: Number(matchId),
+          text,
         });
+        io.to(`battle_${matchId}`).emit('roast_submitted', {
+          matchId: Number(matchId),
+          battle,
+        });
+      } catch (error) {
+        socket.emit('error_message', { message: error.message || 'Failed to submit roast' });
       }
-      
-      io.emit('users_online', { count: io.sockets.size - 1 });
     });
 
-    socket.on('error', (error) => {
-      console.error('Socket error:', error);
+    socket.on('cast_vote', async ({ matchId, selectedPlayer }) => {
+      try {
+        const battle = await battleService.castVote({
+          user,
+          matchId: Number(matchId),
+          selectedPlayer,
+        });
+        io.to(`battle_${matchId}`).emit('vote_update', {
+          matchId: Number(matchId),
+          votesPlayer1: battle.votesPlayer1,
+          votesPlayer2: battle.votesPlayer2,
+        });
+      } catch (error) {
+        socket.emit('error_message', { message: error.message || 'Failed to cast vote' });
+      }
     });
+
+    socket.on('place_prediction', async ({ matchId, selectedPlayer, amount }) => {
+      try {
+        await battleService.placePrediction({
+          user,
+          matchId: Number(matchId),
+          selectedPlayer,
+          amount,
+        });
+      } catch (error) {
+        socket.emit('error_message', { message: error.message || 'Failed to place prediction' });
+      }
+    });
+
+    socket.on('disconnect', () => {});
   });
 
-  console.log('Socket.io initialized with Clerk auth');
   return io;
 };
 
 const getIO = () => io;
 
-const emitToLobby = (event, data) => {
-  if (io) io.to('lobby').emit(event, data);
-};
-
-const emitToMatch = (matchId, event, data) => {
-  if (io) io.to(`match_${matchId}`).emit(event, data);
-};
-
-const emitToUser = (userId, event, data) => {
-  if (io && io.sockets) {
-    for (const socket of io.sockets.sockets.values()) {
-      if (socket.data.user?._id?.toString() === userId.toString()) {
-        socket.emit(event, data);
-      }
-    }
-  }
-};
-
-const broadcastBattleUpdate = (battle) => {
-  if (io) {
-    io.to('lobby').emit('battle_updated', battle);
-    io.to(`match_${battle.matchId}`).emit('battle_state', battle);
-  }
-};
-
-const broadcastLeaderboard = async () => {
-  if (!io) return;
-  
-  const { User } = require('./modules/users/models/user.model');
-  const leaderboard = await User.find({ isBanned: false })
-    .sort({ xp: -1 })
-    .limit(10)
-    .select('username imageUrl xp wins')
-    .lean();
-
-  io.to('lobby').emit('leaderboard', leaderboard);
-};
-
 module.exports = {
   initializeSocket,
   getIO,
-  emitToLobby,
-  emitToMatch,
-  emitToUser,
-  broadcastBattleUpdate,
-  broadcastLeaderboard,
 };

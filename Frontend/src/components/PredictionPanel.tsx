@@ -7,13 +7,15 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 interface PredictionPanelProps {
+  player1Id?: string
+  player2Id?: string
   player1Name: string
   player2Name: string
   onPredict: (playerId: string, amount: number) => void
   isSpectator: boolean
 }
 
-export function PredictionPanel({ player1Name, player2Name, onPredict, isSpectator }: PredictionPanelProps) {
+export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name, onPredict, isSpectator }: PredictionPanelProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [amount, setAmount] = useState('10')
 
@@ -48,8 +50,8 @@ export function PredictionPanel({ player1Name, player2Name, onPredict, isSpectat
   }
 
   const options = [
-    { id: player1Name, label: player1Name, accent: 'from-blue-500/16 to-blue-300/10 border-blue-400/18' },
-    { id: player2Name, label: player2Name, accent: 'from-violet-500/16 to-fuchsia-300/10 border-violet-400/18' },
+    { id: player1Id || player1Name, label: player1Name, accent: 'from-blue-500/16 to-blue-300/10 border-blue-400/18' },
+    { id: player2Id || player2Name, label: player2Name, accent: 'from-violet-500/16 to-fuchsia-300/10 border-violet-400/18' },
   ]
 
   return (

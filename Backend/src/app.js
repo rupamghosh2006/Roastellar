@@ -10,6 +10,8 @@ const logger = require('./utils/logger');
 
 const userRoutes = require('./modules/users/routes/user.routes');
 const battleRoutes = require('./modules/battles/routes/battle.routes');
+const predictionRoutes = require('./modules/predictions/routes/prediction.routes');
+const leaderboardRoutes = require('./modules/leaderboard/routes/leaderboard.routes');
 const clerkRoutes = require('./modules/auth/routes/clerk.routes');
 const walletRoutes = require('./modules/wallet/wallet.routes');
 
@@ -47,6 +49,8 @@ app.get('/health', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/battles', battleRoutes);
+app.use('/api/predictions', predictionRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/wallet', walletRoutes);
 
 app.use(notFound);

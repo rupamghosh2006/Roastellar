@@ -2,8 +2,10 @@ module.exports = {
   BATTLE_STATUS: {
     OPEN: 'open',
     ACTIVE: 'active',
+    VOTING: 'voting',
     ENDED: 'ended',
     DRAW: 'draw',
+    CANCELLED: 'cancelled',
   },
 
   BADGES: {
@@ -17,9 +19,11 @@ module.exports = {
     WALLET_CREATED: 'wallet_created',
     BATTLE_CREATED: 'battle_created',
     BATTLE_JOINED: 'battle_joined',
+    ROAST_SUBMITTED: 'roast_submitted',
     VOTE_CAST: 'vote_cast',
     PREDICTION_PLACED: 'prediction_placed',
     BATTLE_COMPLETED: 'battle_completed',
+    BATTLE_FINISHED: 'battle_finished',
   },
 
   ROLE: {

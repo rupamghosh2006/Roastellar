@@ -75,6 +75,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  totalBattles: {
+    type: Number,
+    default: 0,
+  },
   badges: [{
     type: String,
   }],
@@ -119,6 +123,7 @@ userSchema.methods.toPublicJSON = function() {
     wins: this.wins,
     losses: this.losses,
     rankPoints: this.rankPoints,
+    totalBattles: this.totalBattles,
     badges: this.badges,
     profileCid: this.profileCid,
     role: this.role,

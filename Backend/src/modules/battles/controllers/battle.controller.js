@@ -1,201 +1,124 @@
-const Battle = require('../models/battle.model');
-const User = require('../../users/models/user.model');
+const battleService = require('../services/battle.service');
 const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 
+function parseMatchId(raw) {
+  const matchId = Number(raw);
+  if (!Number.isFinite(matchId) || matchId <= 0) {
+    throw new Error('Invalid matchId');
+  }
+  return matchId;
+}
+
 exports.create = async (req, res) => {
   try {
-    const { topic, topicCid, entryFee } = req.body;
-    const user = req.auth.user;
-
-    const lastBattle = await Battle.findOne().sort({ matchId: -1 });
-    const matchId = lastBattle ? lastBattle.matchId + 1 : 1;
-
-    const battle = new Battle({
-      matchId,
-      creator: user._id,
-      player1: user._id,
-      topic: topic || 'Roast Battle',
-      topicCid: topicCid || '',
-      entryFee: entryFee || 1000,
-      status: 'open',
+    const { topic, entryFee } = req.body || {};
+    const battle = await battleService.createBattle({
+      user: req.auth.user,
+      topic,
+      entryFee,
     });
-
-    await battle.save();
-
-    return ApiResponse.created(res, battle.toJSON(), 'Battle created');
+    return ApiResponse.created(res, battle, 'Battle created');
   } catch (error) {
-    logger.error('Create battle error:', error);
-    return ApiResponse.error(res, error.message);
+    logger.error('Create battle error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to create battle');
   }
 };
 
 exports.join = async (req, res) => {
   try {
-    const { matchId } = req.params;
-    const user = req.auth.user;
-
-    const battle = await Battle.findOne({ matchId: parseInt(matchId) });
-    if (!battle) {
-      return ApiResponse.notFound(res, 'Match not found');
-    }
-
-    if (battle.status !== 'open') {
-      return ApiResponse.badRequest(res, 'Match is not open');
-    }
-
-    if (battle.player1.toString() === user._id.toString()) {
-      return ApiResponse.badRequest(res, 'Cannot join your own match');
-    }
-
-    battle.player2 = user._id;
-    battle.status = 'active';
-    battle.startedAt = new Date();
-    await battle.save();
-
-    return ApiResponse.success(res, battle.toJSON(), 'Joined battle');
+    const matchId = parseMatchId(req.params.matchId);
+    const battle = await battleService.joinBattle({
+      user: req.auth.user,
+      matchId,
+    });
+    return ApiResponse.success(res, battle, 'Joined battle');
   } catch (error) {
-    logger.error('Join battle error:', error);
-    return ApiResponse.error(res, error.message);
-  }
-};
-
-exports.submitRoast = async (req, res) => {
-  try {
-    const { matchId } = req.params;
-    const { roastCid } = req.body;
-    const user = req.auth.user;
-
-    const battle = await Battle.findOne({ matchId: parseInt(matchId) });
-    if (!battle) {
-      return ApiResponse.notFound(res, 'Match not found');
-    }
-
-    const isPlayer1 = battle.player1.toString() === user._id.toString();
-    const isPlayer2 = battle.player2?.toString() === user._id.toString();
-
-    if (!isPlayer1 && !isPlayer2) {
-      return ApiResponse.forbidden(res, 'Only players can submit roasts');
-    }
-
-    if (isPlayer1) {
-      battle.roast1Cid = roastCid;
-    } else {
-      battle.roast2Cid = roastCid;
-    }
-
-    await battle.save();
-
-    return ApiResponse.success(res, battle.toJSON(), 'Roast submitted');
-  } catch (error) {
-    logger.error('Submit roast error:', error);
-    return ApiResponse.error(res, error.message);
-  }
-};
-
-exports.vote = async (req, res) => {
-  try {
-    const { matchId } = req.params;
-    const { selectedPlayer } = req.body;
-    const user = req.auth.user;
-
-    const battle = await Battle.findOne({ matchId: parseInt(matchId) });
-    if (!battle) {
-      return ApiResponse.notFound(res, 'Match not found');
-    }
-
-    if (battle.status !== 'active') {
-      return ApiResponse.badRequest(res, 'Match is not active');
-    }
-
-    const player1Id = battle.player1.toString();
-    const player2Id = battle.player2?.toString();
-
-    if (selectedPlayer === player1Id) {
-      battle.votesPlayer1 += 1;
-    } else if (selectedPlayer === player2Id) {
-      battle.votesPlayer2 += 1;
-    } else {
-      return ApiResponse.badRequest(res, 'Invalid player selection');
-    }
-
-    await battle.save();
-
-    return ApiResponse.success(res, battle.toJSON(), 'Vote recorded');
-  } catch (error) {
-    logger.error('Vote error:', error);
-    return ApiResponse.error(res, error.message);
-  }
-};
-
-exports.finalize = async (req, res) => {
-  try {
-    const { matchId } = req.params;
-
-    const battle = await Battle.findOne({ matchId: parseInt(matchId) });
-    if (!battle) {
-      return ApiResponse.notFound(res, 'Match not found');
-    }
-
-    if (battle.status === 'ended' || battle.status === 'draw') {
-      return ApiResponse.badRequest(res, 'Match already finalized');
-    }
-
-    const votes1 = battle.votesPlayer1;
-    const votes2 = battle.votesPlayer2;
-
-    if (votes1 === votes2) {
-      battle.status = 'draw';
-    } else if (votes1 > votes2) {
-      battle.winner = battle.player1;
-      battle.status = 'ended';
-    } else {
-      battle.winner = battle.player2;
-      battle.status = 'ended';
-    }
-
-    battle.endedAt = new Date();
-    await battle.save();
-
-    return ApiResponse.success(res, battle.toJSON(), 'Battle finalized');
-  } catch (error) {
-    logger.error('Finalize error:', error);
-    return ApiResponse.error(res, error.message);
-  }
-};
-
-exports.getMatch = async (req, res) => {
-  try {
-    const { matchId } = req.params;
-
-    const battle = await Battle.findOne({ matchId: parseInt(matchId) })
-      .populate('player1', 'username imageUrl')
-      .populate('player2', 'username imageUrl')
-      .populate('creator', 'username imageUrl')
-      .populate('winner', 'username imageUrl');
-
-    if (!battle) {
-      return ApiResponse.notFound(res, 'Match not found');
-    }
-
-    return ApiResponse.success(res, battle.toJSON());
-  } catch (error) {
-    logger.error('Get match error:', error);
-    return ApiResponse.error(res, error.message);
+    logger.error('Join battle error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to join battle');
   }
 };
 
 exports.getOpenMatches = async (req, res) => {
   try {
-    const battles = await Battle.find({ status: 'open' })
-      .populate('player1', 'username imageUrl')
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .lean();
-
+    const battles = await battleService.getOpenBattles();
     return ApiResponse.success(res, battles);
   } catch (error) {
-    logger.error('Get open matches error:', error);
-    return ApiResponse.error(res, error.message);
+    logger.error('Get open battles error', { message: error?.message });
+    return ApiResponse.error(res, error.message || 'Failed to fetch open battles');
+  }
+};
+
+exports.getMatch = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const battle = await battleService.getBattleByMatchId(matchId);
+    return ApiResponse.success(res, battle);
+  } catch (error) {
+    logger.error('Get battle error', { message: error?.message });
+    if (error.message === 'Battle not found') {
+      return ApiResponse.notFound(res, 'Battle not found');
+    }
+    return ApiResponse.error(res, error.message || 'Failed to fetch battle');
+  }
+};
+
+exports.submitRoast = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const text = req.body?.text || req.body?.roast || '';
+    const battle = await battleService.submitRoast({
+      user: req.auth.user,
+      matchId,
+      text,
+    });
+    return ApiResponse.success(res, battle, 'Roast submitted');
+  } catch (error) {
+    logger.error('Submit roast error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to submit roast');
+  }
+};
+
+exports.vote = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const selectedPlayer = req.body?.selectedPlayer || req.body?.playerId;
+    const battle = await battleService.castVote({
+      user: req.auth.user,
+      matchId,
+      selectedPlayer,
+    });
+    return ApiResponse.success(res, battle, 'Vote recorded');
+  } catch (error) {
+    logger.error('Vote error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to cast vote');
+  }
+};
+
+exports.finalize = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const battle = await battleService.finalizeBattle({
+      matchId,
+      actorUserId: req.auth?.user?._id || null,
+    });
+    return ApiResponse.success(res, battle, 'Battle finalized');
+  } catch (error) {
+    logger.error('Finalize error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to finalize battle');
+  }
+};
+
+exports.cancel = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const battle = await battleService.cancelBattle({
+      user: req.auth.user,
+      matchId,
+    });
+    return ApiResponse.success(res, battle, 'Battle cancelled');
+  } catch (error) {
+    logger.error('Cancel battle error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to cancel battle');
   }
 };

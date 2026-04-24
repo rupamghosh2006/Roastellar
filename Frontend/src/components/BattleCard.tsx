@@ -13,7 +13,7 @@ interface BattleCardProps {
 
 export function BattleCard({ battle, index = 0 }: BattleCardProps) {
   const isOpen = battle.status === 'open'
-  const isActive = battle.status === 'active'
+  const isActive = battle.status === 'active' || battle.status === 'voting'
 
   return (
     <motion.div
@@ -86,7 +86,7 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
               Instant reward settlement
             </div>
             <Link
-              href={`/battle/${battle.id}`}
+              href={`/battle/${battle.matchId || battle.id}`}
               className={cn(
                 'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-opacity',
                 isOpen

@@ -1,56 +1,48 @@
-const { predictionService, uploadService } = require('../services/prediction.service');
-const ApiResponse = require('../../utils/apiResponse');
-const logger = require('../../utils/logger');
+const predictionService = require('../services/prediction.service');
+const ApiResponse = require('../../../utils/apiResponse');
+const logger = require('../../../utils/logger');
+
+function parseMatchId(raw) {
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error('Invalid matchId');
+  }
+  return parsed;
+}
 
 exports.place = async (req, res) => {
   try {
-    const { matchId } = req.params;
-    const { selectedPlayer, amount } = req.body;
-    const prediction = await predictionService.place(
-      req.user.id,
-      parseInt(matchId),
-      selectedPlayer,
-      amount
-    );
+    const matchId = parseMatchId(req.params.matchId);
+    const prediction = await predictionService.place({
+      user: req.auth.user,
+      matchId,
+      selectedPlayer: req.body?.selectedPlayer,
+      amount: req.body?.amount,
+    });
     return ApiResponse.created(res, prediction, 'Prediction placed');
   } catch (error) {
-    logger.error('Place prediction error:', error);
-    return ApiResponse.badRequest(res, error.message);
+    logger.error('Prediction place error', { message: error?.message });
+    return ApiResponse.badRequest(res, error.message || 'Failed to place prediction');
   }
 };
 
 exports.getMatchPredictions = async (req, res) => {
   try {
-    const { matchId } = req.params;
-    const predictions = await predictionService.getPredictionsForMatch(parseInt(matchId));
-    return ApiResponse.success(res, predictions);
-  } catch (error) {
-    logger.error('Get predictions error:', error);
-    return ApiResponse.error(res, error.message);
-  }
-};
+    const matchId = parseMatchId(req.params.matchId);
+    const [summary, predictions] = await Promise.all([
+      predictionService.getSummary(matchId),
+      predictionService.getAllForMatch(matchId),
+    ]);
 
-exports.myPredictions = async (req, res) => {
-  try {
-    const predictions = await predictionService.getUserPredictions(req.user.id);
-    return ApiResponse.success(res, predictions);
+    return ApiResponse.success(res, {
+      summary,
+      predictions,
+    });
   } catch (error) {
-    logger.error('My predictions error:', error);
-    return ApiResponse.error(res, error.message);
-  }
-};
-
-exports.upload = async (req, res) => {
-  try {
-    const { data, name } = req.body;
-    if (!data) {
-      return ApiResponse.badRequest(res, 'Data is required');
+    logger.error('Prediction summary error', { message: error?.message });
+    if (error.message === 'Battle not found') {
+      return ApiResponse.notFound(res, 'Battle not found');
     }
-    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-    const cid = await uploadService.uploadJSON(parsedData, name || 'upload');
-    return ApiResponse.success(res, { cid }, 'Uploaded to IPFS');
-  } catch (error) {
-    logger.error('Upload error:', error);
-    return ApiResponse.badRequest(res, error.message);
+    return ApiResponse.error(res, error.message || 'Failed to fetch predictions');
   }
 };

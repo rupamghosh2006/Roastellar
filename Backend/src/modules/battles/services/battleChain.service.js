@@ -69,6 +69,10 @@ class BattleChainService {
     if (simulated?.error) {
       throw new Error(`Soroban simulate failed: ${simulated.error}`);
     }
+    const simulatedReturnValue =
+      parseReturnValue(simulated?.result?.retval) ??
+      parseReturnValue(simulated?.retval) ??
+      parseReturnValue(simulated?.result?.result?.retval);
 
     const assemble =
       StellarSdk?.SorobanRpc?.assembleTransaction ||
@@ -103,11 +107,25 @@ class BattleChainService {
     const pollIntervalMs = Number(process.env.STELLAR_TX_POLL_INTERVAL_MS || 1200);
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-      const txResult = await rpcServer.getTransaction(hash);
+      let txResult = null;
+      try {
+        txResult = await rpcServer.getTransaction(hash);
+      } catch (error) {
+        logger.warn('Soroban getTransaction decode failed, using fallback return value', {
+          method,
+          txHash: hash,
+          message: error?.message,
+        });
+        return {
+          txHash: hash,
+          returnValue: simulatedReturnValue,
+          raw: null,
+        };
+      }
       if (txResult?.status === 'SUCCESS') {
         return {
           txHash: hash,
-          returnValue: parseReturnValue(txResult.returnValue),
+          returnValue: parseReturnValue(txResult.returnValue) ?? simulatedReturnValue,
           raw: txResult,
         };
       }
@@ -117,7 +135,7 @@ class BattleChainService {
       await sleep(pollIntervalMs);
     }
 
-    return { txHash: hash, returnValue: null, raw: null };
+    return { txHash: hash, returnValue: simulatedReturnValue, raw: null };
   }
 
   async createMatchOnChain({ entryFee, topicCid, sourceSecret, sourcePublic }) {

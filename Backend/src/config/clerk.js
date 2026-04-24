@@ -5,6 +5,10 @@ const clerkClient = new Clerk({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
 
+function canUseDevAuthFallback() {
+  return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH_FALLBACK === 'true';
+}
+
 const clerk = {
   client: clerkClient,
   
@@ -28,7 +32,7 @@ const clerk = {
   },
 
   async verifyToken(token) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (canUseDevAuthFallback()) {
       try {
         const decoded = decodeJwt(token);
         const payload = decoded?.payload || {};

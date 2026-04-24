@@ -4,6 +4,9 @@
 
 @layer base {
   :root {
+    --font-inter: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-orbitron: "Orbitron", "Eurostile", "Bank Gothic", "Segoe UI", sans-serif;
+    --font-space: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
     --background: 230 26% 6%;
     --foreground: 210 40% 98%;
     --card: 228 25% 10%;

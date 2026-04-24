@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="18" fill="#09090F"/>
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#bg)" stroke="rgba(255,255,255,0.12)"/>
+  <path d="M35.92 13C29.65 18.05 26.15 24.58 26.15 30.04C26.15 34.45 29.02 37.57 33.23 37.57C36.41 37.57 38.87 35.92 40.09 33.15C41.66 37.11 40.86 42.17 36.88 46.79C47.78 42.03 50.78 30.25 46.37 22.36C44.94 24.27 43.28 25.33 41.24 26.05C41.54 21.45 39.9 17.1 35.92 13Z" fill="url(#flame)"/>
+  <path d="M31.6 25.67C28.96 28.12 27.45 30.95 27.45 33.33C27.45 36.11 29.41 38.12 32.06 38.12C34.34 38.12 35.98 36.7 36.56 34.56C37.78 36.99 37.52 40.32 35.44 43.78C42 40.86 43.91 33.4 40.86 28.5C39.96 29.61 38.88 30.37 37.48 30.83C37.58 28.23 35.92 26.37 31.6 25.67Z" fill="#FCD34D"/>
+  <defs>
+    <linearGradient id="bg" x1="9" y1="8" x2="57" y2="57" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#1D1240"/>
+      <stop offset="1" stop-color="#0B1220"/>
+    </linearGradient>
+    <linearGradient id="flame" x1="26" y1="13" x2="48" y2="47" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60A5FA"/>
+      <stop offset="0.5" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+</svg>

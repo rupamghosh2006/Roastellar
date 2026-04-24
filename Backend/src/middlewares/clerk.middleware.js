@@ -4,7 +4,7 @@ const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 
 function canUseDevFallback() {
-  return process.env.NODE_ENV !== 'production';
+  return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH_FALLBACK === 'true';
 }
 
 function buildUserSeed(claims, clerkUser) {

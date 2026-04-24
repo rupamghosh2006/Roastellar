@@ -313,14 +313,18 @@ class BattleService {
         if (!battle || battle.status !== 'active') return;
         if (battle.roast1 && battle.roast2) return;
 
-        battle.status = 'voting';
+        // Contract finalize requires both roasts mirrored on-chain.
+        // If roast phase ends incomplete, cancel and refund escrowed funds.
+        battle.status = 'cancelled';
+        battle.endedAt = new Date();
+        const refundTxHashes = await this.refundBattleEscrowOnCancel(battle);
+        battle.finance = {
+          ...(battle.finance || {}),
+          payoutTxHashes: [...((battle.finance || {}).payoutTxHashes || []), ...refundTxHashes],
+        };
         await battle.save();
         timerService.clear(`roast_${matchId}`);
-        this.startVotingTimer(matchId);
-        io?.to(`battle_${matchId}`).emit('voting_started', {
-          matchId,
-          durationSec: VOTING_PHASE_SECONDS,
-        });
+        io?.to(`battle_${matchId}`).emit('battle_result', winnerPayload(battle));
       },
     });
   }
@@ -666,6 +670,53 @@ class BattleService {
     return payoutHashes;
   }
 
+  async refundBattleEscrowOnCancel(battle) {
+    const refundTxHashes = [];
+
+    if (battle.finance?.entryTxPlayer1 && battle.player1Wallet) {
+      refundTxHashes.push(await escrowService.transferFromEscrow({
+        toPublicKey: battle.player1Wallet,
+        amountXlm: battle.entryFee,
+        memo: `cancel_refund_${battle.matchId}_p1`,
+      }));
+    }
+
+    if (battle.finance?.entryTxPlayer2 && battle.player2Wallet) {
+      refundTxHashes.push(await escrowService.transferFromEscrow({
+        toPublicKey: battle.player2Wallet,
+        amountXlm: battle.entryFee,
+        memo: `cancel_refund_${battle.matchId}_p2`,
+      }));
+    }
+
+    const pendingPredictions = await Prediction.find({
+      battleId: battle._id,
+      settled: false,
+    });
+    if (pendingPredictions.length > 0) {
+      const predictorIds = pendingPredictions.map((prediction) => prediction.predictor);
+      const predictorUsers = await User.find({ _id: { $in: predictorIds } }).select('_id walletPublicKey');
+      const walletByUserId = new Map(predictorUsers.map((user) => [String(user._id), user.walletPublicKey]));
+
+      for (const prediction of pendingPredictions) {
+        const wallet = walletByUserId.get(String(prediction.predictor));
+        if (wallet) {
+          prediction.payoutTxHash = await escrowService.transferFromEscrow({
+            toPublicKey: wallet,
+            amountXlm: prediction.amount,
+            memo: `pred_cancel_refund_${battle.matchId}`,
+          });
+          refundTxHashes.push(prediction.payoutTxHash);
+        }
+        prediction.settled = true;
+        prediction.won = false;
+        await prediction.save();
+      }
+    }
+
+    return refundTxHashes;
+  }
+
   async finalizeBattle({ matchId, actorUserId, internalCall = false }) {
     timerService.clear(`roast_${matchId}`);
     timerService.clear(`voting_${matchId}`);
@@ -821,16 +872,14 @@ class BattleService {
     if (battle.status !== 'open') throw new Error('Only open battles can be cancelled');
     if (String(battle.creator) !== String(user._id)) throw new Error('Only creator can cancel this battle');
 
-    if (battle.finance?.entryTxPlayer1 && battle.player1Wallet) {
-      await escrowService.transferFromEscrow({
-        toPublicKey: battle.player1Wallet,
-        amountXlm: battle.entryFee,
-        memo: `cancel_refund_${matchId}`,
-      });
-    }
+    const refundTxHashes = await this.refundBattleEscrowOnCancel(battle);
 
     battle.status = 'cancelled';
     battle.endedAt = new Date();
+    battle.finance = {
+      ...(battle.finance || {}),
+      payoutTxHashes: [...((battle.finance || {}).payoutTxHashes || []), ...refundTxHashes],
+    };
     await battle.save();
 
     await trackEvent('battle_cancelled', user._id, { matchId });

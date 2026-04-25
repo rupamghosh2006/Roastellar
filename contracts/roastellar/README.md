@@ -5,11 +5,11 @@ A fully on-chain roast battle and prediction platform on Stellar testnet.
 ## Contract Address (Testnet)
 
 ```
-CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ
+CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2
 ```
 
 **Network:** Stellar Testnet  
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ
+**Explorer:** https://stellar.expert/explorer/testnet/contract/CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2
 
 ## Overview
 
@@ -140,7 +140,7 @@ stellar contract deploy \
 ```bash
 # Register user
 stellar contract invoke \
-  --id CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ \
+  --id CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2 \
   --source testkey \
   --network testnet \
   -- register_user \
@@ -150,7 +150,7 @@ stellar contract invoke \
 
 # Create match
 stellar contract invoke \
-  --id CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ \
+  --id CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2 \
   --source testkey \
   --network testnet \
   -- create_match \
@@ -160,7 +160,7 @@ stellar contract invoke \
 
 # Get match
 stellar contract invoke \
-  --id CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ \
+  --id CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2 \
   --source testkey \
   --network testnet \
   -- get_match \

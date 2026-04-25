@@ -13,7 +13,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 **Contract ID (Testnet):** `CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2`
 
 **Network:** Stellar Testnet
-**Explorer:** https://stellar.expert/explacker/testnet/contract/CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2
+**Explorer:** https://stellar.expert/explorer/testnet/contract/CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2
 
 ## Testnet Users (Verified)
 
@@ -24,6 +24,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 | ABANTIKA KUNDU | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` | 5/5 |
 | Anubhab Rakshit | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | 3/5 |
 | Debasmit Bose | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | 4/5 |
+| Rakhi Kundu | `GDNNF4DU7LZF7SMXRCDCEQTBKV5733I2BUUDSOHDYK6NFUB4URN3XAJM` | 5/5 |
 
 View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
 
@@ -40,6 +41,7 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 | ABANTIKA KUNDU | Web2-like onboarding excellent. Voting not working properly (shows draw). |
 | Anubhab Rakshit | Too many mock/demo parts in UI. Improve UX. |
 | Debasmit Bose | Mobile responsive menu button useless. Need Clerk logout button. |
+| Rakhi Kundu | Perfect experience - rated 5/5 on all aspects. Everything on point. |
 
 ### Common Themes
 1. **Voting bugs** - Match shows draw even after voting
@@ -63,6 +65,10 @@ Based on user feedback, the following improvements are planned:
 ### 3. Mobile Responsive Improvements
 - **Issue:** Top right menu button redundant (footer nav already exists)
 - **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1
+
+### 4. Logout button
+- **Issue:** User needed a dedicated logout button
+- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/fa368559be91147008b212585b30a98294be9c7c
 
 ## Architecture
 

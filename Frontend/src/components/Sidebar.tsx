@@ -6,12 +6,19 @@ import { motion } from 'framer-motion'
 import { Flame, LayoutDashboard, Trophy, User, Wallet, Waves, Swords } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const navItems = [
+const desktopNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', hint: 'Arena hub' },
   { href: '/battles', icon: Swords, label: 'Battles', hint: 'Live matches' },
   { href: '/leaderboard', icon: Trophy, label: 'Leaderboard', hint: 'Top roasters' },
   { href: '/wallet', icon: Wallet, label: 'Wallet', hint: 'Stellar vault' },
   { href: '/profile', icon: User, label: 'Profile', hint: 'Badges and history' },
+]
+
+const mobileNavItems = [
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/battles', icon: Swords, label: 'Battles' },
+  { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
+  { href: '/profile', icon: User, label: 'Profile' },
 ]
 
 export function Sidebar() {
@@ -32,7 +39,7 @@ export function Sidebar() {
           </div>
 
           <nav className="space-y-2">
-            {navItems.map((item) => {
+            {desktopNavItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
               const Icon = item.icon
 
@@ -74,8 +81,8 @@ export function Sidebar() {
       </aside>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/95 px-2 pt-2 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5 gap-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-          {navItems.map((item) => {
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          {mobileNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             const Icon = item.icon
 

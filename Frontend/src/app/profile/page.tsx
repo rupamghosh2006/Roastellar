@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { UserProfile, useAuth } from '@clerk/nextjs'
 import { Award, PenSquare, ShieldCheck, Swords, Trophy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -195,6 +195,14 @@ export default function ProfilePage() {
                   <p className="text-sm text-white/55">No badges earned yet.</p>
                 )}
               </div>
+            </div>
+          </div>
+
+          <div className="glass rounded-[36px] p-6">
+            <p className="text-sm uppercase tracking-[0.24em] text-white/35">Account settings</p>
+            <p className="mt-2 text-sm text-white/55">Manage your Clerk profile and use the built-in sign out action here.</p>
+            <div className="mt-6 overflow-auto rounded-[24px] border border-white/10 bg-white/[0.03] p-2">
+              <UserProfile routing="hash" />
             </div>
           </div>
         </div>

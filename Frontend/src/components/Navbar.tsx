@@ -3,9 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserButton, useAuth } from '@clerk/nextjs'
-import { motion } from 'framer-motion'
-import { Flame, Menu, Sparkles, Wallet, X } from 'lucide-react'
-import { useState } from 'react'
+import { Flame, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const publicLinks = [
@@ -23,7 +21,6 @@ const appLinks = [
 export function Navbar() {
   const pathname = usePathname()
   const { isSignedIn } = useAuth()
-  const [mobileOpen, setMobileOpen] = useState(false)
   const links = isSignedIn ? appLinks : publicLinks
 
   return (
@@ -61,7 +58,7 @@ export function Navbar() {
           })}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="flex items-center gap-3">
           {isSignedIn ? (
             <>
               <Link
@@ -71,11 +68,13 @@ export function Navbar() {
                 <Wallet className="h-4 w-4 text-amber-300" />
                 Wallet
               </Link>
-              <UserButton />
+              <div className="hidden md:block">
+                <UserButton />
+              </div>
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="text-sm font-medium text-white/70 transition-colors hover:text-white">
+              <Link href="/sign-in" className="hidden text-sm font-medium text-white/70 transition-colors hover:text-white sm:block">
                 Sign In
               </Link>
               <Link
@@ -87,63 +86,7 @@ export function Navbar() {
             </>
           )}
         </div>
-
-        <button
-          onClick={() => setMobileOpen((value) => !value)}
-          className="rounded-full border border-white/10 bg-white/5 p-2 text-white md:hidden"
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
       </div>
-
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="border-t border-white/10 bg-slate-950/95 px-4 py-4 md:hidden"
-        >
-          <div className="space-y-2">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="block rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <div className="mt-4 space-y-2">
-            {isSignedIn ? (
-              <div className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/5 px-4 py-3">
-                <div className="flex items-center gap-2 text-white/70">
-                  <Sparkles className="h-4 w-4 text-amber-300" />
-                  Arena access active
-                </div>
-                <UserButton />
-              </div>
-            ) : (
-              <>
-                <Link
-                  href="/sign-in"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-center text-white/80"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/sign-up"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-2xl bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-3 text-center font-semibold text-slate-950"
-                >
-                  Start Free
-                </Link>
-              </>
-            )}
-          </div>
-        </motion.div>
-      )}
     </nav>
   )
 }

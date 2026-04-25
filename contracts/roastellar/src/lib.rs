@@ -69,8 +69,6 @@ pub enum DataKey {
     HasVoted(Address, u32),
 }
 
-const ZERO_ADDRESS: &str = "GA7QYJ7CSYQD3CNHCBOGAD3IEOIN2JT2CZ3RSR5TQCLMNXVQ5CVJ6BKI";
-
 #[contract]
 pub struct Roastellar;
 
@@ -276,7 +274,10 @@ impl Roastellar {
         let winner: Address = if match_data.votes_player1 > match_data.votes_player2 {
             match_data.player1.clone()
         } else {
-            match_data.player2.clone().unwrap_or(Address::from_string(&String::from_str(&e, ZERO_ADDRESS)))
+            match match_data.player2.clone() {
+                Some(p2) => p2,
+                None => panic!("player2 missing at finalize"),
+            }
         };
         let mut winner_updated: Option<User> = None;
         let mut loser_updated: Option<User> = None;

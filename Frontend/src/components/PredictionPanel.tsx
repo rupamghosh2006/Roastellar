@@ -11,15 +11,17 @@ interface PredictionPanelProps {
   player2Id?: string
   player1Name: string
   player2Name: string
-  onPredict: (playerId: string, amount: number) => void
+  onPredict: (playerId: string, amount: number) => Promise<void> | void
   isSpectator: boolean
+  disabled?: boolean
 }
 
-export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name, onPredict, isSpectator }: PredictionPanelProps) {
+export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name, onPredict, isSpectator, disabled = false }: PredictionPanelProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [amount, setAmount] = useState('10')
+  const [submitting, setSubmitting] = useState(false)
 
-  const submitPrediction = () => {
+  const submitPrediction = async () => {
     if (!selectedPlayer) {
       toast.error('Choose a player to back')
       return
@@ -31,7 +33,12 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
       return
     }
 
-    onPredict(selectedPlayer, parsed)
+    try {
+      setSubmitting(true)
+      await onPredict(selectedPlayer, parsed)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (!isSpectator) {
@@ -69,9 +76,10 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
           <motion.button
             key={option.id}
             whileHover={{ y: -2 }}
+            disabled={submitting || disabled}
             onClick={() => setSelectedPlayer(option.id)}
             className={cn(
-              'w-full rounded-2xl border bg-gradient-to-r p-4 text-left transition-all',
+              'w-full rounded-2xl border bg-gradient-to-r p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
               option.accent,
               selectedPlayer === option.id ? 'ring-2 ring-blue-400/45' : 'opacity-80 hover:opacity-100'
             )}
@@ -89,17 +97,19 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
           type="number"
           min="1"
           value={amount}
+          disabled={submitting || disabled}
           onChange={(event) => setAmount(event.target.value)}
-          className="w-full bg-transparent text-white outline-none placeholder:text-white/25"
+          className="w-full bg-transparent text-white outline-none placeholder:text-white/25 disabled:cursor-not-allowed disabled:opacity-60"
           placeholder="10"
         />
       </div>
 
       <button
         onClick={submitPrediction}
-        className="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-92"
+        disabled={submitting || disabled}
+        className="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Predict Winner
+        {submitting ? 'Placing prediction...' : 'Predict Winner'}
       </button>
     </div>
   )

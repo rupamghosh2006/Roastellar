@@ -4,6 +4,7 @@ const BattleCounter = require('../models/battleCounter.model');
 const Prediction = require('../../predictions/models/prediction.model');
 const User = require('../../users/models/user.model');
 const Analytics = require('../../analytics/models/analytics.model');
+const { StellarSdk } = require('../../../config/stellar');
 const ipfsService = require('./ipfs.service');
 const chainService = require('./battleChain.service');
 const escrowService = require('./battleEscrow.service');
@@ -14,6 +15,10 @@ const logger = require('../../../utils/logger');
 const ROAST_PHASE_SECONDS = Number(process.env.BATTLE_ROAST_SECONDS || 60);
 const VOTING_PHASE_SECONDS = Number(process.env.BATTLE_VOTING_SECONDS || 30);
 const VOTE_STAKE_XLM = Number(process.env.BATTLE_VOTE_STAKE_XLM || 0);
+const BATTLE_START_COUNTDOWN_SECONDS = Number(process.env.BATTLE_START_COUNTDOWN_SECONDS || 3);
+const VOTING_FINALIZE_GRACE_SECONDS = Number(process.env.BATTLE_VOTING_FINALIZE_GRACE_SECONDS || 0);
+const VOTING_FINALIZE_MAX_WAIT_SECONDS = Number(process.env.BATTLE_VOTING_FINALIZE_MAX_WAIT_SECONDS || 45);
+const VOTING_PENDING_POLL_MS = Number(process.env.BATTLE_VOTING_PENDING_POLL_MS || 500);
 
 function sanitizeText(value, max = 280) {
   const text = String(value || '')
@@ -26,6 +31,10 @@ function sanitizeText(value, max = 280) {
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function isValidPublicKey(value) {
+  return Boolean(value) && Boolean(StellarSdk?.StrKey?.isValidEd25519PublicKey?.(String(value)));
 }
 
 async function trackEvent(eventType, userId, metadata = {}) {
@@ -70,8 +79,89 @@ function getOnChainMatchId(battle) {
 }
 
 class BattleService {
+  constructor() {
+    this.pendingVotesByMatch = new Map();
+  }
+
   normalizeBattle(battleDoc) {
     return battleDoc?.toJSON ? battleDoc.toJSON() : battleDoc;
+  }
+
+  incrementPendingVote(matchId) {
+    const key = Number(matchId);
+    const current = Number(this.pendingVotesByMatch.get(key) || 0);
+    this.pendingVotesByMatch.set(key, current + 1);
+  }
+
+  decrementPendingVote(matchId) {
+    const key = Number(matchId);
+    const current = Number(this.pendingVotesByMatch.get(key) || 0);
+    if (current <= 1) {
+      this.pendingVotesByMatch.delete(key);
+      return;
+    }
+    this.pendingVotesByMatch.set(key, current - 1);
+  }
+
+  getPendingVoteCount(matchId) {
+    return Number(this.pendingVotesByMatch.get(Number(matchId)) || 0);
+  }
+
+  async waitForPendingVotes(matchId, maxWaitMs) {
+    const startedAt = Date.now();
+    let sawPending = false;
+    while (Date.now() - startedAt < maxWaitMs) {
+      const pending = this.getPendingVoteCount(matchId);
+      if (pending > 0) {
+        sawPending = true;
+      }
+      if (pending <= 0) return sawPending;
+      await new Promise((resolve) => setTimeout(resolve, VOTING_PENDING_POLL_MS));
+    }
+    return sawPending;
+  }
+
+  async resolveUserWalletPublic(user, { persist = true } = {}) {
+    if (!user) return '';
+    const stored = String(user.walletPublicKey || '').trim();
+    let derived = '';
+
+    try {
+      if (user.walletEncryptedSecret) {
+        const secret = escrowService.getUserSecret(user);
+        derived = StellarSdk.Keypair.fromSecret(secret).publicKey();
+      }
+    } catch (error) {
+      logger.warn('Failed deriving wallet public key from encrypted secret', {
+        userId: String(user._id || ''),
+        message: error?.message,
+      });
+    }
+
+    const resolved = isValidPublicKey(derived) ? derived : stored;
+
+    if (persist && isValidPublicKey(derived) && stored !== derived) {
+      try {
+        user.walletPublicKey = derived;
+        await user.save();
+        logger.warn('Auto-corrected mismatched wallet public key from secret', {
+          userId: String(user._id || ''),
+          oldPublic: stored,
+          newPublic: derived,
+        });
+      } catch (error) {
+        logger.warn('Failed persisting corrected wallet public key', {
+          userId: String(user._id || ''),
+          message: error?.message,
+        });
+      }
+    }
+
+    if (!isValidPublicKey(resolved)) {
+      throw new Error('User wallet public key is invalid');
+    }
+
+    return resolved;
   }
 
   async serializeByMatchId(matchId) {
@@ -121,6 +211,7 @@ class BattleService {
       throw new Error('Entry fee must be greater than zero');
     }
 
+    const creatorWalletPublic = await this.resolveUserWalletPublic(user);
     const matchId = await nextMatchId();
     const uploadedTopicCid = await ipfsService.uploadJSON(
       {
@@ -144,12 +235,12 @@ class BattleService {
         entryFee: fee,
         topicCid,
         sourceSecret: escrowService.getUserSecret(user),
-        sourcePublic: user.walletPublicKey,
+        sourcePublic: creatorWalletPublic,
       });
     } catch (error) {
       try {
         await escrowService.transferFromEscrow({
-          toPublicKey: user.walletPublicKey,
+          toPublicKey: creatorWalletPublic,
           amountXlm: fee,
           memo: `entry_refund_${matchId}`,
         });
@@ -166,7 +257,7 @@ class BattleService {
       matchId,
       creator: user._id,
       player1: user._id,
-      player1Wallet: user.walletPublicKey,
+      player1Wallet: creatorWalletPublic,
       topic: safeTopic,
       topicCid,
       entryFee: fee,
@@ -217,13 +308,14 @@ class BattleService {
       throw new Error('Cannot join your own battle');
     }
 
+    const challengerWalletPublic = await this.resolveUserWalletPublic(user);
     const now = new Date();
     const updated = await Battle.findOneAndUpdate(
       { _id: battle._id, status: 'open', player2: null },
       {
         $set: {
           player2: user._id,
-          player2Wallet: user.walletPublicKey,
+          player2Wallet: challengerWalletPublic,
           status: 'active',
           startedAt: now,
         },
@@ -244,7 +336,7 @@ class BattleService {
       });
       const joinTxHash = await chainService.joinMatchOnChain({
         onChainMatchId,
-        playerPublic: user.walletPublicKey,
+        playerPublic: challengerWalletPublic,
         sourceSecret: escrowService.getUserSecret(user),
       });
       updated.chain = {
@@ -278,17 +370,15 @@ class BattleService {
 
     await trackEvent('battle_joined', user._id, { matchId, onChainMatchId, entryTxHash });
 
-    this.startRoastTimer(updated.matchId);
+    this.startBattleCountdown(updated.matchId);
 
     const io = getIO();
     if (io) {
+      const battlePayload = await this.getBattleByMatchId(updated.matchId);
       io.to(`battle_${updated.matchId}`).emit('player_joined', {
         matchId: updated.matchId,
         playerId: String(user._id),
-      });
-      io.to(`battle_${updated.matchId}`).emit('battle_started', {
-        matchId: updated.matchId,
-        durationSec: ROAST_PHASE_SECONDS,
+        battle: battlePayload,
       });
       io.to('lobby').emit('open_battles_updated', await this.getOpenBattles());
     }
@@ -329,6 +419,32 @@ class BattleService {
     });
   }
 
+  startBattleCountdown(matchId) {
+    const io = getIO();
+    timerService.schedule({
+      matchId: `start_${matchId}`,
+      durationSec: BATTLE_START_COUNTDOWN_SECONDS,
+      onTick: (remaining) => {
+        io?.to(`battle_${matchId}`).emit('countdown_tick', {
+          matchId,
+          phase: 'starting',
+          remaining,
+        });
+      },
+      onExpire: async () => {
+        const battle = await Battle.findOne({ matchId });
+        if (!battle || battle.status !== 'active') return;
+        const battlePayload = await this.getBattleByMatchId(matchId);
+        io?.to(`battle_${matchId}`).emit('battle_started', {
+          matchId,
+          durationSec: ROAST_PHASE_SECONDS,
+          battle: battlePayload,
+        });
+        this.startRoastTimer(matchId);
+      },
+    });
+  }
+
   startVotingTimer(matchId) {
     const io = getIO();
     timerService.schedule({
@@ -343,6 +459,15 @@ class BattleService {
       },
       onExpire: async () => {
         try {
+          const pendingAtStart = this.getPendingVoteCount(matchId);
+          let waitedForPendingVotes = false;
+          const maxWaitMs = Math.max(0, VOTING_FINALIZE_MAX_WAIT_SECONDS) * 1000;
+          if (maxWaitMs > 0 && pendingAtStart > 0) {
+            waitedForPendingVotes = await this.waitForPendingVotes(matchId, maxWaitMs);
+          }
+          if (waitedForPendingVotes && VOTING_FINALIZE_GRACE_SECONDS > 0) {
+            await new Promise((resolve) => setTimeout(resolve, VOTING_FINALIZE_GRACE_SECONDS * 1000));
+          }
           await this.finalizeBattle({ matchId, actorUserId: null, internalCall: true });
         } catch (error) {
           logger.error('Auto finalize failed', { matchId, message: error?.message });
@@ -370,7 +495,7 @@ class BattleService {
     const roastCid = uploadedRoastCid || `local-roast-${matchId}-${String(user._id).slice(-6)}`;
 
     const onChainMatchId = getOnChainMatchId(battle);
-    const playerPublic = isPlayer1 ? battle.player1Wallet : battle.player2Wallet;
+    const playerPublic = await this.resolveUserWalletPublic(user);
     if (!playerPublic) {
       throw new Error('Missing player wallet for on-chain roast mirroring');
     }
@@ -385,11 +510,13 @@ class BattleService {
     if (isPlayer1) {
       battle.roast1 = safeText;
       battle.roast1Cid = roastCid;
+      battle.player1Wallet = playerPublic;
       battle.chain = { ...(battle.chain || {}), roast1TxHash: roastTxHash };
     }
     if (isPlayer2) {
       battle.roast2 = safeText;
       battle.roast2Cid = roastCid;
+      battle.player2Wallet = playerPublic;
       battle.chain = { ...(battle.chain || {}), roast2TxHash: roastTxHash };
     }
 
@@ -434,75 +561,81 @@ class BattleService {
 
     const existing = await BattleVote.findOne({ battleId: battle._id, voter: user._id });
     if (existing) throw new Error('Vote already recorded');
+    this.incrementPendingVote(matchId);
 
-    const selectedPlayerPublic = selected === String(battle.player1) ? battle.player1Wallet : battle.player2Wallet;
-    if (!selectedPlayerPublic) throw new Error('Missing selected player wallet for mirrored on-chain vote');
-
-    let voteStakeTxHash = '';
-    if (VOTE_STAKE_XLM > 0) {
-      voteStakeTxHash = await escrowService.transferFromUserToEscrow({
-        user,
-        amountXlm: VOTE_STAKE_XLM,
-        memo: `vote_stake_${matchId}`,
-      });
-    }
-
-    let voteTxHash = '';
     try {
-      voteTxHash = await chainService.voteOnChain({
-        onChainMatchId: getOnChainMatchId(battle),
-        selectedPlayerPublic,
-        voterPublic: user.walletPublicKey,
-        sourceSecret: escrowService.getUserSecret(user),
-      });
-    } catch (error) {
-      if (voteStakeTxHash) {
-        try {
-          await escrowService.transferFromEscrow({
-            toPublicKey: user.walletPublicKey,
-            amountXlm: VOTE_STAKE_XLM,
-            memo: `vote_refund_${matchId}`,
-          });
-        } catch (refundError) {
-          logger.error('Vote stake refund failed', { matchId, message: refundError?.message });
-        }
+      const voterPublic = await this.resolveUserWalletPublic(user);
+      const selectedPlayerPublic = selected === String(battle.player1) ? battle.player1Wallet : battle.player2Wallet;
+      if (!isValidPublicKey(selectedPlayerPublic)) throw new Error('Missing selected player wallet for mirrored on-chain vote');
+
+      let voteStakeTxHash = '';
+      if (VOTE_STAKE_XLM > 0) {
+        voteStakeTxHash = await escrowService.transferFromUserToEscrow({
+          user,
+          amountXlm: VOTE_STAKE_XLM,
+          memo: `vote_stake_${matchId}`,
+        });
       }
-      throw error;
-    }
 
-    await BattleVote.create({
-      battleId: battle._id,
-      voter: user._id,
-      selectedPlayer: selected,
-    });
+      let voteTxHash = '';
+      try {
+        voteTxHash = await chainService.voteOnChain({
+          onChainMatchId: getOnChainMatchId(battle),
+          selectedPlayerPublic,
+          voterPublic,
+          sourceSecret: escrowService.getUserSecret(user),
+        });
+      } catch (error) {
+        if (voteStakeTxHash) {
+          try {
+            await escrowService.transferFromEscrow({
+              toPublicKey: voterPublic,
+              amountXlm: VOTE_STAKE_XLM,
+              memo: `vote_refund_${matchId}`,
+            });
+          } catch (refundError) {
+            logger.error('Vote stake refund failed', { matchId, message: refundError?.message });
+          }
+        }
+        throw error;
+      }
 
-    if (selected === String(battle.player1)) {
-      battle.votesPlayer1 += 1;
-    } else {
-      battle.votesPlayer2 += 1;
-    }
-    battle.chain = {
-      ...(battle.chain || {}),
-      voteTxHashes: [...((battle.chain || {}).voteTxHashes || []), voteTxHash],
-    };
-    if (voteStakeTxHash) {
-      battle.finance = {
-        ...(battle.finance || {}),
-        voteStakeTxHashes: [...((battle.finance || {}).voteStakeTxHashes || []), voteStakeTxHash],
+      await BattleVote.create({
+        battleId: battle._id,
+        voter: user._id,
+        selectedPlayer: selected,
+      });
+
+      if (selected === String(battle.player1)) {
+        battle.votesPlayer1 += 1;
+      } else {
+        battle.votesPlayer2 += 1;
+      }
+      battle.chain = {
+        ...(battle.chain || {}),
+        voteTxHashes: [...((battle.chain || {}).voteTxHashes || []), voteTxHash],
       };
+      if (voteStakeTxHash) {
+        battle.finance = {
+          ...(battle.finance || {}),
+          voteStakeTxHashes: [...((battle.finance || {}).voteStakeTxHashes || []), voteStakeTxHash],
+        };
+      }
+      await battle.save();
+
+      await trackEvent('vote_cast', user._id, { matchId, selectedPlayer: selected, voteTxHash, voteStakeTxHash });
+
+      const io = getIO();
+      io?.to(`battle_${matchId}`).emit('vote_update', {
+        matchId,
+        votesPlayer1: battle.votesPlayer1,
+        votesPlayer2: battle.votesPlayer2,
+      });
+
+      return this.getBattleByMatchId(matchId);
+    } finally {
+      this.decrementPendingVote(matchId);
     }
-    await battle.save();
-
-    await trackEvent('vote_cast', user._id, { matchId, selectedPlayer: selected, voteTxHash, voteStakeTxHash });
-
-    const io = getIO();
-    io?.to(`battle_${matchId}`).emit('vote_update', {
-      matchId,
-      votesPlayer1: battle.votesPlayer1,
-      votesPlayer2: battle.votesPlayer2,
-    });
-
-    return this.getBattleByMatchId(matchId);
   }
 
   async placePrediction({ user, matchId, selectedPlayer, amount }) {
@@ -523,8 +656,9 @@ class BattleService {
     const existing = await Prediction.findOne({ battleId: battle._id, predictor: user._id });
     if (existing) throw new Error('Prediction already placed');
 
+    const predictorPublic = await this.resolveUserWalletPublic(user);
     const selectedPlayerPublic = selected === String(battle.player1) ? battle.player1Wallet : battle.player2Wallet;
-    if (!selectedPlayerPublic) throw new Error('Missing selected player wallet for mirrored on-chain prediction');
+    if (!isValidPublicKey(selectedPlayerPublic)) throw new Error('Missing selected player wallet for mirrored on-chain prediction');
 
     const escrowTxHash = await escrowService.transferFromUserToEscrow({
       user,
@@ -538,14 +672,14 @@ class BattleService {
         onChainMatchId: getOnChainMatchId(battle),
         selectedPlayerPublic,
         amount: parsedAmount,
-        predictorPublic: user.walletPublicKey,
+        predictorPublic,
         sourceSecret: escrowService.getUserSecret(user),
       });
     } catch (error) {
       try {
         await escrowService.transferFromEscrow({
-          toPublicKey: user.walletPublicKey,
-          amountXlm: parsedAmount,
+          toPublicKey: predictorPublic,
+          amountXlm: updated.entryFee,
           memo: `prediction_refund_${matchId}`,
         });
       } catch (refundError) {
@@ -733,8 +867,18 @@ class BattleService {
       throw new Error('Battle is not fully mirrored on-chain yet');
     }
 
-    const vote1 = battle.votesPlayer1;
-    const vote2 = battle.votesPlayer2;
+    const [vote1, vote2] = await Promise.all([
+      BattleVote.countDocuments({ battleId: battle._id, selectedPlayer: battle.player1 }),
+      BattleVote.countDocuments({ battleId: battle._id, selectedPlayer: battle.player2 }),
+    ]);
+    battle.votesPlayer1 = vote1;
+    battle.votesPlayer2 = vote2;
+    logger.info('Finalizing battle vote snapshot', {
+      matchId,
+      vote1,
+      vote2,
+      pendingVotes: this.getPendingVoteCount(matchId),
+    });
     battle.endedAt = new Date();
 
     const onChainMatchId = getOnChainMatchId(battle);

@@ -18,6 +18,7 @@ import {
   onBattleResult,
   onCountdownTick,
   onErrorMessage,
+  onPlayerJoined,
   onRoastSubmitted,
   onSpectatorCount,
   onVoteUpdate,
@@ -27,7 +28,7 @@ import {
 import { cn } from '@/lib/utils'
 
 type TimerState = {
-  phase: 'active' | 'voting' | null
+  phase: 'starting' | 'active' | 'voting' | null
   remaining: number
 }
 
@@ -47,6 +48,7 @@ export default function BattleRoomPage() {
   const [spectators, setSpectators] = useState(0)
   const [me, setMe] = useState<User | null>(null)
   const [activity, setActivity] = useState<string[]>([])
+  const [predictionBusy, setPredictionBusy] = useState(false)
 
   const pushActivity = useCallback((line: string) => {
     setActivity((current) => [line, ...current].slice(0, 10))
@@ -98,6 +100,13 @@ export default function BattleRoomPage() {
           pushActivity(`Spectators online: ${Number(event?.count ?? 0)}`)
         })
 
+        onPlayerJoined((event) => {
+          if (Number(event?.matchId) !== matchId) return
+          if (event?.battle) {
+            setBattle(normalizeBattle(event.battle))
+          }
+        })
+
         onCountdownTick((event) => {
           if (Number(event?.matchId) !== matchId) return
           setTimer({
@@ -109,9 +118,23 @@ export default function BattleRoomPage() {
         onBattleStarted((event) => {
           if (Number(event?.matchId) !== matchId) return
           if (event?.battle) {
-            setBattle(normalizeBattle(event.battle))
+            setBattle((current) => {
+              const next = normalizeBattle(event.battle)
+              if (!current) return next
+              // Never downgrade an already-started voting/result state back to active from delayed events.
+              const lockedStates = new Set(['voting', 'ended', 'draw', 'cancelled'])
+              if (lockedStates.has(current.status) && next.status === 'active') {
+                return current
+              }
+              return next
+            })
           } else {
-            setBattle((current) => (current ? { ...current, status: 'active' } : current))
+            setBattle((current) => {
+              if (!current) return current
+              const lockedStates = new Set(['voting', 'ended', 'draw', 'cancelled'])
+              if (lockedStates.has(current.status)) return current
+              return { ...current, status: 'active' }
+            })
           }
           setTimer({
             phase: 'active',
@@ -129,11 +152,16 @@ export default function BattleRoomPage() {
           } else if (event?.userId && event?.roast) {
             setBattle((current) => {
               if (!current) return current
-              return {
+              const next = {
                 ...current,
                 roast1: String(current.player1?.id) === String(event.userId) ? event.roast : current.roast1,
                 roast2: String(current.player2?.id) === String(event.userId) ? event.roast : current.roast2,
               }
+              // Fallback: if both roasts exist, surface voting UI even if voting_started socket arrives late.
+              if (next.roast1 && next.roast2 && next.status === 'active') {
+                return { ...next, status: 'voting' }
+              }
+              return next
             })
             pushActivity('A roast was submitted')
           }
@@ -286,6 +314,7 @@ export default function BattleRoomPage() {
 
   const placePrediction = async (selectedPlayer: string, amount: number) => {
     try {
+      setPredictionBusy(true)
       const token = await getToken({ skipCache: true })
       if (!token) {
         throw new Error('Missing token')
@@ -296,6 +325,8 @@ export default function BattleRoomPage() {
       toast.success('Prediction placed')
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to place prediction')
+    } finally {
+      setPredictionBusy(false)
     }
   }
 
@@ -327,7 +358,10 @@ export default function BattleRoomPage() {
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm text-white/80">
                 <Pill icon={<Sparkles className="h-4 w-4 text-violet-200" />} label={`Status: ${battle.status}`} />
-                <Pill icon={<Timer className="h-4 w-4 text-amber-200" />} label={timer.remaining > 0 ? `${timer.phase || 'phase'} ${timer.remaining}s` : 'No timer'} />
+                <Pill
+                  icon={<Timer className="h-4 w-4 text-amber-200" />}
+                  label={timer.remaining > 0 ? `${timer.phase || 'phase'} ${timer.remaining}s` : 'No timer'}
+                />
                 <Pill icon={<Users className="h-4 w-4 text-blue-200" />} label={`${spectators} spectators`} />
                 <Pill icon={<Coins className="h-4 w-4 text-emerald-200" />} label={`Pot ${battle.pot} XLM`} />
                 {canJoinOpenBattle && (
@@ -397,6 +431,7 @@ export default function BattleRoomPage() {
                 player1Name={battle.player1?.username || 'Player 1'}
                 player2Name={battle.player2?.username || 'Player 2'}
                 isSpectator={isSpectator}
+                disabled={predictionBusy}
                 onPredict={(selectedPlayer, amount) => placePrediction(selectedPlayer, amount)}
               />
 

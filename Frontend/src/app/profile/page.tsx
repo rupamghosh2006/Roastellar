@@ -186,11 +186,14 @@ export default function ProfilePage() {
             <div className="glass rounded-[36px] p-6">
               <p className="text-sm uppercase tracking-[0.24em] text-white/35">Badges</p>
               <div className="mt-4 flex flex-wrap gap-3">
-                {(user?.badges?.length ? user.badges : ['Rising Roaster', 'Wallet Ready']).map((badge) => (
+                {(user?.badges ?? []).map((badge) => (
                   <span key={badge} className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75">
                     {badge}
                   </span>
                 ))}
+                {!user?.badges?.length && (
+                  <p className="text-sm text-white/55">No badges earned yet.</p>
+                )}
               </div>
             </div>
           </div>

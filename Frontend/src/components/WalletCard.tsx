@@ -9,11 +9,12 @@ import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
 interface WalletCardProps {
   address: string
   balance: number
+  funded?: boolean
   isLoading?: boolean
   variant?: 'compact' | 'full'
 }
 
-export function WalletCard({ address, balance, isLoading, variant = 'compact' }: WalletCardProps) {
+export function WalletCard({ address, balance, funded = false, isLoading, variant = 'compact' }: WalletCardProps) {
   const [copied, setCopied] = useState(false)
 
   const copyAddress = async () => {
@@ -55,7 +56,7 @@ export function WalletCard({ address, balance, isLoading, variant = 'compact' }:
         </div>
         <div className="w-full rounded-2xl border border-blue-400/12 bg-blue-500/10 px-3 py-2 text-left sm:w-auto sm:text-right">
           <p className="text-[11px] uppercase tracking-[0.24em] text-blue-200/80">Status</p>
-          <p className="mt-1 text-sm font-semibold text-white">Funded</p>
+          <p className="mt-1 text-sm font-semibold text-white">{funded ? 'Funded' : 'Pending'}</p>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { ArrowUpDown, Clock3, Copy, ExternalLink, Eye, EyeOff, Wallet as WalletIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -11,12 +11,6 @@ import { WalletBalance, WalletCard } from '@/components/WalletCard'
 import { PageLoader } from '@/components/LoadingScreen'
 import { apiRoutes, type Wallet, type WalletSecretExport } from '@/lib/api'
 import { formatDate, getExplorerUrl } from '@/lib/utils'
-
-const rewardHistory = [
-  'Starter reward credited during onboarding',
-  'Prediction payout from semifinal room',
-  'Community streak bonus queued',
-]
 
 export default function WalletPage() {
   const router = useRouter()
@@ -52,6 +46,23 @@ export default function WalletPage() {
       })
       .finally(() => setLoading(false))
   }, [getToken, isLoaded, isSignedIn, router])
+
+  const rewardHistory = useMemo(() => {
+    const history: string[] = []
+
+    if (!wallet) {
+      history.push('No wallet is linked to this account yet.')
+      return history
+    }
+
+    if (wallet.createdAt) {
+      history.push(`Wallet created on ${formatDate(wallet.createdAt)}.`)
+    }
+
+    history.push(wallet.funded ? 'Wallet funding is confirmed on Stellar testnet.' : 'Wallet funding is still pending.')
+    history.push(`Current available balance: ${wallet.balance.toFixed(2)} XLM.`)
+    return history
+  }, [wallet])
 
   if (loading) {
     return (
@@ -113,11 +124,18 @@ export default function WalletPage() {
           </div>
 
           <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
-            <WalletCard
-              address={wallet?.address ?? 'GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'}
-              balance={wallet?.balance ?? 0}
-              variant="full"
-            />
+            {wallet ? (
+              <WalletCard
+                address={wallet.address || wallet.publicKey}
+                balance={wallet.balance}
+                funded={wallet.funded}
+                variant="full"
+              />
+            ) : (
+              <div className="glass rounded-[22px] p-5 text-white/70 sm:rounded-[28px] sm:p-6">
+                Wallet data is unavailable right now. Please refresh after signing in again.
+              </div>
+            )}
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
               <WalletBalance label="Available" balance={wallet?.balance ?? 0} icon={<WalletIcon className="h-4 w-4 text-amber-200" />} />
@@ -180,7 +198,7 @@ export default function WalletPage() {
                   Explorer
                 </div>
                 <a
-                  href={wallet ? getExplorerUrl(wallet.address) : '#'}
+                  href={wallet ? getExplorerUrl(wallet.address || wallet.publicKey) : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 block text-sm text-blue-200 underline-offset-4 hover:underline"
@@ -188,7 +206,7 @@ export default function WalletPage() {
                   Open wallet on Stellar Expert
                 </a>
                 <p className="mt-4 text-sm text-white/50">
-                  Created {wallet?.createdAt ? formatDate(wallet.createdAt) : 'just now'}
+                  Created {wallet?.createdAt ? formatDate(wallet.createdAt) : 'date unavailable'}
                 </p>
               </div>
             </div>

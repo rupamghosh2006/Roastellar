@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { ArrowRight, Coins, Flame, ShieldCheck, Sparkles, Swords, Trophy, Wallet } from 'lucide-react'
+import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/api'
 import { isOnboardingComplete } from '@/lib/utils'
 
 const features = [
@@ -21,20 +22,65 @@ const steps = [
   'Join battles, vote on winners, and climb the leaderboard.',
 ]
 
-const previewLeaderboard = [
-  { name: 'NovaBurn', xp: '18,240', badge: 'Top Predictor' },
-  { name: 'VoxFire', xp: '16,980', badge: 'Crowd Favorite' },
-  { name: 'NeonAsh', xp: '15,420', badge: 'Streak 9' },
-]
-
 export default function LandingPage() {
   const { isSignedIn } = useAuth()
   const router = useRouter()
+  const [openBattles, setOpenBattles] = useState<Battle[]>([])
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
 
   useEffect(() => {
     if (!isSignedIn) return
     router.replace(isOnboardingComplete() ? '/dashboard' : '/onboarding')
   }, [isSignedIn, router])
+
+  useEffect(() => {
+    Promise.allSettled([apiRoutes.battles.open(), apiRoutes.users.leaderboard()]).then(([battlesResult, leaderboardResult]) => {
+      if (battlesResult.status === 'fulfilled') {
+        setOpenBattles(battlesResult.value.data)
+      }
+
+      if (leaderboardResult.status === 'fulfilled') {
+        setLeaderboard(leaderboardResult.value.data)
+      }
+    })
+  }, [])
+
+  const featuredBattle = useMemo(() => {
+    if (openBattles.length === 0) {
+      return null
+    }
+    return [...openBattles].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+  }, [openBattles])
+
+  const featuredPlayers = useMemo(
+    () => [featuredBattle?.player1, featuredBattle?.player2].filter((player): player is User => Boolean(player)),
+    [featuredBattle]
+  )
+
+  const totalSpectators = useMemo(() => openBattles.reduce((sum, battle) => sum + battle.spectators, 0), [openBattles])
+  const totalVotes = useMemo(
+    () => openBattles.reduce((sum, battle) => sum + battle.player1Votes + battle.player2Votes, 0),
+    [openBattles]
+  )
+  const totalPot = useMemo(() => openBattles.reduce((sum, battle) => sum + battle.pot, 0), [openBattles])
+  const topLeaderboard = leaderboard.slice(0, 3)
+
+  const arenaSignals = useMemo(() => {
+    const signals: string[] = []
+    if (featuredBattle) {
+      signals.push(`Latest open topic: "${featuredBattle.topic}"`)
+    }
+    if (leaderboard[0]) {
+      signals.push(`${leaderboard[0].username} is leading with ${leaderboard[0].xp.toLocaleString()} XP.`)
+    }
+    if (openBattles.length > 0) {
+      signals.push(`${openBattles.length} open battles are available in the arena right now.`)
+    }
+    if (signals.length === 0) {
+      signals.push('Live arena signals will appear as soon as battles and leaderboard activity starts.')
+    }
+    return signals
+  }, [featuredBattle, leaderboard, openBattles.length])
 
   return (
     <main className="overflow-hidden pt-16">
@@ -93,9 +139,9 @@ export default function LandingPage() {
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
               {[
-                { value: '15s', label: 'Onboarding challenge' },
-                { value: 'Live', label: 'Battle loops' },
-                { value: 'XLM', label: 'Reward-ready wallet' },
+                { value: String(leaderboard.length), label: 'Ranked players' },
+                { value: String(openBattles.length), label: 'Open battles now' },
+                { value: `${totalPot.toFixed(2)} XLM`, label: 'Open prize pool' },
               ].map((stat) => (
                 <div key={stat.label} className="glass rounded-[24px] p-4">
                   <p className="font-orbitron text-2xl font-bold text-white">{stat.value}</p>
@@ -115,27 +161,31 @@ export default function LandingPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.3em] text-white/35">Live Match Preview</p>
-                  <p className="mt-2 font-orbitron text-2xl text-white">Friday Night Fire</p>
+                  <p className="mt-2 font-orbitron text-2xl text-white">{featuredBattle?.topic ?? 'No live battle yet'}</p>
                 </div>
                 <div className="rounded-full bg-emerald-400/14 px-3 py-1 text-xs uppercase tracking-[0.24em] text-emerald-200">
-                  Live
+                  {featuredBattle ? featuredBattle.status.toUpperCase() : 'IDLE'}
                 </div>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {['NovaBurn', 'VoxFire'].map((name, index) => (
-                  <div key={name} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
+                {(featuredPlayers.length ? featuredPlayers : [null, null]).slice(0, 2).map((player, index) => (
+                  <div key={player?.id ?? `slot-${index}`} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
                     <div className="flex items-center gap-3">
                       <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${index === 0 ? 'bg-blue-500/16' : 'bg-violet-500/16'}`}>
                         <Flame className={`h-6 w-6 ${index === 0 ? 'text-blue-300' : 'text-violet-300'}`} />
                       </div>
                       <div>
-                        <p className="font-semibold text-white">{name}</p>
-                        <p className="text-sm text-white/45">{index === 0 ? 'Crowd manipulator' : 'Finisher'}</p>
+                        <p className="font-semibold text-white">{player?.username ?? 'Waiting for player'}</p>
+                        <p className="text-sm text-white/45">
+                          {player ? `${player.wins} wins | ${player.xp.toLocaleString()} XP` : 'Seat is still open'}
+                        </p>
                       </div>
                     </div>
                     <div className="mt-5 rounded-2xl border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/72">
-                      “You brought a wallet to a wit fight. Stellar can settle rewards, but it cannot settle your timing.”
+                      {index === 0
+                        ? featuredBattle?.roast1 || 'Roast will appear here when the first player submits.'
+                        : featuredBattle?.roast2 || 'Roast will appear here when the second player submits.'}
                     </div>
                   </div>
                 ))}
@@ -143,9 +193,9 @@ export default function LandingPage() {
 
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
                 {[
-                  { label: 'Spectators', value: '1.2k' },
-                  { label: 'Predictions', value: '402' },
-                  { label: 'Pot', value: '48 XLM' },
+                  { label: 'Spectators', value: totalSpectators.toLocaleString() },
+                  { label: 'Votes', value: totalVotes.toLocaleString() },
+                  { label: 'Pot', value: `${totalPot.toFixed(2)} XLM` },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-white/35">{item.label}</p>
@@ -229,31 +279,35 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {previewLeaderboard.map((entry, index) => (
-              <div key={entry.name} className="glass rounded-[28px] p-5">
+            {topLeaderboard.length > 0 ? topLeaderboard.map((entry, index) => (
+              <div key={entry.id} className="glass rounded-[28px] p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 font-orbitron text-white">
                     {index + 1}
                   </div>
                   <Trophy className="h-5 w-5 text-amber-200" />
                 </div>
-                <p className="mt-5 font-orbitron text-2xl text-white">{entry.name}</p>
-                <p className="mt-2 text-sm text-white/50">{entry.xp} XP</p>
+                <p className="mt-5 font-orbitron text-2xl text-white">{entry.username}</p>
+                <p className="mt-2 text-sm text-white/50">{entry.xp.toLocaleString()} XP</p>
                 <div className="mt-4 rounded-full bg-white/6 px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/45">
-                  {entry.badge}
+                  {entry.wins} wins
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="glass rounded-[28px] p-5 text-white/65">
+                Leaderboard data will show here once players start competing.
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-3">
-          {['“Feels like a launch-ready gaming startup.”', '“The wallet reveal is the hook.”', '“Social + fintech actually works here.”'].map((quote) => (
-            <div key={quote} className="glass rounded-[32px] p-6 text-white/70">
-              <p className="text-lg leading-8">{quote}</p>
-              <p className="mt-6 text-sm uppercase tracking-[0.28em] text-white/35">Judge placeholder</p>
+          {arenaSignals.slice(0, 3).map((signal) => (
+            <div key={signal} className="glass rounded-[32px] p-6 text-white/70">
+              <p className="text-lg leading-8">{signal}</p>
+              <p className="mt-6 text-sm uppercase tracking-[0.28em] text-white/35">Arena Signal</p>
             </div>
           ))}
         </div>

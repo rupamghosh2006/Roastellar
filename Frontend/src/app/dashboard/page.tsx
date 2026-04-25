@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { ArrowRight, Coins, Sparkles, Swords, Trophy, Wallet as WalletIcon } from 'lucide-react'
@@ -12,12 +12,6 @@ import { PageLoader, SkeletonCard } from '@/components/LoadingScreen'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User, type Wallet } from '@/lib/api'
 import { setOnboardingComplete } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
-
-const mockActivity = [
-  'NovaBurn won 12 XLM in "Friday Night Fire"',
-  'Three new open battles were created in the last hour',
-  'Prediction rewards were sent to 42 spectators',
-]
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -85,6 +79,34 @@ export default function DashboardPage() {
       })
       .finally(() => setIsLoading(false))
   }, [getToken, isLoaded, isSignedIn, router])
+
+  const liveActivity = useMemo(() => {
+    const activity: string[] = []
+
+    if (battles.length > 0) {
+      activity.push(`${battles.length} open battle${battles.length > 1 ? 's are' : ' is'} live right now.`)
+      const hottestBattle = [...battles].sort((a, b) => b.pot - a.pot)[0]
+      activity.push(`Highest open pot: ${hottestBattle.pot.toFixed(2)} XLM for "${hottestBattle.topic}".`)
+    }
+
+    if (leaderboard[0]) {
+      activity.push(`${leaderboard[0].username} leads the leaderboard with ${leaderboard[0].xp.toLocaleString()} XP.`)
+    }
+
+    if (user?.rank) {
+      activity.push(`Your current rank is #${user.rank}.`)
+    }
+
+    if (wallet) {
+      activity.push(`Wallet balance available: ${wallet.balance.toFixed(2)} XLM.`)
+    }
+
+    if (activity.length === 0) {
+      activity.push('No live activity is available yet.')
+    }
+
+    return activity.slice(0, 5)
+  }, [battles, leaderboard, user?.rank, wallet])
 
   if (isLoading) {
     return (
@@ -171,7 +193,7 @@ export default function DashboardPage() {
               <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
                 <p className="text-sm uppercase tracking-[0.24em] text-white/35">Live activity feed</p>
                 <div className="mt-5 space-y-4">
-                  {mockActivity.map((item) => (
+                  {liveActivity.map((item) => (
                     <div key={item} className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
                       {item}
                     </div>

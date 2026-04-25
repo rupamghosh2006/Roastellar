@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { UserProfile, useAuth } from '@clerk/nextjs'
-import { Award, PenSquare, ShieldCheck, Swords, Trophy } from 'lucide-react'
+import { SignOutButton, useAuth } from '@clerk/nextjs'
+import { Award, LogOut, PenSquare, ShieldCheck, Swords, Trophy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
@@ -119,13 +119,21 @@ export default function ProfilePage() {
                   <p className="mt-2 text-white/55">Member since {formatDate(user?.createdAt ?? new Date())}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsEditing((value) => !value)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 py-3 font-medium text-white/82"
-              >
-                <PenSquare className="h-4 w-4" />
-                {isEditing ? 'Cancel Edit' : 'Edit Profile'}
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => setIsEditing((value) => !value)}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 py-3 font-medium text-white/82"
+                >
+                  <PenSquare className="h-4 w-4" />
+                  {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+                </button>
+                <SignOutButton>
+                  <button className="inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-500/10 px-5 py-3 font-medium text-rose-100/90 transition-colors hover:bg-rose-500/20">
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </SignOutButton>
+              </div>
             </div>
 
             {isEditing && (
@@ -198,13 +206,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="glass rounded-[36px] p-6">
-            <p className="text-sm uppercase tracking-[0.24em] text-white/35">Account settings</p>
-            <p className="mt-2 text-sm text-white/55">Manage your Clerk profile and use the built-in sign out action here.</p>
-            <div className="mt-6 overflow-auto rounded-[24px] border border-white/10 bg-white/[0.03] p-2">
-              <UserProfile routing="hash" />
-            </div>
-          </div>
         </div>
       </main>
     </div>

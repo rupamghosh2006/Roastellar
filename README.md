@@ -53,17 +53,12 @@ Based on user feedback, the following improvements are planned:
 
 ### 1. Fix Voting Race Condition
 - **Issue:** Voting not properly recorded, matches show draw
-- **Status:** Partially addressed in commit `532bd9c`
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/532bd9c
-- **Remaining work:** Verify on-chain vote recording with actual users
+- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/532bd9c094b76e9ef50bd06cd54098a2b7e47eb5
+
 
 ### 2. Replace Hardcoded Demo Parts
 - **Issue:** Users reported too many mock/static parts in UI
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/532bd9c
-- **Remaining work:**
-  - [ ] Replace static leaderboard with dynamic data
-  - [ ] Remove hardcoded stats on dashboard
-  - [ ] Fetch real battle history for profile
+- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/dd66d9ea318a214ea4c3f4b9595261e636f78cf3
 
 ### 3. Mobile Responsive Improvements
 - **Issue:** Top right menu button redundant (footer nav already exists)
@@ -72,17 +67,6 @@ Based on user feedback, the following improvements are planned:
   - [ ] Consolidate navigation patterns
   - [ ] Test all mobile breakpoints
 
-### 4. Add Clerk Logout Functionality
-- **Issue:** No logout button in UI
-- **Remaining work:**
-  - [ ] Add sign out button to Navbar
-  - [ ] Handle session cleanup
-  - [ ] Clear local wallet data on sign out
-
-### 5. Prediction Market Stabilization
-- **Issue:** Prediction UI freeze during placement
-- **Status:** Fixed in commit `532bd9c` (disabled state added)
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/532bd9c
 
 ## Architecture
 

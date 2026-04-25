@@ -62,11 +62,7 @@ Based on user feedback, the following improvements are planned:
 
 ### 3. Mobile Responsive Improvements
 - **Issue:** Top right menu button redundant (footer nav already exists)
-- **Remaining work:**
-  - [ ] Remove or repurpose mobile menu
-  - [ ] Consolidate navigation patterns
-  - [ ] Test all mobile breakpoints
-
+- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1
 
 ## Architecture
 

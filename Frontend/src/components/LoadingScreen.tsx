@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Flame } from 'lucide-react'
+import { BrandLogo } from '@/components/BrandLogo'
 
 interface LoadingScreenProps {
   message?: string
@@ -18,7 +18,7 @@ export function LoadingScreen({ message = 'Booting the arena...' }: LoadingScree
       >
         <div className="absolute inset-0 rounded-full bg-blue-400/20 blur-3xl" />
         <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-blue-400/20 bg-white/8">
-          <Flame className="h-10 w-10 text-blue-300" />
+          <BrandLogo size={56} className="rounded-full border-blue-300/30 bg-transparent" />
         </div>
       </motion.div>
       <p className="mt-8 font-orbitron text-xl text-white">{message}</p>

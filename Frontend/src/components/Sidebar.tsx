@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Flame, LayoutDashboard, Trophy, User, Wallet, Waves, Swords } from 'lucide-react'
+import { LayoutDashboard, Trophy, User, Wallet, Waves, Swords } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { BrandLogo } from '@/components/BrandLogo'
 
 const desktopNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', hint: 'Arena hub' },
@@ -29,9 +30,7 @@ export function Sidebar() {
       <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r border-white/10 bg-slate-950/40 px-4 py-6 backdrop-blur-xl lg:flex lg:flex-col">
         <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.4)]">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10">
-              <Flame className="h-6 w-6 text-blue-300" />
-            </div>
+            <BrandLogo size={48} className="rounded-2xl border-blue-400/20 bg-blue-500/10" />
             <div>
               <p className="font-orbitron text-lg font-bold text-white">Arena Core</p>
               <p className="text-xs uppercase tracking-[0.28em] text-white/35">Premium Access</p>

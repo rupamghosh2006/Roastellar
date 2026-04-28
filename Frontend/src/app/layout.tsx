@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@/components/ClerkProvider'
 import { Navbar } from '@/components/Navbar'
+import { WarpBackground } from '@/components/WarpBackground'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Roastellar - Roast. Battle. Earn.',
   description: 'A gamified social battle platform powered by Stellar where users join roast battles, vote, predict winners, and earn rewards.',
   icons: {
-    icon: '/icon.svg',
+    icon: '/logo.jpeg',
+    apple: '/logo.jpeg',
   },
 }
 
@@ -25,8 +27,11 @@ export default function RootLayout({
     <html lang="en" className="dark" data-scroll-behavior="smooth">
       <body className="font-inter antialiased">
         <ClerkProvider>
-          <Navbar />
-          {children}
+          <WarpBackground />
+          <div className="relative z-10">
+            <Navbar />
+            {children}
+          </div>
         </ClerkProvider>
       </body>
     </html>

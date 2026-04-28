@@ -2,13 +2,13 @@
 
 import { SignUp } from '@clerk/nextjs'
 import Link from 'next/link'
-import { Flame } from 'lucide-react'
+import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SignUpPage() {
   return (
     <div className="min-h-screen pt-16 flex flex-col items-center justify-center px-4">
       <Link href="/" className="flex items-center gap-2 mb-8">
-        <Flame className="w-8 h-8 text-primary" />
+        <BrandLogo size={32} />
         <span className="font-orbitron font-bold text-xl text-gradient">Roastellar</span>
       </Link>
       <SignUp />

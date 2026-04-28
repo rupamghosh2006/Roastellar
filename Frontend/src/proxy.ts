@@ -22,6 +22,6 @@ const handler = clerkMiddleware(async (auth, request) => {
 export default handler
 
 export const config = {
-  matcher: ['/((?!_next).*)'],
+  matcher: ['/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|png|gif|svg|webp|ico|ttf|woff2?|map)).*)'],
 }
 

@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserButton, useAuth } from '@clerk/nextjs'
-import { Flame, Wallet } from 'lucide-react'
+import { Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { isWalletAuthenticated } from '@/lib/walletAuth'
+import { BrandLogo } from '@/components/BrandLogo'
 
 const publicLinks = [
   { href: '#how-it-works', label: 'How It Works' },
@@ -32,9 +33,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 rounded-xl bg-blue-500/25 blur-lg" />
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/25 bg-white/10">
-              <Flame className="h-5 w-5 text-blue-300" />
-            </div>
+            <BrandLogo size={40} className="relative" />
           </div>
           <div>
             <p className="font-orbitron text-lg font-bold text-white">Roastellar</p>

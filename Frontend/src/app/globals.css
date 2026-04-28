@@ -43,11 +43,8 @@
   }
 
   body {
-    @apply min-h-screen bg-background text-foreground antialiased;
+    @apply min-h-screen bg-transparent text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-image:
-      radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 70%),
-      linear-gradient(180deg, #07070d 0%, #0a0a0f 50%, #07070d 100%);
   }
 
   body::before {

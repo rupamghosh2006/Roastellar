@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@clerk/nextjs'
 import { ArrowRight, Sparkles, Wallet as WalletIcon } from 'lucide-react'
@@ -19,7 +19,6 @@ type Step = 'choice' | 'welcome' | 'game' | 'minting' | 'complete' | 'existingWa
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const [step, setStep] = useState<Step>('choice')
   const [wallet, setWallet] = useState<Wallet | null>(null)
@@ -109,10 +108,13 @@ export default function OnboardingPage() {
   }
 
   useEffect(() => {
-    if (step === 'choice' && isSignedIn && searchParams.get('flow') === 'new') {
+    const flow = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('flow')
+      : null
+    if (step === 'choice' && isSignedIn && flow === 'new') {
       setStep('game')
     }
-  }, [isSignedIn, searchParams, step])
+  }, [isSignedIn, step])
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 pb-12 pt-24 sm:px-6 lg:px-8">

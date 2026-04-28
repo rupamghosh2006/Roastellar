@@ -5,7 +5,6 @@ import { useAuth } from '@clerk/nextjs'
 import { ArrowUpDown, Clock3, Copy, ExternalLink, Eye, EyeOff, Wallet as WalletIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { FreighterConnectCard } from '@/components/FreighterConnectCard'
 import { Sidebar } from '@/components/Sidebar'
 import { WalletBalance, WalletCard } from '@/components/WalletCard'
 import { PageLoader } from '@/components/LoadingScreen'
@@ -142,7 +141,6 @@ export default function WalletPage() {
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
               <WalletBalance label="Available" balance={wallet?.balance ?? 0} icon={<WalletIcon className="h-4 w-4 text-amber-200" />} />
               <WalletBalance label="In Battles" balance={0} icon={<ArrowUpDown className="h-4 w-4 text-blue-200" />} />
-              <FreighterConnectCard compact />
               <div className="glass rounded-[22px] p-4 sm:rounded-[28px] sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>

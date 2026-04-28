@@ -162,9 +162,31 @@ router.post('/wallet/verify', async (req, res) => {
 
     const keypair = StellarSdk.Keypair.fromPublicKey(walletAddress);
     const challengeBytes = Buffer.from(challenge, 'utf8');
-    const isValidSignature = signedCandidates.some((candidate) => keypair.verify(challengeBytes, candidate));
+    const challengeHash = crypto.createHash('sha256').update(challengeBytes).digest();
+
+    const normalizedCandidates = signedCandidates.flatMap((candidate) => {
+      const values = [candidate];
+      // Decorated signatures include 4-byte hint + 64-byte sig.
+      if (candidate.length === 68) {
+        values.push(candidate.subarray(4));
+      }
+      return values;
+    });
+
+    const isValidSignature = normalizedCandidates.some((candidate) => {
+      try {
+        return keypair.verify(challengeBytes, candidate) || keypair.verify(challengeHash, candidate);
+      } catch (_) {
+        return false;
+      }
+    });
 
     if (!isValidSignature) {
+      logger.warn('Wallet signature verification failed', {
+        walletAddress,
+        signerAddress,
+        candidateLengths: signedCandidates.map((item) => item.length),
+      });
       return ApiResponse.unauthorized(res, 'Invalid wallet signature');
     }
 

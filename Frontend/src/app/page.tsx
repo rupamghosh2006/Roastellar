@@ -123,7 +123,7 @@ export default function LandingPage() {
               className="mt-10 flex flex-col gap-4 sm:flex-row"
             >
               <Link
-                href="/sign-up"
+                href="/onboarding"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-90"
               >
                 Start Free
@@ -273,7 +273,7 @@ export default function LandingPage() {
               <p className="text-sm uppercase tracking-[0.32em] text-amber-200/80">Leaderboard preview</p>
               <h2 className="mt-3 font-orbitron text-4xl font-bold text-white">Competitive by default</h2>
             </div>
-            <Link href="/sign-up" className="text-sm font-semibold text-blue-200 hover:text-blue-100">
+            <Link href="/onboarding" className="text-sm font-semibold text-blue-200 hover:text-blue-100">
               Join the leaderboard
             </Link>
           </div>
@@ -325,3 +325,4 @@ export default function LandingPage() {
     </main>
   )
 }
+

@@ -69,7 +69,7 @@ export function Hero() {
           ) : (
             <>
               <Link
-                href="/sign-up"
+                href="/onboarding"
                 className="px-8 py-4 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 group"
               >
                 Start Free
@@ -106,3 +106,4 @@ export function Hero() {
     </section>
   )
 }
+

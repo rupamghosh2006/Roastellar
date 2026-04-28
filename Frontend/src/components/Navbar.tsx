@@ -79,7 +79,7 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="hidden text-sm font-medium text-white/70 transition-colors hover:text-white sm:block">
+              <Link href="/sign-in" className="text-sm font-medium text-white/70 transition-colors hover:text-white">
                 Sign In
               </Link>
               <Link

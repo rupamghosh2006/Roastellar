@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@clerk/nextjs'
 import { ArrowRight, Sparkles, Wallet as WalletIcon } from 'lucide-react'
@@ -19,6 +19,7 @@ type Step = 'choice' | 'welcome' | 'game' | 'minting' | 'complete' | 'existingWa
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const [step, setStep] = useState<Step>('choice')
   const [wallet, setWallet] = useState<Wallet | null>(null)
@@ -27,8 +28,8 @@ export default function OnboardingPage() {
 
   const handleGameComplete = async () => {
     if (!isSignedIn) {
-      toast.error('Please sign in before creating your arena wallet.')
-      router.push('/sign-in')
+      toast.error('Please sign up before creating your arena wallet.')
+      router.push('/sign-up?redirect_url=/onboarding?flow=new')
       return
     }
 
@@ -99,6 +100,20 @@ export default function OnboardingPage() {
     }
   }
 
+  const startNewUserFlow = () => {
+    if (!isSignedIn) {
+      router.push('/sign-up?redirect_url=/onboarding?flow=new')
+      return
+    }
+    setStep('game')
+  }
+
+  useEffect(() => {
+    if (step === 'choice' && isSignedIn && searchParams.get('flow') === 'new') {
+      setStep('game')
+    }
+  }, [isSignedIn, searchParams, step])
+
   return (
     <main className="flex min-h-screen items-center justify-center px-4 pb-12 pt-24 sm:px-6 lg:px-8">
       <div className="w-full max-w-5xl">
@@ -121,7 +136,7 @@ export default function OnboardingPage() {
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
                   <button
-                    onClick={() => setStep('welcome')}
+                    onClick={startNewUserFlow}
                     className="rounded-[24px] border border-white/12 bg-white/[0.04] p-6 text-left transition-colors hover:bg-white/[0.08]"
                   >
                     <p className="font-orbitron text-xl text-white">Yes, I&apos;m new</p>

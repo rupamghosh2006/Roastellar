@@ -189,9 +189,9 @@ export default function BattlesPage() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Battle board</p>
-                <h1 className="mt-3 font-orbitron text-3xl font-bold text-white sm:text-4xl">Create or join live roast battles</h1>
+                <h1 className="mt-3 font-orbitron text-3xl font-bold text-white sm:text-4xl">It is time for Roasting.</h1>
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
-                  Every match is realtime with spectators, voting, predictions, and on-chain settlement.
+                  Create or join live roast battles.
                 </p>
               </div>
 

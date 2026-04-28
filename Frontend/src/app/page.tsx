@@ -5,11 +5,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
-import { ArrowRight, Coins, Flame, ShieldCheck, Sparkles, Swords, Trophy, Wallet } from 'lucide-react'
+import { ArrowRight, Coins, Flame, ShieldCheck, Swords, Trophy, Wallet } from 'lucide-react'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/api'
 import { isOnboardingComplete } from '@/lib/utils'
 import { isWalletAuthenticated } from '@/lib/walletAuth'
 import { BrandLogo } from '@/components/BrandLogo'
+import TextPressure from '@/components/TextPressure'
 
 const features = [
   { icon: Swords, title: 'Live roast battles', copy: 'Fast-paced match rooms with real-time submissions, votes, and reactions.' },
@@ -86,60 +87,62 @@ export default function LandingPage() {
 
   return (
     <main className="overflow-hidden pt-16">
-      <section className="relative px-4 pb-20 pt-16 sm:px-6 lg:px-8 lg:pt-24">
+      <section className="relative px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pt-36">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.15)_0%,transparent_70%)]" />
-        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-16">
+          <div className="w-full max-w-5xl text-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200"
-            >
-              <Sparkles className="h-4 w-4" />
-              Built for social competition on Stellar
-            </motion.div>
-
-            <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
-              className="mt-6 max-w-3xl font-orbitron text-5xl font-black leading-tight text-white md:text-7xl"
+              className="mx-auto mt-6 w-full max-w-5xl"
             >
-              Roast. Battle. <span className="text-gradient">Earn.</span>
-            </motion.h1>
+              <TextPressure
+                text="Roast Battle Earn"
+                textColor="#f8fafc"
+                minFontSize={52}
+                width
+                weight
+                italic
+                alpha={false}
+                flex
+                scale={false}
+                className="font-orbitron tracking-tight"
+              />
+            </motion.div>
 
-            <motion.p
+            {/* <motion.p
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.16 }}
-              className="mt-6 max-w-2xl text-lg leading-8 text-white/60"
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-white/60"
             >
               Roastellar turns competitive social banter into a premium multiplayer experience with live battles,
               instant wallet onboarding, spectator predictions, and reward-ready Stellar rails.
-            </motion.p>
+            </motion.p> */}
 
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.24 }}
-              className="mt-10 flex flex-col gap-4 sm:flex-row"
+              className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
             >
               <Link
                 href="/onboarding"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02]"
+                className="inline-flex items-center justify-center gap-2 rounded-[10px] border-2 border-[#725AC1] bg-transparent px-[30px] py-[15px] text-[18px] font-medium tracking-[1px] text-[#725AC1] transition-all duration-500 ease-out [box-shadow:inset_0_0_0_0_#725AC1] hover:text-white hover:[box-shadow:inset_0_-100px_0_0_#725AC1] active:scale-90"
               >
                 Start Free
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <a
+              {/* <a
                 href="#how-it-works"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 transition-all duration-200"
               >
                 Watch Demo
-              </a>
+              </a> */}
             </motion.div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
               {[
                 { value: String(leaderboard.length), label: 'Ranked players' },
                 { value: String(openBattles.length), label: 'Open battles now' },
@@ -157,7 +160,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.18 }}
-            className="relative"
+            className="relative mt-8 w-full max-w-5xl"
           >
             <div className="rounded-2xl border border-slate-700/70 bg-slate-950/88 p-6 shadow-[0_24px_80px_rgba(2,6,23,0.6)] backdrop-blur-md">
               <div className="flex items-start justify-between gap-4">
@@ -278,11 +281,6 @@ export default function LandingPage() {
         </h2>
       </div>
 
-      <p className="max-w-xl text-sm leading-7 text-slate-400 sm:text-base">
-        The first-time user experience is designed as a seamless sequence.
-        Account creation, wallet onboarding, challenge entry, and arena access
-        arrive in one elegant motion.
-      </p>
     </motion.div>
 
     {/* Cards */}

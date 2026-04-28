@@ -92,7 +92,7 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="rounded-full bg-gradient-to-r from-fuchsia-400 via-pink-400 to-violet-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_8px_24px_rgba(232,121,249,0.35)] transition-opacity hover:opacity-90">
+              <Link href="/sign-in" className="rounded-full bg-gradient-to-r from-amber-300 via-amber-600 to-violet-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_8px_24px_rgba(232,121,249,0.35)] transition-opacity hover:opacity-90">
                 Sign In
               </Link>
               {/* <Link

@@ -23,6 +23,7 @@ export default function BattlesPage() {
   const [topic, setTopic] = useState('')
   const [entryFee, setEntryFee] = useState('10')
   const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
+  const [enablingBattleMode, setEnablingBattleMode] = useState(false)
 
   useEffect(() => {
     if (!isLoaded) {
@@ -147,6 +148,27 @@ export default function BattlesPage() {
     }
   }
 
+  const enableBattleMode = async () => {
+    try {
+      setEnablingBattleMode(true)
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
+      if (!token) {
+        throw new Error('Missing token')
+      }
+
+      await apiRoutes.wallet.create(token)
+      const [meRes, walletRes] = await Promise.all([apiRoutes.users.me(token), apiRoutes.wallet.me(token)])
+      setUser(meRes.data)
+      setWallet(walletRes.data)
+      setManagedWalletBlocked(false)
+      toast.success('Battle mode enabled. You can now create and join battles.')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Unable to enable battle mode right now')
+    } finally {
+      setEnablingBattleMode(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen pt-16">
@@ -217,6 +239,15 @@ export default function BattlesPage() {
               <p className="mt-2 text-xs text-amber-200/90">
                 Freighter-primary mode active: battle actions requiring server-managed signing are temporarily gated.
               </p>
+            )}
+            {managedWalletBlocked && (
+              <button
+                onClick={enableBattleMode}
+                disabled={enablingBattleMode}
+                className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/15 px-4 py-2 text-xs font-semibold text-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {enablingBattleMode ? 'Enabling Battle Mode...' : 'Enable Battle Mode'}
+              </button>
             )}
           </section>
 

@@ -19,31 +19,50 @@ function buildChallenge({ walletAddress, nonce }) {
   ].join('\n');
 }
 
-function parseSignedMessage(value) {
-  if (!value) return null;
+function parseSignedMessageCandidates(value) {
+  const candidates = [];
+  if (!value) return candidates;
 
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-
-    try {
-      return Buffer.from(trimmed, 'base64');
-    } catch (_) {}
-
-    if (/^[0-9a-fA-F]+$/.test(trimmed)) {
-      try {
-        return Buffer.from(trimmed, 'hex');
-      } catch (_) {}
-    }
-
-    return Buffer.from(trimmed, 'utf8');
-  }
+  const pushUnique = (buf) => {
+    if (!Buffer.isBuffer(buf) || buf.length === 0) return;
+    const exists = candidates.some((item) => item.equals(buf));
+    if (!exists) candidates.push(buf);
+  };
 
   if (typeof value === 'object' && value.type === 'Buffer' && Array.isArray(value.data)) {
-    return Buffer.from(value.data);
+    pushUnique(Buffer.from(value.data));
+    return candidates;
   }
 
-  return null;
+  if (typeof value !== 'string') {
+    return candidates;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) return candidates;
+
+  // Base64
+  try {
+    pushUnique(Buffer.from(trimmed, 'base64'));
+  } catch (_) {}
+
+  // Base64url
+  try {
+    const normalized = trimmed.replace(/-/g, '+').replace(/_/g, '/');
+    pushUnique(Buffer.from(normalized, 'base64'));
+  } catch (_) {}
+
+  // Hex
+  if (/^[0-9a-fA-F]+$/.test(trimmed) && trimmed.length % 2 === 0) {
+    try {
+      pushUnique(Buffer.from(trimmed, 'hex'));
+    } catch (_) {}
+  }
+
+  // UTF-8 raw
+  pushUnique(Buffer.from(trimmed, 'utf8'));
+
+  return candidates;
 }
 
 router.post('/wallet/challenge', async (req, res) => {
@@ -136,13 +155,14 @@ router.post('/wallet/verify', async (req, res) => {
     }
 
     const challenge = buildChallenge({ walletAddress, nonce });
-    const signedMessage = parseSignedMessage(signedMessageRaw);
-    if (!signedMessage) {
+    const signedCandidates = parseSignedMessageCandidates(signedMessageRaw);
+    if (signedCandidates.length === 0) {
       return ApiResponse.badRequest(res, 'Invalid signedMessage format');
     }
 
     const keypair = StellarSdk.Keypair.fromPublicKey(walletAddress);
-    const isValidSignature = keypair.verify(Buffer.from(challenge, 'utf8'), signedMessage);
+    const challengeBytes = Buffer.from(challenge, 'utf8');
+    const isValidSignature = signedCandidates.some((candidate) => keypair.verify(challengeBytes, candidate));
 
     if (!isValidSignature) {
       return ApiResponse.unauthorized(res, 'Invalid wallet signature');

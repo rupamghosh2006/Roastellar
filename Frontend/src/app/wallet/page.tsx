@@ -76,6 +76,10 @@ export default function WalletPage() {
   }
 
   const exportForFreighter = async () => {
+    if (!wallet?.managedWalletAvailable) {
+      toast.error('This account uses Freighter as primary wallet. No managed wallet secret is available.')
+      return
+    }
     try {
       setIsExporting(true)
       const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
@@ -143,11 +147,15 @@ export default function WalletPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.24em] text-white/35">Freighter Import</p>
-                    <p className="mt-2 text-sm text-white/72">Export this Roastellar wallet secret key and import it in Freighter.</p>
+                    <p className="mt-2 text-sm text-white/72">
+                      {wallet?.managedWalletAvailable
+                        ? 'Export this Roastellar managed wallet secret key and import it in Freighter.'
+                        : 'Managed wallet export is unavailable because your Freighter wallet is the primary identity wallet.'}
+                    </p>
                   </div>
                 </div>
 
-                {!walletSecret && (
+                {!walletSecret && wallet?.managedWalletAvailable && (
                   <button
                     onClick={exportForFreighter}
                     disabled={isExporting}
@@ -187,6 +195,11 @@ export default function WalletPage() {
                     <div className="rounded-[20px] border border-white/8 bg-white/[0.03] p-3 text-xs text-white/72">
                       Freighter steps: Open Freighter {'->'} Add Wallet {'->'} Import from Secret Key {'->'} paste this key {'->'} switch to TESTNET.
                     </div>
+                  </div>
+                )}
+                {!wallet?.managedWalletAvailable && (
+                  <div className="mt-4 rounded-[20px] border border-blue-300/20 bg-blue-500/10 p-3 text-xs text-blue-100/90">
+                    Primary wallet mode: your connected Freighter wallet is used as your identity and primary account.
                   </div>
                 )}
               </div>

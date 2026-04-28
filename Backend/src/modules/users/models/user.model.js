@@ -133,6 +133,7 @@ userSchema.methods.toPublicJSON = function() {
     imageUrl: this.imageUrl,
     walletPublicKey: this.walletPublicKey,
     identityWalletAddress: this.identityWalletAddress,
+    hasManagedWallet: Boolean(this.walletPublicKey && this.walletEncryptedSecret),
     walletCreatedAt: this.walletCreatedAt,
     walletFunded: this.walletFunded,
     onboardingCompleted: this.onboardingCompleted,

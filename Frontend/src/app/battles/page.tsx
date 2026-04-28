@@ -22,6 +22,7 @@ export default function BattlesPage() {
   const [wallet, setWallet] = useState<Wallet | null>(null)
   const [topic, setTopic] = useState('')
   const [entryFee, setEntryFee] = useState('10')
+  const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
 
   useEffect(() => {
     if (!isLoaded) {
@@ -66,6 +67,7 @@ export default function BattlesPage() {
         setUser(nextUser)
         setWallet(nextWallet)
         setBattles(openBattles)
+        setManagedWalletBlocked(Boolean(nextUser && !nextUser.hasManagedWallet))
 
         if (!nextWallet?.publicKey && nextUser?.walletAddress) {
           setWallet({
@@ -113,6 +115,10 @@ export default function BattlesPage() {
     if (!resolvedWallet) {
       toast.error('Create your wallet first')
       router.push('/onboarding')
+      return
+    }
+    if (managedWalletBlocked) {
+      toast.error('Battle create/join is temporarily gated for Freighter-primary accounts until wallet-native signing is enabled.')
       return
     }
 
@@ -207,6 +213,11 @@ export default function BattlesPage() {
             <p className="mt-3 text-xs text-white/45">
               Signed in as {user?.username ?? 'Player'} | Wallet {(wallet?.publicKey || user?.walletAddress) ? 'ready' : 'missing'}
             </p>
+            {managedWalletBlocked && (
+              <p className="mt-2 text-xs text-amber-200/90">
+                Freighter-primary mode active: battle actions requiring server-managed signing are temporarily gated.
+              </p>
+            )}
           </section>
 
           <section className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">

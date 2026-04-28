@@ -4,8 +4,12 @@ const walletService = require('./wallet.service');
 const logger = require('../../utils/logger');
 
 function walletPayload(user, balance = 0) {
+  const publicKey = user.identityWalletAddress || user.walletPublicKey;
   return {
-    publicKey: user.walletPublicKey,
+    publicKey,
+    address: publicKey,
+    identityWalletAddress: user.identityWalletAddress || null,
+    managedWalletAvailable: Boolean(user.walletPublicKey && user.walletEncryptedSecret),
     funded: Boolean(user.walletFunded),
     balance,
     createdAt: user.walletCreatedAt,
@@ -85,11 +89,12 @@ exports.getMyWallet = async (req, res, next) => {
       return ApiResponse.notFound(res, 'User not found');
     }
 
-    if (!user.walletPublicKey) {
+    const activeWallet = user.identityWalletAddress || user.walletPublicKey;
+    if (!activeWallet) {
       return ApiResponse.notFound(res, 'Wallet not created yet');
     }
 
-    const balance = await walletService.getBalance(user.walletPublicKey);
+    const balance = await walletService.getBalance(activeWallet);
     return ApiResponse.success(res, walletPayload(user, balance));
   } catch (error) {
     next(error);
@@ -143,7 +148,7 @@ exports.exportWalletSecret = async (req, res, next) => {
     }
 
     if (!user.walletPublicKey || !user.walletEncryptedSecret) {
-      return ApiResponse.notFound(res, 'Wallet not created yet');
+      return ApiResponse.forbidden(res, 'Managed wallet is not available for this account');
     }
 
     const secretKey = walletService.decryptSecret(user.walletEncryptedSecret);

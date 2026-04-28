@@ -50,6 +50,7 @@ export default function BattleRoomPage() {
   const [me, setMe] = useState<User | null>(null)
   const [activity, setActivity] = useState<string[]>([])
   const [predictionBusy, setPredictionBusy] = useState(false)
+  const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
 
   const pushActivity = useCallback((line: string) => {
     setActivity((current) => [line, ...current].slice(0, 10))
@@ -91,6 +92,7 @@ export default function BattleRoomPage() {
 
         if (!active) return
         setMe(meRes.data)
+        setManagedWalletBlocked(Boolean(!meRes.data.hasManagedWallet))
         setBattle(battleRes.data)
         setPredictionSummary(predictionRes.data.summary)
         setSpectators(battleRes.data.spectators ?? 0)
@@ -258,6 +260,10 @@ export default function BattleRoomPage() {
   }, [battle, me])
 
   const submitRoast = async () => {
+    if (managedWalletBlocked) {
+      toast.error('Roast submission is temporarily gated for Freighter-primary accounts until wallet-native signing is enabled.')
+      return
+    }
     if (!battle) return
     if (!roastText.trim()) {
       toast.error('Write your roast first')
@@ -282,6 +288,10 @@ export default function BattleRoomPage() {
   }
 
   const castVote = async (selectedPlayer: string) => {
+    if (managedWalletBlocked) {
+      toast.error('Voting is temporarily gated for Freighter-primary accounts until wallet-native signing is enabled.')
+      return
+    }
     try {
       setActionBusy(true)
       const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
@@ -299,6 +309,10 @@ export default function BattleRoomPage() {
   }
 
   const joinOpenBattle = async () => {
+    if (managedWalletBlocked) {
+      toast.error('Joining battles is temporarily gated for Freighter-primary accounts until wallet-native signing is enabled.')
+      return
+    }
     try {
       setActionBusy(true)
       const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
@@ -316,6 +330,10 @@ export default function BattleRoomPage() {
   }
 
   const placePrediction = async (selectedPlayer: string, amount: number) => {
+    if (managedWalletBlocked) {
+      toast.error('Predictions are temporarily gated for Freighter-primary accounts until wallet-native signing is enabled.')
+      return
+    }
     try {
       setPredictionBusy(true)
       const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })

@@ -23,6 +23,8 @@ export interface User {
   rankPoints?: number
   totalBattles?: number
   walletAddress?: string | null
+  identityWalletAddress?: string | null
+  hasManagedWallet?: boolean
   walletBalance?: number | null
   badges: string[]
   rank?: number
@@ -81,6 +83,8 @@ export interface PredictionSummary {
 export interface Wallet {
   address: string
   publicKey: string
+  identityWalletAddress?: string | null
+  managedWalletAvailable?: boolean
   balance: number
   funded: boolean
   createdAt?: string | null
@@ -127,6 +131,8 @@ type BackendUser = {
   totalBattles?: number
   badges?: string[]
   walletPublicKey?: string
+  identityWalletAddress?: string
+  hasManagedWallet?: boolean
   walletAddress?: string
   walletFunded?: boolean
   onboardingCompleted?: boolean
@@ -166,6 +172,8 @@ type BackendBattle = {
 type BackendWallet = {
   publicKey?: string
   address?: string
+  identityWalletAddress?: string
+  managedWalletAvailable?: boolean
   funded?: boolean
   balance?: number
   createdAt?: string | null
@@ -215,6 +223,8 @@ export function normalizeUser(user: BackendUser | null | undefined): User {
     rankPoints: user?.rankPoints ?? 0,
     totalBattles: user?.totalBattles ?? 0,
     walletAddress: user?.walletAddress ?? user?.walletPublicKey ?? null,
+    identityWalletAddress: user?.identityWalletAddress ?? null,
+    hasManagedWallet: Boolean(user?.hasManagedWallet),
     walletBalance: null,
     badges: user?.badges ?? [],
     onboardingCompleted: user?.onboardingCompleted ?? false,
@@ -227,6 +237,8 @@ export function normalizeWallet(wallet: BackendWallet | null | undefined): Walle
   return {
     address: publicKey,
     publicKey,
+    identityWalletAddress: wallet?.identityWalletAddress ?? null,
+    managedWalletAvailable: Boolean(wallet?.managedWalletAvailable),
     balance: wallet?.balance ?? 0,
     funded: Boolean(wallet?.funded),
     createdAt: wallet?.createdAt ?? null,

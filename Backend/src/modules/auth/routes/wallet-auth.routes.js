@@ -5,7 +5,6 @@ const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 const { StellarSdk } = require('../../../config/stellar');
 const { signWalletToken } = require('../../../config/authToken');
-const walletService = require('../../wallet/wallet.service');
 
 const router = express.Router();
 const NONCE_TTL_MS = Number(process.env.WALLET_AUTH_NONCE_TTL_MS || 5 * 60 * 1000);
@@ -198,22 +197,9 @@ router.post('/wallet/verify', async (req, res) => {
       return ApiResponse.unauthorized(res, 'Invalid wallet signature');
     }
 
-    if (!user.walletEncryptedSecret) {
-      const { publicKey, secretKey } = walletService.createStellarWallet();
-      user.walletPublicKey = publicKey;
-      user.walletEncryptedSecret = walletService.encryptSecret(secretKey);
-      user.walletCreatedAt = new Date();
-      user.walletFunded = false;
-      try {
-        await walletService.fundWithFriendbot(publicKey);
-        user.walletFunded = true;
-      } catch (fundError) {
-        logger.warn('Wallet-auth managed wallet funding pending', {
-          walletAddress: publicKey,
-          message: fundError?.message,
-        });
-      }
-    }
+    // Wallet-auth users keep Freighter as identity wallet; managed wallet is optional and never auto-created here.
+    user.identityWalletAddress = walletAddress;
+    user.walletPublicKey = user.walletPublicKey || walletAddress;
 
     user.walletAuthNonce = '';
     user.walletAuthNonceExpiresAt = null;

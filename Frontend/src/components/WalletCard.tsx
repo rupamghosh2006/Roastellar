@@ -40,7 +40,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'glass gradient-border relative overflow-hidden rounded-[22px] p-4 sm:rounded-[28px] sm:p-6',
+        'relative overflow-hidden rounded-[22px] border border-white/10 bg-[#111317] p-4 sm:rounded-[28px] sm:p-6',
         variant === 'full' && 'min-h-[600px]',
         variant === 'full' && 'w-full'
       )}

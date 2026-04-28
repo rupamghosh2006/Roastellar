@@ -79,15 +79,15 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="text-sm font-medium text-white/70 transition-colors hover:text-white">
+              <Link href="/sign-in" className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-opacity hover:opacity-90">
                 Sign In
               </Link>
-              <Link
+              {/* <Link
                 href="/onboarding"
                 className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-opacity hover:opacity-90"
               >
                 Start Free
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { ArrowUpDown, Clock3, Copy, ExternalLink, Eye, EyeOff, Wallet as WalletIcon } from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { AnonymousIcon } from '@hugeicons/core-free-icons'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
@@ -157,8 +159,14 @@ export default function WalletPage() {
                   <button
                     onClick={exportForFreighter}
                     disabled={isExporting}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-5 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
+                    <HugeiconsIcon
+                      icon={AnonymousIcon}
+                      size={24}
+                      color="currentColor"
+                      strokeWidth={1.5}
+                    />
                     {isExporting ? 'Exporting...' : 'Reveal Secret For Freighter'}
                   </button>
                 )}

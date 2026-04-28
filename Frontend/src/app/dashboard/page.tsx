@@ -209,30 +209,84 @@ export default function DashboardPage() {
                   </div>
                   <Coins className="h-5 w-5 text-amber-200" />
                 </div>
-                <div className="mt-6 space-y-3">
-                  {leaderboard.slice(0, 5).map((entry, index) => (
-                    <motion.div
-                      key={entry.id}
-                      initial={{ opacity: 0, x: -14 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex flex-col gap-4 rounded-[24px] border border-white/8 bg-white/[0.03] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8 font-orbitron text-white">
-                          {index + 1}
+                <div className="mt-6">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
+                    {[
+                      leaderboard[1] ?? null,
+                      leaderboard[0] ?? null,
+                      leaderboard[2] ?? null,
+                    ].map((entry, idx) => {
+                      const slot = idx === 0 ? 2 : idx === 1 ? 1 : 3
+                      const cardStyles =
+                        slot === 1
+                          ? 'bg-[#E8D65A] text-[#090511] min-h-[220px]'
+                          : slot === 2
+                          ? 'bg-[#8576E8] text-[#090511] min-h-[185px]'
+                          : 'bg-[#D7D6E6] text-[#090511] min-h-[185px]'
+                      const chipStyles =
+                        slot === 1
+                          ? 'bg-[#0D0931] text-[#E8D65A]'
+                          : slot === 2
+                          ? 'bg-[#1D1550] text-[#BFB7FF]'
+                          : 'bg-[#15103A] text-[#E6E5FF]'
+
+                      return (
+                        <motion.div
+                          key={`podium-${slot}-${entry?.id ?? 'empty'}`}
+                          initial={{ opacity: 0, y: 18 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.08 }}
+                          className={`relative rounded-[28px] px-5 pb-7 pt-8 ${cardStyles}`}
+                        >
+                          <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                            {entry?.avatar ? (
+                              <img
+                                src={entry.avatar}
+                                alt={entry.username}
+                                className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/70 bg-[#1B1449] text-xs font-bold text-white">
+                                {entry?.username?.slice(0, 2).toUpperCase() ?? `#${slot}`}
+                              </div>
+                            )}
+                          </div>
+                          <div className={`mx-auto inline-flex rounded-full px-4 py-2 text-2xs font-bold uppercase tracking-[0.08em] ${chipStyles}`}>
+                            {slot === 1 ? '1st place' : slot === 2 ? '2nd place' : '3rd place'}
+                          </div>
+                          <p className="mt-10 text-center font-orbitron text-[2rem] font-black leading-none">
+                            {entry ? entry.xp.toLocaleString() : '0'}
+                          </p>
+                          <p className="mt-2 text-center text-sm font-semibold">
+                            {entry?.username ?? 'Waiting'}
+                          </p>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    {leaderboard.slice(3, 6).map((entry, index) => (
+                      <motion.div
+                        key={entry.id}
+                        initial={{ opacity: 0, x: -14 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.03] px-4 py-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/8 font-orbitron text-white">
+                            {entry.rank}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">{entry.username}</p>
+                            <p className="text-xs text-white/45">{entry.wins} wins</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-white">{entry.username}</p>
-                          <p className="text-sm text-white/45">{entry.wins} wins</p>
-                        </div>
-                      </div>
-                      <div className="text-left sm:text-right">
-                        <p className="font-orbitron text-white">{entry.xp.toLocaleString()}</p>
-                        <p className="text-xs text-white/40">XP</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                        <p className="font-orbitron text-white">{entry.xp.toLocaleString()} XP</p>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
                 <Link href="/leaderboard" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-200">
                   View leaderboard

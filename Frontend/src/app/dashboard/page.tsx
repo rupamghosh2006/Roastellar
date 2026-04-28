@@ -11,6 +11,7 @@ import { BattleList } from '@/components/BattleCard'
 import { PageLoader, SkeletonCard } from '@/components/LoadingScreen'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User, type Wallet } from '@/lib/api'
 import { setOnboardingComplete } from '@/lib/utils'
+import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
@@ -28,16 +29,15 @@ export default function DashboardPage() {
       return
     }
 
-    if (!isSignedIn) {
+    const walletMode = isWalletAuthenticated()
+    if (!isSignedIn && !walletMode) {
       router.replace('/sign-in')
       return
     }
 
-    getToken({ skipCache: true })
+    Promise.resolve(walletMode ? getWalletAuthToken() : getToken({ skipCache: true }))
       .then((token) => {
-        if (!token) {
-          throw new Error('Missing Clerk session token')
-        }
+        if (!token) throw new Error('Missing auth token')
 
         return Promise.allSettled([
           apiRoutes.users.me(token),
@@ -75,7 +75,7 @@ export default function DashboardPage() {
       })
       .catch(() => {
         setHasAuthWarning(true)
-        toast.error('Please sign in again to load your account dashboard.')
+        toast.error('Unable to load your authenticated dashboard session.')
       })
       .finally(() => setIsLoading(false))
   }, [getToken, isLoaded, isSignedIn, router])

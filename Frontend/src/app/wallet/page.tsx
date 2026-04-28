@@ -11,6 +11,7 @@ import { WalletBalance, WalletCard } from '@/components/WalletCard'
 import { PageLoader } from '@/components/LoadingScreen'
 import { apiRoutes, type Wallet, type WalletSecretExport } from '@/lib/api'
 import { formatDate, getExplorerUrl } from '@/lib/utils'
+import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 
 export default function WalletPage() {
   const router = useRouter()
@@ -26,16 +27,15 @@ export default function WalletPage() {
       return
     }
 
-    if (!isSignedIn) {
+    const walletMode = isWalletAuthenticated()
+    if (!isSignedIn && !walletMode) {
       router.replace('/sign-in')
       return
     }
 
-    getToken({ skipCache: true })
+    Promise.resolve(walletMode ? getWalletAuthToken() : getToken({ skipCache: true }))
       .then((token) => {
-        if (!token) {
-          throw new Error('Missing Clerk session token')
-        }
+        if (!token) throw new Error('Missing auth token')
 
         return apiRoutes.wallet.me(token)
       })
@@ -78,10 +78,8 @@ export default function WalletPage() {
   const exportForFreighter = async () => {
     try {
       setIsExporting(true)
-      const token = await getToken({ skipCache: true })
-      if (!token) {
-        throw new Error('Missing Clerk session token')
-      }
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
+      if (!token) throw new Error('Missing auth token')
 
       const response = await apiRoutes.wallet.exportSecret(token)
       setWalletSecret(response.data)

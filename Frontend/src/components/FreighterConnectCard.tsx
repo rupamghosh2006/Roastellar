@@ -10,6 +10,7 @@ import { cn, formatAddress } from '@/lib/utils'
 interface FreighterConnectCardProps {
   className?: string
   compact?: boolean
+  onConnected?: (state: FreighterState) => void
 }
 
 const defaultState: FreighterState = {
@@ -21,7 +22,7 @@ const defaultState: FreighterState = {
   error: null,
 }
 
-export function FreighterConnectCard({ className, compact = false }: FreighterConnectCardProps) {
+export function FreighterConnectCard({ className, compact = false, onConnected }: FreighterConnectCardProps) {
   const [state, setState] = useState<FreighterState>(defaultState)
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState(false)
@@ -39,6 +40,7 @@ export function FreighterConnectCard({ className, compact = false }: FreighterCo
     setConnecting(false)
 
     if (nextState.connected) {
+      onConnected?.(nextState)
       toast.success('Freighter connected')
       if (nextState.network && nextState.network !== 'TESTNET') {
         toast.warning('Freighter is connected, but not on Stellar Testnet.')

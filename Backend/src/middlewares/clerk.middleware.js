@@ -1,4 +1,5 @@
 const { clerk } = require('../config/clerk');
+const { verifyWalletToken } = require('../config/authToken');
 const User = require('../modules/users/models/user.model');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
@@ -72,6 +73,26 @@ exports.protect = async (req, res, next) => {
         method: req.method,
       });
       return ApiResponse.unauthorized(res, 'Authentication required. No token provided.');
+    }
+
+    const walletClaims = verifyWalletToken(token);
+    if (walletClaims?.sub && walletClaims?.typ === 'wallet') {
+      const user = await User.findById(walletClaims.sub);
+      if (!user) {
+        return ApiResponse.unauthorized(res, 'Wallet user not found.');
+      }
+
+      user.lastLoginAt = new Date();
+      await user.save();
+
+      req.auth = {
+        user,
+        claims: walletClaims,
+        clerkUser: null,
+        isNewUser: false,
+        authType: 'wallet',
+      };
+      return next();
     }
 
     const claims = await clerk.verifyToken(token, {
@@ -161,6 +182,15 @@ exports.optionalAuth = async (req, res, next) => {
     }
 
     if (!token) {
+      return next();
+    }
+
+    const walletClaims = verifyWalletToken(token);
+    if (walletClaims?.sub && walletClaims?.typ === 'wallet') {
+      const walletUser = await User.findById(walletClaims.sub);
+      if (walletUser && !walletUser.isBanned) {
+        req.auth = { user: walletUser, claims: walletClaims, authType: 'wallet' };
+      }
       return next();
     }
 

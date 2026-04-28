@@ -1,4 +1,5 @@
 import axios, { type AxiosRequestConfig } from 'axios'
+import { getWalletAuthToken } from '@/lib/walletAuth'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrender.com'
 
@@ -194,7 +195,9 @@ function unwrapData<T>(payload: T | ApiEnvelope<T>): T {
 }
 
 function authConfig(token?: string): AxiosRequestConfig {
-  return token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+  const fallbackToken = !token && typeof window !== 'undefined' ? getWalletAuthToken() : null
+  const resolvedToken = token || fallbackToken
+  return resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {}
 }
 
 export function normalizeUser(user: BackendUser | null | undefined): User {
@@ -332,6 +335,22 @@ async function getAndNormalize<TOutput, TInput = TOutput>(
 }
 
 export const apiRoutes = {
+  auth: {
+    walletChallenge: (payload: { walletAddress: string; username?: string }) =>
+      getAndNormalize(
+        api.post<{ walletAddress: string; challenge: string; nonce: string; expiresAt: string }>('/api/auth/wallet/challenge', payload),
+        (data) => data
+      ),
+    walletVerify: (payload: { walletAddress: string; nonce: string; signedMessage: string; signerAddress?: string }) =>
+      getAndNormalize(
+        api.post<{ token: string; user: BackendUser; authType: 'wallet' }>('/api/auth/wallet/verify', payload),
+        (data) => ({
+          token: data.token,
+          user: normalizeUser(data.user),
+          authType: data.authType,
+        })
+      ),
+  },
   users: {
     me: (token?: string) => getAndNormalize(api.get<BackendUser>('/api/users/me', authConfig(token)), normalizeUser),
     leaderboard: () => getAndNormalize(api.get<BackendUser[]>('/api/leaderboard'), normalizeLeaderboard),

@@ -21,6 +21,7 @@ function isOriginAllowed(origin, allowedOrigins) {
 const initializeSocket = (httpServer) => {
   const { Server } = require('socket.io');
   const { clerk } = require('./clerk');
+  const { verifyWalletToken } = require('./authToken');
   const User = require('../modules/users/models/user.model');
 
   const allowedOrigins = getAllowedOrigins();
@@ -42,6 +43,16 @@ const initializeSocket = (httpServer) => {
       const token = socket.handshake.auth?.token || socket.handshake.headers.authorization?.split(' ')[1];
       if (!token) {
         return next(new Error('Authentication required'));
+      }
+
+      const walletClaims = verifyWalletToken(token);
+      if (walletClaims?.sub && walletClaims?.typ === 'wallet') {
+        const walletUser = await User.findById(walletClaims.sub);
+        if (!walletUser) {
+          return next(new Error('Wallet user not found'));
+        }
+        socket.data.user = walletUser;
+        return next();
       }
 
       const claims = await clerk.verifyToken(token, {

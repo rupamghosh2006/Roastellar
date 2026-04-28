@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { UserButton, useAuth } from '@clerk/nextjs'
 import { Flame, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { isWalletAuthenticated } from '@/lib/walletAuth'
 
 const publicLinks = [
   { href: '#how-it-works', label: 'How It Works' },
@@ -21,7 +22,9 @@ const appLinks = [
 export function Navbar() {
   const pathname = usePathname()
   const { isSignedIn } = useAuth()
-  const links = isSignedIn ? appLinks : publicLinks
+  const walletMode = isWalletAuthenticated()
+  const isAuthenticated = isSignedIn || walletMode
+  const links = isAuthenticated ? appLinks : publicLinks
 
   return (
     <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-2xl">
@@ -59,7 +62,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {isSignedIn ? (
+          {isAuthenticated ? (
             <>
               <Link
                 href="/wallet"
@@ -68,9 +71,11 @@ export function Navbar() {
                 <Wallet className="h-4 w-4 text-amber-300" />
                 Wallet
               </Link>
-              <div className="hidden md:block">
-                <UserButton />
-              </div>
+              {!walletMode && (
+                <div className="hidden md:block">
+                  <UserButton />
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -78,7 +83,7 @@ export function Navbar() {
                 Sign In
               </Link>
               <Link
-                href="/sign-up"
+                href="/onboarding"
                 className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-opacity hover:opacity-90"
               >
                 Start Free

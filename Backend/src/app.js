@@ -13,6 +13,7 @@ const battleRoutes = require('./modules/battles/routes/battle.routes');
 const predictionRoutes = require('./modules/predictions/routes/prediction.routes');
 const leaderboardRoutes = require('./modules/leaderboard/routes/leaderboard.routes');
 const clerkRoutes = require('./modules/auth/routes/clerk.routes');
+const walletAuthRoutes = require('./modules/auth/routes/wallet-auth.routes');
 const walletRoutes = require('./modules/wallet/wallet.routes');
 
 const app = express();
@@ -51,6 +52,7 @@ app.use(morgan('dev'));
 
 // Clerk webhook needs the raw request body for Svix signature verification.
 app.use('/api/clerk', clerkRoutes);
+app.use('/api/auth', walletAuthRoutes);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));

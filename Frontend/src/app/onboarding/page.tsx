@@ -11,7 +11,7 @@ import { MiniGame } from '@/components/MiniGame'
 import { WalletMintLoader } from '@/components/WalletMintLoader'
 import { WalletReveal } from '@/components/WalletReveal'
 import { apiRoutes, type Wallet } from '@/lib/api'
-import { signFreighterMessage } from '@/lib/freighter'
+import { getFreighterState, signFreighterMessage } from '@/lib/freighter'
 import { setOnboardingComplete } from '@/lib/utils'
 import { setWalletAuthSession } from '@/lib/walletAuth'
 
@@ -60,39 +60,42 @@ export default function OnboardingPage() {
   }
 
   const continueWithExistingWallet = async () => {
-    if (!freighterConnected) {
-      toast.error('Please connect your Freighter wallet first.')
-      return
-    }
-    if (!freighterAddress) {
-      toast.error('Freighter wallet address is missing. Please reconnect and try again.')
+    const liveState = await getFreighterState()
+    const effectiveAddress = (liveState.address || freighterAddress || '').trim()
+
+    if (!liveState.connected || !effectiveAddress) {
+      toast.error('Freighter is not connected with a valid wallet address. Reconnect and try again.')
       return
     }
 
     try {
       const challenge = await apiRoutes.auth.walletChallenge({
-        walletAddress: freighterAddress,
+        walletAddress: effectiveAddress,
       })
 
-      const signed = await signFreighterMessage(challenge.data.challenge, freighterAddress)
+      const signed = await signFreighterMessage(challenge.data.challenge, effectiveAddress)
       if (signed.error || !signed.signedMessage) {
         throw new Error(signed.error || 'Freighter signature was empty')
       }
 
       const verified = await apiRoutes.auth.walletVerify({
-        walletAddress: freighterAddress,
+        walletAddress: effectiveAddress,
         nonce: challenge.data.nonce,
         signedMessage: signed.signedMessage,
-        signerAddress: signed.signerAddress || freighterAddress,
+        signerAddress: signed.signerAddress || effectiveAddress,
       })
 
-      setWalletAuthSession(verified.data.token, freighterAddress)
+      setWalletAuthSession(verified.data.token, effectiveAddress)
       setOnboardingComplete()
       toast.success('Freighter connected. Wallet identity unlocked.')
       router.push('/dashboard')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Wallet login failed:', error)
-      toast.error('Unable to start wallet session. Please try again.')
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Unable to start wallet session. Please try again.'
+      toast.error(message)
     }
   }
 

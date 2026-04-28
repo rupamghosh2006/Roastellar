@@ -185,12 +185,12 @@ export default function BattlesPage() {
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-8">
-          <section className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-8">
+          <section className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-8 border-l-4 border-l-orange-500/40">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.28em] text-blue-200/75">Battle board</p>
+                <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Battle board</p>
                 <h1 className="mt-3 font-orbitron text-3xl font-bold text-white sm:text-4xl">Create or join live roast battles</h1>
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-white/55 sm:text-base">
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
                   Every match is realtime with spectators, voting, predictions, and on-chain settlement.
                 </p>
               </div>
@@ -203,9 +203,9 @@ export default function BattlesPage() {
             </div>
           </section>
 
-          <section className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
+          <section className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-violet-500/40">
             <div className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-blue-200" />
+              <Plus className="h-5 w-5 text-violet-300" />
               <h2 className="font-orbitron text-2xl text-white">Create Contest</h2>
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-[1fr_180px_auto]">
@@ -213,7 +213,7 @@ export default function BattlesPage() {
                 value={topic}
                 onChange={(event) => setTopic(event.target.value)}
                 placeholder="Example: Roast Web3 influencers in one line"
-                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-white/30"
+                className="input-glass"
               />
               <input
                 value={entryFee}
@@ -221,22 +221,22 @@ export default function BattlesPage() {
                 type="number"
                 min={1}
                 placeholder="Entry fee"
-                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-white/30"
+                className="input-glass"
               />
               <button
                 onClick={createBattle}
                 disabled={submitting}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Swords className="h-4 w-4" />
                 {submitting ? 'Creating...' : 'Create Battle'}
               </button>
             </div>
-            <p className="mt-3 text-xs text-white/45">
+            <p className="mt-3 text-xs text-slate-500">
               Signed in as {user?.username ?? 'Player'} | Wallet {(wallet?.publicKey || user?.walletAddress) ? 'ready' : 'missing'}
             </p>
             {managedWalletBlocked && (
-              <p className="mt-2 text-xs text-amber-200/90">
+              <p className="mt-2 text-xs text-amber-400/90">
                 Freighter-primary mode active: battle actions requiring server-managed signing are temporarily gated.
               </p>
             )}
@@ -251,9 +251,9 @@ export default function BattlesPage() {
             )}
           </section>
 
-          <section className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
+          <section className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-cyan-500/40">
             <div className="mb-4 flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-200" />
+              <Users className="h-5 w-5 text-cyan-300" />
               <h2 className="font-orbitron text-2xl text-white">Open Battles</h2>
             </div>
             <BattleList battles={battles} emptyMessage="No open battles right now. Create one and start the arena." />
@@ -266,10 +266,10 @@ export default function BattlesPage() {
 
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
+    <div className="glass rounded-xl px-3 py-3 border-t-2 border-t-orange-500/50">
+      <p className="text-xs uppercase tracking-[0.22em] text-slate-500">{label}</p>
       <p className="mt-1 text-sm font-semibold text-white">
-        <Flame className="mr-1 inline h-3.5 w-3.5 text-amber-200" />
+        <Flame className="mr-1 inline h-3.5 w-3.5 text-orange-400" />
         {value}
       </p>
     </div>

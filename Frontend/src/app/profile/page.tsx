@@ -105,22 +105,22 @@ export default function ProfilePage() {
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-6xl space-y-8">
-          <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-8">
+          <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-8 border-l-4 border-l-violet-500/40">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-5">
-                <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-gradient-to-br from-blue-500/22 to-violet-500/18 font-orbitron text-4xl text-white">
+                <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-orange-500/15 font-orbitron text-4xl font-bold text-white">
                   {user?.username?.[0]?.toUpperCase() ?? '?'}
                 </div>
                 <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-white/35">Profile</p>
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Profile</p>
                   <h1 className="mt-2 font-orbitron text-3xl font-bold text-white sm:text-4xl">{user?.username}</h1>
-                  <p className="mt-2 text-white/55">Member since {formatDate(user?.createdAt ?? new Date())}</p>
+                  <p className="mt-2 text-slate-400">Member since {formatDate(user?.createdAt ?? new Date())}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => setIsEditing((value) => !value)}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 py-3 font-medium text-white/82"
+                  className="btn-secondary"
                 >
                   <PenSquare className="h-4 w-4" />
                   {isEditing ? 'Cancel Edit' : 'Edit Profile'}
@@ -132,14 +132,14 @@ export default function ProfilePage() {
                       toast.success('Wallet session disconnected')
                       router.push('/')
                     }}
-                    className="inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-500/10 px-5 py-3 font-medium text-rose-100/90 transition-colors hover:bg-rose-500/20"
+                    className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-5 py-3 font-medium text-red-200 transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     Disconnect Wallet Session
                   </button>
                 ) : (
                   <SignOutButton>
-                    <button className="inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-500/10 px-5 py-3 font-medium text-rose-100/90 transition-colors hover:bg-rose-500/20">
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-5 py-3 font-medium text-red-200 transition-colors">
                       <LogOut className="h-4 w-4" />
                       Logout
                     </button>
@@ -149,39 +149,39 @@ export default function ProfilePage() {
             </div>
 
             {isEditing && (
-              <div className="mt-6 grid gap-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 sm:grid-cols-2">
+              <div className="mt-6 grid gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:grid-cols-2">
                 <label className="space-y-2 sm:col-span-2">
-                  <span className="text-xs uppercase tracking-[0.2em] text-white/45">Username (unique)</span>
+                  <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Username (unique)</span>
                   <input
                     value={username}
                     onChange={(event) => setUsername(event.target.value)}
                     placeholder="your_unique_name"
-                    className="w-full rounded-2xl border border-white/12 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/30"
+                    className="input-glass w-full"
                   />
                 </label>
                 <label className="space-y-2">
-                  <span className="text-xs uppercase tracking-[0.2em] text-white/45">First Name</span>
+                  <span className="text-xs uppercase tracking-[0.2em] text-slate-500">First Name</span>
                   <input
                     value={firstName}
                     onChange={(event) => setFirstName(event.target.value)}
                     placeholder="First name"
-                    className="w-full rounded-2xl border border-white/12 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/30"
+                    className="input-glass w-full"
                   />
                 </label>
                 <label className="space-y-2">
-                  <span className="text-xs uppercase tracking-[0.2em] text-white/45">Last Name</span>
+                  <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Last Name</span>
                   <input
                     value={lastName}
                     onChange={(event) => setLastName(event.target.value)}
                     placeholder="Last name"
-                    className="w-full rounded-2xl border border-white/12 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/30"
+                    className="input-glass w-full"
                   />
                 </label>
                 <div className="sm:col-span-2">
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-5 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    className="btn-primary w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {saving ? 'Saving...' : 'Save Profile'}
                   </button>
@@ -191,28 +191,28 @@ export default function ProfilePage() {
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <Stat label="XP" value={(user?.xp ?? 0).toLocaleString()} icon={<Award className="h-5 w-5 text-blue-200" />} />
-            <Stat label="Wins" value={String(user?.wins ?? 0)} icon={<Trophy className="h-5 w-5 text-amber-200" />} />
-            <Stat label="Losses" value={String(user?.losses ?? 0)} icon={<Swords className="h-5 w-5 text-violet-200" />} />
-            <Stat label="Win Rate" value={`${winRate}%`} icon={<ShieldCheck className="h-5 w-5 text-emerald-200" />} />
+            <Stat label="XP" value={(user?.xp ?? 0).toLocaleString()} icon={<Award className="h-5 w-5 text-violet-300" />} accentColor="violet" />
+            <Stat label="Wins" value={String(user?.wins ?? 0)} icon={<Trophy className="h-5 w-5 text-orange-400" />} accentColor="orange" />
+            <Stat label="Losses" value={String(user?.losses ?? 0)} icon={<Swords className="h-5 w-5 text-red-400" />} accentColor="red" />
+            <Stat label="Win Rate" value={`${winRate}%`} icon={<ShieldCheck className="h-5 w-5 text-emerald-300" />} accentColor="emerald" />
           </div>
 
           <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="glass rounded-[36px] p-6">
-              <p className="text-sm uppercase tracking-[0.24em] text-white/35">Wallet address</p>
-              <p className="mt-4 break-all text-white/78">{user?.walletAddress ? formatAddress(user.walletAddress, 8) : 'Wallet not linked yet'}</p>
+            <div className="glass rounded-2xl p-6 border-l-4 border-l-cyan-500/40">
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Wallet address</p>
+              <p className="mt-4 break-all text-slate-300 font-mono text-sm">{user?.walletAddress ? formatAddress(user.walletAddress, 8) : 'Wallet not linked yet'}</p>
             </div>
 
-            <div className="glass rounded-[36px] p-6">
-              <p className="text-sm uppercase tracking-[0.24em] text-white/35">Badges</p>
+            <div className="glass rounded-2xl p-6 border-l-4 border-l-violet-500/40">
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Badges</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {(user?.badges ?? []).map((badge) => (
-                  <span key={badge} className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75">
+                  <span key={badge} className="chip-violet">
                     {badge}
                   </span>
                 ))}
                 {!user?.badges?.length && (
-                  <p className="text-sm text-white/55">No badges earned yet.</p>
+                  <p className="text-sm text-slate-400">No badges earned yet.</p>
                 )}
               </div>
             </div>
@@ -224,10 +224,16 @@ export default function ProfilePage() {
   )
 }
 
-function Stat({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+function Stat({ label, value, icon, accentColor = 'blue' }: { label: string; value: string; icon: React.ReactNode; accentColor?: string }) {
+  const borderColors: Record<string, string> = {
+    violet: 'border-l-violet-500/50',
+    orange: 'border-l-orange-500/50',
+    red: 'border-l-red-500/50',
+    emerald: 'border-l-emerald-500/50',
+  };
   return (
-    <div className="glass rounded-[28px] p-5">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
+    <div className={`glass rounded-2xl p-5 border-l-4 ${borderColors[accentColor] || 'border-l-blue-500/50'}`}>
+      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
         {icon}
         {label}
       </div>

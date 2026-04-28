@@ -371,20 +371,20 @@ export default function BattleRoomPage() {
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-8">
-          <section className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-8">
+          <section className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-8 border-l-4 border-l-orange-500/40">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.24em] text-blue-200/75">Battle #{battle.matchId}</p>
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Battle #{battle.matchId}</p>
                 <h1 className="mt-2 font-orbitron text-3xl text-white sm:text-4xl">{battle.topic}</h1>
               </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-white/80">
-                <Pill icon={<Sparkles className="h-4 w-4 text-violet-200" />} label={`Status: ${battle.status}`} />
+              <div className="flex flex-wrap items-center gap-3 text-sm text-white">
+                <Pill icon={<Sparkles className="h-4 w-4 text-violet-300" />} label={`Status: ${battle.status}`} />
                 <Pill
-                  icon={<Timer className="h-4 w-4 text-amber-200" />}
+                  icon={<Timer className="h-4 w-4 text-amber-300" />}
                   label={timer.remaining > 0 ? `${timer.phase || 'phase'} ${timer.remaining}s` : 'No timer'}
                 />
-                <Pill icon={<Users className="h-4 w-4 text-blue-200" />} label={`${spectators} spectators`} />
-                <Pill icon={<Coins className="h-4 w-4 text-emerald-200" />} label={`Pot ${battle.pot} XLM`} />
+                <Pill icon={<Users className="h-4 w-4 text-cyan-300" />} label={`${spectators} spectators`} />
+                <Pill icon={<Coins className="h-4 w-4 text-emerald-300" />} label={`Pot ${battle.pot} XLM`} />
                 {canJoinOpenBattle && (
                   <button
                     onClick={joinOpenBattle}
@@ -421,9 +421,9 @@ export default function BattleRoomPage() {
                 />
               </div>
 
-              <div className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6">
+              <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-violet-500/40">
                 <div className="flex items-center gap-2">
-                  <MessageSquareText className="h-5 w-5 text-blue-200" />
+                  <MessageSquareText className="h-5 w-5 text-violet-300" />
                   <h2 className="font-orbitron text-xl text-white sm:text-2xl">Roast Submission</h2>
                 </div>
                 <textarea
@@ -431,13 +431,13 @@ export default function BattleRoomPage() {
                   onChange={(event) => setRoastText(event.target.value)}
                   placeholder={canRoast ? 'Drop your best roast here...' : 'Only battle players can submit roasts'}
                   disabled={!canRoast || actionBusy}
-                  className="mt-4 h-36 w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-4 h-36 w-full input-glass disabled:cursor-not-allowed disabled:opacity-60"
                 />
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={submitRoast}
                     disabled={!canRoast || actionBusy || !roastText.trim()}
-                    className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Submit Roast
                   </button>
@@ -456,10 +456,10 @@ export default function BattleRoomPage() {
                 onPredict={(selectedPlayer, amount) => placePrediction(selectedPlayer, amount)}
               />
 
-              <div className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6">
-                <p className="text-sm uppercase tracking-[0.22em] text-white/40">Prediction Pot</p>
+              <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-cyan-500/40">
+                <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Prediction Pot</p>
                 <p className="mt-3 font-orbitron text-3xl text-white">{predictionSummary?.totalAmount ?? 0} XLM</p>
-                <div className="mt-4 space-y-2 text-sm text-white/70">
+                <div className="mt-4 space-y-2 text-sm text-slate-400">
                   <p>Backed on P1: {predictionSummary?.onPlayer1 ?? 0} XLM</p>
                   <p>Backed on P2: {predictionSummary?.onPlayer2 ?? 0} XLM</p>
                 </div>
@@ -467,19 +467,19 @@ export default function BattleRoomPage() {
             </aside>
           </section>
 
-          <section className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6">
+          <section className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-emerald-500/40">
             <div className="flex items-center gap-2">
-              <Swords className="h-5 w-5 text-blue-200" />
+              <Swords className="h-5 w-5 text-emerald-300" />
               <h2 className="font-orbitron text-xl text-white sm:text-2xl">Live Activity Feed</h2>
             </div>
             <div className="mt-4 space-y-2">
               {activity.length === 0 ? (
-                <p className="text-sm text-white/45">No activity yet.</p>
+                <p className="text-sm text-slate-400">No activity yet.</p>
               ) : (
                 activity.map((line, index) => (
                   <div
                     key={`${line}-${index}`}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/70"
+                    className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-slate-400"
                   >
                     {line}
                   </div>
@@ -505,10 +505,10 @@ export default function BattleRoomPage() {
 
 function Pill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
+    <span className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-medium">
       {icon}
-      <span className="ml-2">{label}</span>
-    </div>
+      {label}
+    </span>
   )
 }
 
@@ -530,25 +530,25 @@ function PlayerCard({
   disabled?: boolean
 }) {
   return (
-    <div className={cn('glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6', winning && 'border-emerald-300/25')}>
-      <p className="text-xs uppercase tracking-[0.2em] text-white/40">{title}</p>
+    <div className={cn('glass rounded-xl p-5 sm:rounded-xl sm:p-6 border-l-4', winning ? 'border-l-emerald-500/50' : 'border-l-white/20')}>
+      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{title}</p>
       <div className="mt-3 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 font-semibold text-white">
+        <div className={cn("flex h-11 w-11 items-center justify-center rounded-full font-semibold text-white", winning ? 'bg-emerald-500/20' : 'bg-white/10')}>
           {player?.username?.[0]?.toUpperCase() ?? '?'}
         </div>
         <div>
           <p className="font-semibold text-white">{player?.username || 'Awaiting challenger'}</p>
-          <p className="text-xs text-white/50">{votes} votes</p>
+          <p className="text-xs text-slate-400">{votes} votes</p>
         </div>
       </div>
-      <div className="mt-4 min-h-[92px] rounded-2xl border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/75">
+      <div className="mt-4 min-h-[92px] rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm leading-6 text-slate-300">
         {roast || 'No roast submitted yet.'}
       </div>
       {onVote && (
         <button
           onClick={onVote}
           disabled={disabled}
-          className="mt-4 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:opacity-55"
+          className="mt-4 w-full rounded-xi bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-semibold px-4 py-2.5 transition-all disabled:cursor-not-allowed disabled:opacity-55"
         >
           Vote for {player?.username || 'Player'}
         </button>
@@ -580,13 +580,13 @@ function ResultModal({
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.92, y: 24 }}
         onClick={(event) => event.stopPropagation()}
-        className="glass w-full max-w-xl rounded-[32px] p-6 sm:p-8"
+        className="glass w-full max-w-xl rounded-2xl p-6 sm:p-8 border-l-4 border-l-orange-500/50"
       >
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-300/14">
-          <Trophy className="h-7 w-7 text-amber-200" />
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/15">
+          <Trophy className="h-7 w-7 text-orange-400" />
         </div>
         <h2 className="mt-5 text-center font-orbitron text-3xl text-white">Battle Result</h2>
-        <p className="mt-3 text-center text-white/75">
+        <p className="mt-3 text-center text-slate-300">
           {battle.status === 'draw' ? 'Draw. Entry refunds applied.' : `${winner?.username || 'Winner'} takes the arena.`}
         </p>
 
@@ -610,13 +610,13 @@ function ResultModal({
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button
             onClick={() => router.push('/battles')}
-            className="w-full rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950"
+            className="w-full btn-primary"
           >
             Play Again
           </button>
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full rounded-full border border-white/12 bg-white/[0.04] px-6 py-3 font-medium text-white"
+            className="w-full btn-secondary"
           >
             Go Dashboard
           </button>
@@ -628,8 +628,8 @@ function ResultModal({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.2em] text-white/40">{label}</p>
+    <div className="glass rounded-xl px-4 py-3 border-t-2 border-t-orange-500/50">
+      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{label}</p>
       <p className="mt-1 text-sm text-white">{value}</p>
     </div>
   )

@@ -132,14 +132,14 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm uppercase tracking-[0.28em] text-blue-200/75">Dashboard</p>
                 <h1 className="mt-3 font-orbitron text-3xl font-bold leading-tight text-white sm:text-4xl">Welcome back, {user?.username ?? 'Player'}</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55 sm:text-base">
+                {/* <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55 sm:text-base">
                   Your command center for battles, wallet health, streaks, and everything the arena is doing right now.
-                </p>
+                </p> */}
               </div>
-              <div className="rounded-[22px] border border-amber-300/14 bg-amber-300/8 px-4 py-4 sm:rounded-[28px] sm:px-5">
+              {/* <div className="rounded-[22px] border border-amber-300/14 bg-amber-300/8 px-4 py-4 sm:rounded-[28px] sm:px-5">
                 <p className="text-xs uppercase tracking-[0.24em] text-amber-100/70">Live edge</p>
                 <p className="mt-2 text-sm text-white/72">Spectator predictions are trending 18% above yesterday.</p>
-              </div>
+              </div> */}
             </div>
 
             {hasAuthWarning && (

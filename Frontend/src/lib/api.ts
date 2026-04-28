@@ -130,6 +130,7 @@ type BackendUser = {
   rankPoints?: number
   totalBattles?: number
   badges?: string[]
+  rank?: number
   walletPublicKey?: string
   identityWalletAddress?: string
   hasManagedWallet?: boolean
@@ -227,6 +228,7 @@ export function normalizeUser(user: BackendUser | null | undefined): User {
     hasManagedWallet: Boolean(user?.hasManagedWallet),
     walletBalance: null,
     badges: user?.badges ?? [],
+    rank: typeof user?.rank === 'number' ? user.rank : undefined,
     onboardingCompleted: user?.onboardingCompleted ?? false,
     createdAt: user?.createdAt ?? new Date(0).toISOString(),
   }

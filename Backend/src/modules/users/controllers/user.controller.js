@@ -17,7 +17,26 @@ function escapeRegex(text) {
 exports.getMe = async (req, res) => {
   try {
     const user = req.auth.user;
-    return ApiResponse.success(res, user.toPublicJSON());
+    const betterRankedCount = await User.countDocuments({
+      isBanned: false,
+      $or: [
+        { rankPoints: { $gt: Number(user.rankPoints || 0) } },
+        {
+          rankPoints: Number(user.rankPoints || 0),
+          xp: { $gt: Number(user.xp || 0) },
+        },
+        {
+          rankPoints: Number(user.rankPoints || 0),
+          xp: Number(user.xp || 0),
+          wins: { $gt: Number(user.wins || 0) },
+        },
+      ],
+    });
+
+    return ApiResponse.success(res, {
+      ...user.toPublicJSON(),
+      rank: betterRankedCount + 1,
+    });
   } catch (error) {
     logger.error('Get me error:', error);
     return ApiResponse.error(res, error.message);

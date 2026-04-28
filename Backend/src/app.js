@@ -52,10 +52,10 @@ app.use(morgan('dev'));
 
 // Clerk webhook needs the raw request body for Svix signature verification.
 app.use('/api/clerk', clerkRoutes);
-app.use('/api/auth', walletAuthRoutes);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/auth', walletAuthRoutes);
 
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,

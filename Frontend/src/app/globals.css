@@ -7,26 +7,30 @@
     --font-inter: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --font-orbitron: "Orbitron", "Eurostile", "Bank Gothic", "Segoe UI", sans-serif;
     --font-space: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
-    --background: 230 26% 6%;
-    --foreground: 210 40% 98%;
-    --card: 228 25% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 228 25% 9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 220 100% 64%;
-    --primary-foreground: 220 30% 8%;
-    --secondary: 262 83% 67%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 228 16% 18%;
-    --muted-foreground: 220 14% 70%;
-    --accent: 44 96% 58%;
-    --accent-foreground: 220 30% 8%;
+    /* Deep space black background */
+    --background: 210 15% 4%;
+    --foreground: 0 0% 100%;
+    --card: 210 15% 6%;
+    --card-foreground: 0 0% 100%;
+    --popover: 210 15% 5%;
+    --popover-foreground: 0 0% 100%;
+    /* Primary accent: fire orange-red */
+    --primary: 16 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    /* Secondary accent: electric violet */
+    --secondary: 270 100% 55%;
+    --secondary-foreground: 0 0% 100%;
+    /* Cyan for live/online */
+    --accent: 185 100% 43%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 210 10% 25%;
+    --muted-foreground: 210 5% 65%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 223 19% 20%;
-    --input: 223 19% 20%;
-    --ring: 220 100% 64%;
-    --radius: 1.25rem;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 10% 15%;
+    --input: 210 10% 12%;
+    --ring: 270 100% 55%;
+    --radius: 1rem;
   }
 
   * {
@@ -35,16 +39,15 @@
 
   html {
     scroll-behavior: smooth;
+    @apply bg-background;
   }
 
   body {
     @apply min-h-screen bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(88, 115, 255, 0.18), transparent 28%),
-      radial-gradient(circle at 80% 10%, rgba(151, 71, 255, 0.14), transparent 24%),
-      radial-gradient(circle at 50% 100%, rgba(255, 198, 64, 0.08), transparent 30%),
-      linear-gradient(180deg, #060816 0%, #090b14 45%, #070811 100%);
+      radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 70%),
+      linear-gradient(180deg, #07070d 0%, #0a0a0f 50%, #07070d 100%);
   }
 
   body::before {
@@ -53,11 +56,11 @@
     inset: 0;
     pointer-events: none;
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-    background-size: 72px 72px;
-    mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
-    opacity: 0.45;
+      linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    opacity: 0.3;
   }
 }
 
@@ -67,11 +70,26 @@
   }
 
   .glass {
-    @apply surface backdrop-blur-xl;
+    @apply surface backdrop-blur-[16px];
   }
 
   .glass-hover {
-    @apply transition-all duration-300 hover:border-white/20 hover:bg-white/[0.07] hover:shadow-[0_24px_80px_rgba(37,99,235,0.18)];
+    @apply transition-all duration-300 hover:border-white/15 hover:bg-white/[0.08] hover:shadow-[0_24px_80px_rgba(124,58,237,0.15)];
+  }
+
+  /* Primary CTA button style */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02];
+  }
+
+  /* Secondary glass button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 transition-all duration-200;
+  }
+
+  /* Input styling */
+  .input-glass {
+    @apply bg-white/5 border border-white/10 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 rounded-xl text-white placeholder:text-slate-600 px-4 py-3 outline-none transition-all;
   }
 
   .panel-gradient {
@@ -79,14 +97,14 @@
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-400 via-violet-300 to-amber-200 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent;
   }
 
   .glow-primary {
     box-shadow:
-      0 0 0 1px rgba(96, 165, 250, 0.12),
-      0 0 30px rgba(59, 130, 246, 0.22),
-      0 0 72px rgba(124, 58, 237, 0.18);
+      0 0 0 1px rgba(124, 58, 237, 0.2),
+      0 0 30px rgba(124, 58, 237, 0.25),
+      0 0 60px rgba(124, 58, 237, 0.15);
   }
 
   .glow-gold {
@@ -106,8 +124,29 @@
     inset: -1px;
     z-index: -1;
     border-radius: inherit;
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.45), rgba(168, 85, 247, 0.28), rgba(250, 204, 21, 0.2));
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.45), rgba(59, 130, 246, 0.28), rgba(250, 204, 21, 0.2));
     opacity: 0.7;
+  }
+
+  /* Vibrant color chips */
+  .chip-fire {
+    @apply bg-orange-500/15 text-orange-400 border border-orange-500/30 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .chip-violet {
+    @apply bg-violet-500/15 text-violet-400 border border-violet-500/30 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .chip-cyan {
+    @apply bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .chip-emerald {
+    @apply bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .chip-red {
+    @apply bg-red-500/15 text-red-400 border border-red-500/30 rounded-full px-3 py-1 text-xs font-semibold;
   }
 }
 

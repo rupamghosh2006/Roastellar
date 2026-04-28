@@ -25,11 +25,11 @@ export default function LeaderboardPage() {
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="glass rounded-[36px] p-8">
+          <div className="glass rounded-2xl p-8 border-l-4 border-l-orange-500/40">
             <div className="flex items-center gap-3">
-              <Trophy className="h-8 w-8 text-amber-200" />
+              <Trophy className="h-8 w-8 text-orange-400" />
               <div>
-                <p className="text-sm uppercase tracking-[0.24em] text-amber-200/75">Leaderboard</p>
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Leaderboard</p>
                 <h1 className="font-orbitron text-3xl font-bold text-white sm:text-4xl">Top roasters in the arena</h1>
               </div>
             </div>

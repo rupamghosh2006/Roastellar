@@ -126,30 +126,30 @@ export default function OnboardingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[40px] md:p-12"
+              className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 md:rounded-2xl md:p-12"
             >
               <div className="mx-auto max-w-3xl text-center">
                 <h1 className="font-orbitron text-3xl font-black text-white sm:text-4xl md:text-5xl">
                   Are you new to Web3?
                 </h1>
-                <p className="mt-4 text-base leading-7 text-white/60 sm:text-lg">
+                <p className="mt-4 text-base leading-7 text-slate-400 sm:text-lg">
                   New users can get a managed wallet through our guided challenge. Existing Web3 users can connect Freighter directly.
                 </p>
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
                   <button
                     onClick={startNewUserFlow}
-                    className="rounded-[24px] border border-white/12 bg-white/[0.04] p-6 text-left transition-colors hover:bg-white/[0.08]"
+                    className="glass rounded-xl border-l-4 border-l-orange-500/50 p-6 text-left transition-colors hover:bg-white/10 hover:border-l-orange-500/70"
                   >
                     <p className="font-orbitron text-xl text-white">Yes, I&apos;m new</p>
-                    <p className="mt-3 text-sm leading-6 text-white/55">Create my wallet in Roastellar and continue with the current onboarding flow.</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-400">Create my wallet in Roastellar and continue with the current onboarding flow.</p>
                   </button>
                   <button
                     onClick={() => setStep('existingWallet')}
-                    className="rounded-[24px] border border-blue-300/25 bg-blue-500/10 p-6 text-left transition-colors hover:bg-blue-500/20"
+                    className="glass rounded-xl border-l-4 border-l-violet-500/50 p-6 text-left transition-colors hover:bg-white/10 hover:border-l-violet-500/70"
                   >
                     <p className="font-orbitron text-xl text-white">No, I have a wallet</p>
-                    <p className="mt-3 text-sm leading-6 text-white/60">Connect Freighter now. Google or email can stay optional for this step.</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-400">Connect Freighter now. Google or email can stay optional for this step.</p>
                   </button>
                 </div>
               </div>
@@ -162,45 +162,45 @@ export default function OnboardingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[40px] md:p-12"
+              className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 md:rounded-2xl md:p-12"
             >
               <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1.1fr_0.9fr]">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/18 bg-blue-500/10 px-4 py-2 text-sm text-blue-100">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200">
                     <Sparkles className="h-4 w-4" />
                     First-time player flow
                   </div>
                   <h1 className="mt-6 font-orbitron text-3xl font-black leading-tight text-white sm:text-4xl md:text-6xl">
                     Welcome to Roastellar.
                   </h1>
-                  <p className="mt-5 max-w-xl text-base leading-7 text-white/60 sm:text-lg sm:leading-8">
+                  <p className="mt-5 max-w-xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8">
                     Before entering the arena, complete your first challenge. You will unlock your wallet, reveal your starter balance,
                     and step into the product with momentum.
                   </p>
                   <button
                     onClick={() => setStep('game')}
-                    className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-90 sm:mt-10 sm:w-auto"
+                    className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] sm:mt-10 sm:w-auto"
                   >
                     Start Challenge
                     <ArrowRight className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setStep('choice')}
-                    className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white/85 sm:mt-4 sm:w-auto"
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 text-sm font-medium transition-all duration-200 sm:mt-4 sm:w-auto"
                   >
                     Back
                   </button>
                 </div>
 
-                <div className="rounded-[24px] border border-white/10 bg-black/20 p-4 sm:rounded-[28px] sm:p-6 md:rounded-[32px]">
+                <div className="glass rounded-xl p-4 sm:rounded-xl sm:p-6 border-l-4 border-l-orange-500/40">
                   <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
                     {[
                       { label: 'Target', value: '20 flames' },
                       { label: 'Timer', value: '15 seconds' },
                       { label: 'Reward', value: 'Wallet reveal' },
                     ].map((item) => (
-                      <div key={item.label} className="rounded-[20px] border border-white/8 bg-white/[0.03] p-4 sm:rounded-[24px] sm:p-5">
-                        <p className="text-xs uppercase tracking-[0.24em] text-white/35">{item.label}</p>
+                      <div key={item.label} className="rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:rounded-xl sm:p-5">
+                        <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
                         <p className="mt-3 font-orbitron text-xl text-white sm:text-2xl">{item.value}</p>
                       </div>
                     ))}
@@ -216,16 +216,16 @@ export default function OnboardingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[40px] md:p-10"
+              className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 md:rounded-2xl md:p-10"
             >
               <div className="mx-auto max-w-3xl">
                 <div className="mb-6 text-center">
-                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-blue-400/18 bg-blue-500/10 px-4 py-2 text-sm text-blue-100">
+                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200">
                     <WalletIcon className="h-4 w-4" />
                     Existing wallet flow
                   </div>
                   <h2 className="mt-5 font-orbitron text-2xl font-bold text-white sm:text-3xl">Connect your Freighter wallet</h2>
-                  <p className="mt-3 text-sm leading-6 text-white/55 sm:text-base">
+                  <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
                     If you already use Web3, connect Freighter and continue anonymously. Sign in stays optional.
                   </p>
                 </div>
@@ -241,14 +241,14 @@ export default function OnboardingPage() {
                   <button
                     onClick={continueWithExistingWallet}
                     disabled={!freighterConnected}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Continue with Freighter
                     <ArrowRight className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setStep('choice')}
-                    className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white/85"
+                    className="inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 text-sm font-medium transition-all duration-200"
                   >
                     Back
                   </button>
@@ -263,11 +263,11 @@ export default function OnboardingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="glass rounded-[28px] p-4 sm:rounded-[32px] sm:p-6 md:rounded-[40px] md:p-8"
+              className="glass rounded-2xl p-4 sm:rounded-2xl sm:p-6 md:rounded-2xl md:p-8"
             >
               <div className="mb-6 text-center">
                 <h2 className="font-orbitron text-2xl font-bold text-white sm:text-3xl">Tap the Falling Flame</h2>
-                <p className="mt-3 text-sm leading-6 text-white/55 sm:text-base">Catch 20 flames before time runs out. Demo mode is tuned so you always leave with a win.</p>
+                <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">Catch 20 flames before time runs out. Demo mode is tuned so you always leave with a win.</p>
               </div>
               <MiniGame onComplete={handleGameComplete} />
             </motion.section>

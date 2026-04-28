@@ -86,13 +86,13 @@ export default function LandingPage() {
   return (
     <main className="overflow-hidden pt-16">
       <section className="relative px-4 pb-20 pt-16 sm:px-6 lg:px-8 lg:pt-24">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.18),transparent_24%),radial-gradient(circle_at_80%_18%,rgba(168,85,247,0.16),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(250,204,21,0.08),transparent_32%)]" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.15)_0%,transparent_70%)]" />
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 rounded-full border border-blue-400/18 bg-blue-500/10 px-4 py-2 text-sm text-blue-100"
+              className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200"
             >
               <Sparkles className="h-4 w-4" />
               Built for social competition on Stellar
@@ -125,14 +125,14 @@ export default function LandingPage() {
             >
               <Link
                 href="/onboarding"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-90"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02]"
               >
                 Start Free
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a
                 href="#how-it-works"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-6 py-3 font-medium text-white/85 transition-colors hover:bg-white/[0.08]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 transition-all duration-200"
               >
                 Watch Demo
               </a>
@@ -144,9 +144,9 @@ export default function LandingPage() {
                 { value: String(openBattles.length), label: 'Open battles now' },
                 { value: `${totalPot.toFixed(2)} XLM`, label: 'Open prize pool' },
               ].map((stat) => (
-                <div key={stat.label} className="glass rounded-[24px] p-4">
+                <div key={stat.label} className="glass rounded-2xl p-4 border-l-2 border-l-violet-500/50">
                   <p className="font-orbitron text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="mt-1 text-sm text-white/45">{stat.label}</p>
+                  <p className="mt-1 text-sm text-slate-400">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -158,32 +158,38 @@ export default function LandingPage() {
             transition={{ delay: 0.18 }}
             className="relative"
           >
-            <div className="glass glow-primary rounded-[36px] p-6">
+            <div className="glass glow-primary rounded-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/35">Live Match Preview</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Live Match Preview</p>
                   <p className="mt-2 font-orbitron text-2xl text-white">{featuredBattle?.topic ?? 'No live battle yet'}</p>
                 </div>
-                <div className="rounded-full bg-emerald-400/14 px-3 py-1 text-xs uppercase tracking-[0.24em] text-emerald-200">
+                <div className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.24em] font-semibold ${
+                  featuredBattle?.status === 'active' 
+                    ? 'chip-fire' 
+                    : featuredBattle?.status === 'voting'
+                    ? 'chip-violet'
+                    : 'chip-cyan'
+                }`}>
                   {featuredBattle ? featuredBattle.status.toUpperCase() : 'IDLE'}
                 </div>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 {(featuredPlayers.length ? featuredPlayers : [null, null]).slice(0, 2).map((player, index) => (
-                  <div key={player?.id ?? `slot-${index}`} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
+                  <div key={player?.id ?? `slot-${index}`} className="glass rounded-2xl p-5 border-l-2 border-l-orange-500/50">
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${index === 0 ? 'bg-blue-500/16' : 'bg-violet-500/16'}`}>
-                        <Flame className={`h-6 w-6 ${index === 0 ? 'text-blue-300' : 'text-violet-300'}`} />
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${index === 0 ? 'bg-orange-500/15' : 'bg-violet-500/15'}`}>
+                        <Flame className={`h-6 w-6 ${index === 0 ? 'text-orange-400' : 'text-violet-400'}`} />
                       </div>
                       <div>
                         <p className="font-semibold text-white">{player?.username ?? 'Waiting for player'}</p>
-                        <p className="text-sm text-white/45">
+                        <p className="text-sm text-slate-400">
                           {player ? `${player.wins} wins | ${player.xp.toLocaleString()} XP` : 'Seat is still open'}
                         </p>
                       </div>
                     </div>
-                    <div className="mt-5 rounded-2xl border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/72">
+                    <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm leading-6 text-slate-300">
                       {index === 0
                         ? featuredBattle?.roast1 || 'Roast will appear here when the first player submits.'
                         : featuredBattle?.roast2 || 'Roast will appear here when the second player submits.'}
@@ -194,12 +200,16 @@ export default function LandingPage() {
 
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
                 {[
-                  { label: 'Spectators', value: totalSpectators.toLocaleString() },
-                  { label: 'Votes', value: totalVotes.toLocaleString() },
-                  { label: 'Pot', value: `${totalPot.toFixed(2)} XLM` },
+                  { label: 'Spectators', value: totalSpectators.toLocaleString(), color: 'cyan' },
+                  { label: 'Votes', value: totalVotes.toLocaleString(), color: 'orange' },
+                  { label: 'Pot', value: `${totalPot.toFixed(2)} XLM`, color: 'violet' },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/35">{item.label}</p>
+                  <div key={item.label} className={`glass rounded-xl p-4 border-t-2 ${
+                    item.color === 'cyan' ? 'border-t-cyan-500/50' : 
+                    item.color === 'orange' ? 'border-t-orange-500/50' : 
+                    'border-t-violet-500/50'
+                  }`}>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
                     <p className="mt-2 font-orbitron text-2xl text-white">{item.value}</p>
                   </div>
                 ))}
@@ -213,10 +223,10 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between gap-6">
             <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-blue-200/70">How it works</p>
+              <p className="text-sm uppercase tracking-[0.32em] text-slate-500">How it works</p>
               <h2 className="mt-3 font-orbitron text-4xl font-bold text-white">One flow from sign-up to reward</h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-white/50">
+            <p className="max-w-xl text-sm leading-6 text-slate-400">
               The first-time user experience is engineered to feel magical: account, challenge, wallet, and arena access in one progression.
             </p>
           </div>
@@ -229,12 +239,12 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.08 }}
-                className="glass rounded-[32px] p-6"
+                className="glass rounded-2xl p-6 border-l-4 border-l-orange-500/40 hover:border-l-orange-500/70 transition-colors"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/8 font-orbitron text-xl text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/15 font-orbitron text-xl font-bold text-orange-400">
                   {index + 1}
                 </div>
-                <p className="mt-6 text-lg leading-8 text-white/78">{step}</p>
+                <p className="mt-6 text-lg leading-8 text-slate-300">{step}</p>
               </motion.div>
             ))}
           </div>
@@ -246,6 +256,26 @@ export default function LandingPage() {
           <div className="grid gap-5 lg:grid-cols-4">
             {features.map((feature, index) => {
               const Icon = feature.icon
+              const accentColors = ['orange', 'violet', 'cyan', 'emerald'];
+              const accentColor = accentColors[index % accentColors.length];
+              const bgColorClass = {
+                orange: 'bg-orange-500/10',
+                violet: 'bg-violet-500/10',
+                cyan: 'bg-cyan-500/10',
+                emerald: 'bg-emerald-500/10',
+              }[accentColor];
+              const textColorClass = {
+                orange: 'text-orange-300',
+                violet: 'text-violet-300',
+                cyan: 'text-cyan-300',
+                emerald: 'text-emerald-300',
+              }[accentColor];
+              const borderColorClass = {
+                orange: 'border-l-orange-500/30',
+                violet: 'border-l-violet-500/30',
+                cyan: 'border-l-cyan-500/30',
+                emerald: 'border-l-emerald-500/30',
+              }[accentColor];
               return (
                 <motion.div
                   key={feature.title}
@@ -253,13 +283,13 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.06 }}
-                  className="glass glass-hover rounded-[32px] p-6"
+                  className={`glass glass-hover rounded-2xl p-6 border-l-4 ${borderColorClass}`}
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/14 to-violet-500/12">
-                    <Icon className="h-5 w-5 text-blue-200" />
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${bgColorClass}`}>
+                    <Icon className={`h-5 w-5 ${textColorClass}`} />
                   </div>
                   <h3 className="mt-6 font-orbitron text-xl text-white">{feature.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/50">{feature.copy}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-400">{feature.copy}</p>
                 </motion.div>
               )
             })}
@@ -268,34 +298,42 @@ export default function LandingPage() {
       </section>
 
       <section id="leaderboard-preview" className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-[40px] border border-white/10 bg-white/[0.03] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.34)]">
+        <div className="glass rounded-2xl border border-white/8 p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-amber-200/80">Leaderboard preview</p>
+              <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Leaderboard preview</p>
               <h2 className="mt-3 font-orbitron text-4xl font-bold text-white">Competitive by default</h2>
             </div>
-            <Link href="/onboarding" className="text-sm font-semibold text-blue-200 hover:text-blue-100">
-              Join the leaderboard
+            <Link href="/onboarding" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors">
+              Join the leaderboard →
             </Link>
           </div>
 
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {topLeaderboard.length > 0 ? topLeaderboard.map((entry, index) => (
-              <div key={entry.id} className="glass rounded-[28px] p-5">
+            {topLeaderboard.length > 0 ? topLeaderboard.map((entry, index) => {
+              const rankColors = ['bg-yellow-500/10 border-l-yellow-500/40', 'bg-gray-500/10 border-l-gray-400/40', 'bg-orange-600/10 border-l-orange-700/40'];
+              const rankBg = rankColors[index];
+              const rankTextColor = index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : 'text-orange-400';
+              return (
+              <div key={entry.id} className={`glass rounded-xl p-5 border-l-4 ${rankBg}`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 font-orbitron text-white">
-                    {index + 1}
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-full font-orbitron text-white font-bold ${
+                    index === 0 ? 'bg-yellow-500/20 text-yellow-300' :
+                    index === 1 ? 'bg-gray-500/20 text-gray-300' :
+                    'bg-orange-600/20 text-orange-300'
+                  }`}>
+                    #{index + 1}
                   </div>
-                  <Trophy className="h-5 w-5 text-amber-200" />
+                  <Trophy className={`h-5 w-5 ${rankTextColor}`} />
                 </div>
                 <p className="mt-5 font-orbitron text-2xl text-white">{entry.username}</p>
-                <p className="mt-2 text-sm text-white/50">{entry.xp.toLocaleString()} XP</p>
-                <div className="mt-4 rounded-full bg-white/6 px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/45">
+                <p className="mt-2 text-sm text-slate-400">{entry.xp.toLocaleString()} XP</p>
+                <div className="mt-4 chip-fire">
                   {entry.wins} wins
                 </div>
               </div>
-            )) : (
-              <div className="glass rounded-[28px] p-5 text-white/65">
+            )}) : (
+              <div className="glass rounded-xl p-5 text-slate-400">
                 Leaderboard data will show here once players start competing.
               </div>
             )}
@@ -305,19 +343,21 @@ export default function LandingPage() {
 
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-3">
-          {arenaSignals.slice(0, 3).map((signal) => (
-            <div key={signal} className="glass rounded-[32px] p-6 text-white/70">
+          {arenaSignals.slice(0, 3).map((signal, idx) => {
+            const signalColors = ['border-l-orange-500/40', 'border-l-violet-500/40', 'border-l-cyan-500/40'];
+            return (
+            <div key={signal} className={`glass rounded-xl p-6 text-slate-300 border-l-4 ${signalColors[idx]}`}>
               <p className="text-lg leading-8">{signal}</p>
-              <p className="mt-6 text-sm uppercase tracking-[0.28em] text-white/35">Arena Signal</p>
+              <p className="mt-6 text-sm uppercase tracking-[0.28em] text-slate-500">Arena Signal</p>
             </div>
-          ))}
+          )})}
         </div>
       </section>
 
-      <footer className="border-t border-white/10 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-white/45 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3 text-white/70">
-            <Flame className="h-5 w-5 text-blue-300" />
+      <footer className="border-t border-white/8 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3 text-slate-400">
+            <Flame className="h-5 w-5 text-orange-400" />
             Roastellar
           </div>
           <p>Gaming energy. Fintech confidence. Stellar-native rewards.</p>

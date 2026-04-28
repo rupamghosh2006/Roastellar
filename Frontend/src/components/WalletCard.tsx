@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
+import LightRays from '@/components/LightRays'
 
 interface WalletCardProps {
   address: string
@@ -39,11 +40,32 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'glass gradient-border rounded-[22px] p-4 sm:rounded-[28px] sm:p-6',
+        'glass gradient-border relative overflow-hidden rounded-[22px] p-4 sm:rounded-[28px] sm:p-6',
+        variant === 'full' && 'min-h-[600px]',
         variant === 'full' && 'w-full'
       )}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      {variant === 'full' && (
+        <div style={{ width: '100%', height: '600px', position: 'absolute', inset: 0 }}>
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#ffffff"
+            raysSpeed={1.3}
+            lightSpread={0.5}
+            rayLength={3}
+            followMouse={true}
+            mouseInfluence={0.2}
+            noiseAmount={0.38}
+            distortion={0}
+            className="custom-rays"
+            pulsating
+            fadeDistance={1.8}
+            saturation={1.1}
+          />
+        </div>
+      )}
+
+      <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/40">
             <WalletIcon className="h-4 w-4 text-amber-200" />
@@ -60,7 +82,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
         </div>
       </div>
 
-      <div className="mt-6 rounded-[24px] border border-white/10 bg-black/20 p-4">
+      <div className="relative z-10 mt-6 rounded-[24px] border border-white/10 bg-black/20 p-4">
         <p className="text-xs uppercase tracking-[0.24em] text-white/35">Public Key</p>
         <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <code className={cn('text-sm text-white/78', variant === 'full' ? 'break-all' : 'truncate')}>
@@ -85,7 +107,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-2 text-sm text-white/45 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative z-10 mt-5 flex flex-col gap-2 text-sm text-white/45 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-300" />
           Secure testnet custody

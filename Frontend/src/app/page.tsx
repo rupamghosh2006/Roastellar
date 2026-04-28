@@ -9,6 +9,7 @@ import { ArrowRight, Coins, Flame, ShieldCheck, Sparkles, Swords, Trophy, Wallet
 import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/api'
 import { isOnboardingComplete } from '@/lib/utils'
 import { isWalletAuthenticated } from '@/lib/walletAuth'
+import { BrandLogo } from '@/components/BrandLogo'
 
 const features = [
   { icon: Swords, title: 'Live roast battles', copy: 'Fast-paced match rooms with real-time submissions, votes, and reactions.' },
@@ -158,38 +159,73 @@ export default function LandingPage() {
             transition={{ delay: 0.18 }}
             className="relative"
           >
-            <div className="glass glow-primary rounded-2xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Live Match Preview</p>
-                  <p className="mt-2 font-orbitron text-2xl text-white">{featuredBattle?.topic ?? 'No live battle yet'}</p>
-                </div>
-                <div className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.24em] font-semibold ${
-                  featuredBattle?.status === 'active' 
-                    ? 'chip-fire' 
-                    : featuredBattle?.status === 'voting'
-                    ? 'chip-violet'
-                    : 'chip-cyan'
-                }`}>
-                  {featuredBattle ? featuredBattle.status.toUpperCase() : 'IDLE'}
-                </div>
-              </div>
+            <div className="rounded-2xl border border-slate-700/70 bg-slate-950/88 p-6 shadow-[0_24px_80px_rgba(2,6,23,0.6)] backdrop-blur-md">
+              <div className="flex items-start justify-between gap-4">
+  <div className="space-y-3">
+    {/* Premium Badge */}
+    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-gradient-to-r from-emerald-500/12 via-emerald-400/8 to-transparent px-4 py-1.5 shadow-[0_0_18px_rgba(16,185,129,0.12)] backdrop-blur-xl">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60"></span>
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
+      </span>
+
+      <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-emerald-300">
+        Live Match Preview
+      </p>
+    </div>
+
+    {/* Title */}
+    <div className="space-y-1">
+      <p className="font-orbitron text-2xl font-semibold leading-tight text-white">
+        {featuredBattle?.topic ?? "No live battle yet"}
+      </p>
+
+      <p className="text-sm text-slate-400">
+        Real-time arena status and battle readiness
+      </p>
+    </div>
+  </div>
+
+  {/* Status Chip */}
+  <div
+    className={`relative overflow-hidden rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] backdrop-blur-xl transition-all ${
+      featuredBattle?.status === "active"
+        ? "border-orange-400/30 bg-orange-500/10 text-orange-300 shadow-[0_0_20px_rgba(249,115,22,0.14)]"
+        : featuredBattle?.status === "voting"
+        ? "border-violet-400/30 bg-violet-500/10 text-violet-300 shadow-[0_0_20px_rgba(168,85,247,0.14)]"
+        : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.14)]"
+    }`}
+  >
+    <span className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></span>
+    <span className="relative">
+      {featuredBattle ? featuredBattle.status.toUpperCase() : "IDLE"}
+    </span>
+  </div>
+</div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 {(featuredPlayers.length ? featuredPlayers : [null, null]).slice(0, 2).map((player, index) => (
-                  <div key={player?.id ?? `slot-${index}`} className="glass rounded-2xl p-5 border-l-2 border-l-orange-500/50">
+                  <div key={player?.id ?? `slot-${index}`} className={`rounded-2xl border p-5 ${
+                    index === 0
+                      ? 'border-orange-500/45 bg-slate-900/75'
+                      : 'border-violet-500/40 bg-slate-900/75'
+                  }`}>
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${index === 0 ? 'bg-orange-500/15' : 'bg-violet-500/15'}`}>
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl border ${
+                        index === 0
+                          ? 'border-orange-500/35 bg-orange-500/15'
+                          : 'border-violet-500/35 bg-violet-500/15'
+                      }`}>
                         <Flame className={`h-6 w-6 ${index === 0 ? 'text-orange-400' : 'text-violet-400'}`} />
                       </div>
                       <div>
-                        <p className="font-semibold text-white">{player?.username ?? 'Waiting for player'}</p>
-                        <p className="text-sm text-slate-400">
+                        <p className="font-semibold text-slate-100">{player?.username ?? 'Waiting for player'}</p>
+                        <p className="text-sm text-slate-300">
                           {player ? `${player.wins} wins | ${player.xp.toLocaleString()} XP` : 'Seat is still open'}
                         </p>
                       </div>
                     </div>
-                    <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm leading-6 text-slate-300">
+                    <div className="mt-5 rounded-xl border border-slate-700/70 bg-slate-950/70 p-4 text-sm leading-7 text-slate-200">
                       {index === 0
                         ? featuredBattle?.roast1 || 'Roast will appear here when the first player submits.'
                         : featuredBattle?.roast2 || 'Roast will appear here when the second player submits.'}
@@ -204,13 +240,13 @@ export default function LandingPage() {
                   { label: 'Votes', value: totalVotes.toLocaleString(), color: 'orange' },
                   { label: 'Pot', value: `${totalPot.toFixed(2)} XLM`, color: 'violet' },
                 ].map((item) => (
-                  <div key={item.label} className={`glass rounded-xl p-4 border-t-2 ${
-                    item.color === 'cyan' ? 'border-t-cyan-500/50' : 
-                    item.color === 'orange' ? 'border-t-orange-500/50' : 
-                    'border-t-violet-500/50'
+                  <div key={item.label} className={`rounded-xl border bg-slate-900/78 p-4 ${
+                    item.color === 'cyan' ? 'border-cyan-500/40' : 
+                    item.color === 'orange' ? 'border-orange-500/40' : 
+                    'border-violet-500/40'
                   }`}>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.label}</p>
-                    <p className="mt-2 font-orbitron text-2xl text-white">{item.value}</p>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{item.label}</p>
+                    <p className="mt-2 font-orbitron text-2xl font-semibold text-slate-100">{item.value}</p>
                   </div>
                 ))}
               </div>
@@ -219,37 +255,83 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-slate-500">How it works</p>
-              <h2 className="mt-3 font-orbitron text-4xl font-bold text-white">One flow from sign-up to reward</h2>
-            </div>
-            <p className="max-w-xl text-sm leading-6 text-slate-400">
-              The first-time user experience is engineered to feel magical: account, challenge, wallet, and arena access in one progression.
-            </p>
+     <section
+  id="how-it-works"
+  className="relative px-4 py-24 sm:px-6 lg:px-8"
+>
+  <div className="mx-auto max-w-7xl">
+    {/* Header */}
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
+    >
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.38em] text-slate-500">
+          How it works
+        </p>
+
+        <h2 className="mt-3 max-w-3xl font-orbitron text-4xl font-bold leading-tight text-white sm:text-5xl">
+          One flow from sign-up to reward
+        </h2>
+      </div>
+
+      <p className="max-w-xl text-sm leading-7 text-slate-400 sm:text-base">
+        The first-time user experience is designed as a seamless sequence.
+        Account creation, wallet onboarding, challenge entry, and arena access
+        arrive in one elegant motion.
+      </p>
+    </motion.div>
+
+    {/* Cards */}
+    <div className="mt-14 grid gap-6 lg:grid-cols-3">
+      {steps.map((step, index) => (
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.22 }}
+          transition={{
+            duration: 0.55,
+            delay: index * 0.12,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          whileHover={{ y: -6, scale: 1.015 }}
+          className="group relative overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] p-7 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.28)]"
+        >
+          {/* subtle shine */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent opacity-70" />
+
+          {/* soft hover glow */}
+          <div className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_45%)]" />
+
+          {/* Number */}
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-inner">
+            <span className="font-orbitron text-lg font-bold text-white/90">
+              {String(index + 1).padStart(2, "0")}
+            </span>
           </div>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="glass rounded-2xl p-6 border-l-4 border-l-orange-500/40 hover:border-l-orange-500/70 transition-colors"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/15 font-orbitron text-xl font-bold text-orange-400">
-                  {index + 1}
-                </div>
-                <p className="mt-6 text-lg leading-8 text-slate-300">{step}</p>
-              </motion.div>
-            ))}
+          {/* Divider */}
+          <div className="relative mt-6 h-px w-full bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
+
+          {/* Content */}
+          <p className="relative mt-6 text-lg leading-8 text-slate-200">
+            {step}
+          </p>
+
+          {/* footer accent */}
+          <div className="relative mt-8 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-slate-500">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+            Step {index + 1}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
 
       <section id="features" className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -357,7 +439,7 @@ export default function LandingPage() {
       <footer className="border-t border-white/8 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3 text-slate-400">
-            <Flame className="h-5 w-5 text-orange-400" />
+            <BrandLogo size={20} className="rounded-md border-orange-400/30" />
             Roastellar
           </div>
           <p>Gaming energy. Fintech confidence. Stellar-native rewards.</p>

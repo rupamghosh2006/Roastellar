@@ -9,6 +9,7 @@ const walletService = require('../../wallet/wallet.service');
 
 const router = express.Router();
 const NONCE_TTL_MS = Number(process.env.WALLET_AUTH_NONCE_TTL_MS || 5 * 60 * 1000);
+const SIGN_MESSAGE_PREFIX = 'Stellar Signed Message:\n';
 
 function buildChallenge({ walletAddress, nonce }) {
   return [
@@ -163,6 +164,8 @@ router.post('/wallet/verify', async (req, res) => {
     const keypair = StellarSdk.Keypair.fromPublicKey(walletAddress);
     const challengeBytes = Buffer.from(challenge, 'utf8');
     const challengeHash = crypto.createHash('sha256').update(challengeBytes).digest();
+    const prefixedBytes = Buffer.from(`${SIGN_MESSAGE_PREFIX}${challenge}`, 'utf8');
+    const prefixedHash = crypto.createHash('sha256').update(prefixedBytes).digest();
 
     const normalizedCandidates = signedCandidates.flatMap((candidate) => {
       const values = [candidate];
@@ -175,7 +178,12 @@ router.post('/wallet/verify', async (req, res) => {
 
     const isValidSignature = normalizedCandidates.some((candidate) => {
       try {
-        return keypair.verify(challengeBytes, candidate) || keypair.verify(challengeHash, candidate);
+        return (
+          keypair.verify(challengeBytes, candidate) ||
+          keypair.verify(challengeHash, candidate) ||
+          keypair.verify(prefixedBytes, candidate) ||
+          keypair.verify(prefixedHash, candidate)
+        );
       } catch (_) {
         return false;
       }

@@ -219,16 +219,16 @@ export default function DashboardPage() {
                       const slot = idx === 0 ? 2 : idx === 1 ? 1 : 3
                       const cardStyles =
                         slot === 1
-                          ? 'bg-[#E8D65A] text-[#090511] min-h-[220px]'
+                          ? 'bg-white/20 backdrop-blur-xl border border-white/30 text-white min-h-[220px]'
                           : slot === 2
-                          ? 'bg-[#8576E8] text-[#090511] min-h-[185px]'
-                          : 'bg-[#D7D6E6] text-[#090511] min-h-[185px]'
+                          ? 'bg-white/15 backdrop-blur-xl border border-white/25 text-white min-h-[185px]'
+                          : 'bg-white/10 backdrop-blur-xl border border-white/20 text-white min-h-[185px]'
                       const chipStyles =
                         slot === 1
-                          ? 'bg-[#0D0931] text-[#E8D65A]'
+                          ? 'bg-black/80 text-white'
                           : slot === 2
-                          ? 'bg-[#1D1550] text-[#BFB7FF]'
-                          : 'bg-[#15103A] text-[#E6E5FF]'
+                          ? 'bg-black/75 text-white'
+                          : 'bg-black/70 text-white'
 
                       return (
                         <motion.div

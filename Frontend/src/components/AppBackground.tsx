@@ -1,13 +1,21 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import DotField from '@/components/DotField'
 import { WarpBackground } from '@/components/WarpBackground'
 
 export function AppBackground() {
   const pathname = usePathname()
+  const [clientPathname, setClientPathname] = useState<string>('')
 
-  if (pathname === '/') {
+  useEffect(() => {
+    setClientPathname(window.location.pathname)
+  }, [pathname])
+
+  const activePathname = clientPathname || pathname
+
+  if (activePathname === '/') {
     return <WarpBackground />
   }
 

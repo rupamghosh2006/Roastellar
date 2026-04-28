@@ -89,7 +89,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen pt-16">
+      <div className="flex min-h-screen">
         <Sidebar />
         <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
           <PageLoader message="Loading profile" />
@@ -101,7 +101,7 @@ export default function ProfilePage() {
   const winRate = user ? ((user.wins / Math.max(user.wins + user.losses, 1)) * 100).toFixed(1) : '0.0'
 
   return (
-    <div className="flex min-h-screen pt-16">
+    <div className="flex min-h-screen">
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-6xl space-y-8">

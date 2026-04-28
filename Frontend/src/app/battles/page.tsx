@@ -171,7 +171,7 @@ export default function BattlesPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen pt-16">
+      <div className="flex min-h-screen">
         <Sidebar />
         <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
           <PageLoader message="Loading battles" />
@@ -181,7 +181,7 @@ export default function BattlesPage() {
   }
 
   return (
-    <div className="flex min-h-screen pt-16">
+    <div className="flex min-h-screen">
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-8">

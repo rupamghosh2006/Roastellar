@@ -27,8 +27,7 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r border-white/10 bg-slate-950/40 px-4 py-6 backdrop-blur-xl lg:flex lg:flex-col">
-        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.4)]">
+<aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-white/10 bg-slate-950/40 px-4 py-6 backdrop-blur-xl lg:flex lg:flex-col">        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.4)]">
           <div className="mb-6 flex items-center gap-3">
             <BrandLogo size={48} className="rounded-2xl border-blue-400/20 bg-blue-500/10" />
             <div>
@@ -69,14 +68,14 @@ export function Sidebar() {
           </nav>
         </div>
 
-        <div className="mt-4 rounded-[28px] border border-amber-300/12 bg-gradient-to-br from-amber-300/10 via-white/[0.03] to-violet-500/10 p-5">
+        {/* <div className="mt-4 rounded-[28px] border border-amber-300/12 bg-gradient-to-br from-amber-300/10 via-white/[0.03] to-violet-500/10 p-5">
           <div className="flex items-center gap-2 text-amber-200">
             <Waves className="h-4 w-4" />
             <span className="text-xs uppercase tracking-[0.28em]">Reward Loop</span>
           </div>
           <p className="mt-3 font-orbitron text-xl text-white">Daily challenge resets in 8h</p>
           <p className="mt-2 text-sm text-white/55">Keep your streak alive to unlock bonus testnet XLM and featured placement.</p>
-        </div>
+        </div> */}
       </aside>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/95 px-2 pt-2 backdrop-blur-xl lg:hidden">

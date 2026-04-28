@@ -26,6 +26,8 @@ export function Navbar() {
   const { isSignedIn } = useAuth()
   const walletMode = isWalletAuthenticated()
   const isAuthenticated = isSignedIn || walletMode
+  if (isAuthenticated) return null
+
   const links = isAuthenticated ? appLinks : publicLinks
 
   return (

@@ -110,7 +110,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen pt-16 md:pt-0">
         <Sidebar />
         <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -123,7 +123,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen pt-16 md:pt-0">
       <Sidebar />
       <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">

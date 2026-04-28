@@ -26,7 +26,29 @@ export function Navbar() {
   const { isSignedIn } = useAuth()
   const walletMode = isWalletAuthenticated()
   const isAuthenticated = isSignedIn || walletMode
-  if (isAuthenticated) return null
+  if (isAuthenticated) {
+    return (
+      <nav className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:hidden">
+        <div className="mx-auto flex h-16 w-full items-center justify-between rounded-full border border-white/10 bg-black/85 px-4 shadow-[0_14px_40px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-xl bg-blue-500/25 blur-lg" />
+              <BrandLogo size={36} className="relative" />
+            </div>
+            <p className="font-orbitron text-xl font-bold text-white">Roastellar</p>
+          </Link>
+
+          <Link
+            href="/wallet"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <Wallet className="h-4 w-4 text-amber-300" />
+            Wallet
+          </Link>
+        </div>
+      </nav>
+    )
+  }
 
   const links = isAuthenticated ? appLinks : publicLinks
 

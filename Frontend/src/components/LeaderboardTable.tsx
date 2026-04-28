@@ -138,39 +138,93 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
-  const [first, second, third] = topThree
+  const getPodiumStyles = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return {
+          bg: 'bg-white/20 backdrop-blur-xl border border-white/30',
+          textColor: 'text-white',
+          height: 'h-80',
+          order: 'order-2',
+        }
+      case 2:
+        return {
+          bg: 'bg-white/15 backdrop-blur-xl border border-white/25',
+          textColor: 'text-white',
+          height: 'h-64',
+          order: 'order-1',
+        }
+      case 3:
+        return {
+          bg: 'bg-white/10 backdrop-blur-xl border border-white/20',
+          textColor: 'text-white',
+          height: 'h-56',
+          order: 'order-3',
+        }
+      default:
+        return {
+          bg: 'bg-white/10 backdrop-blur-xl border border-white/20',
+          textColor: 'text-white',
+          height: 'h-56',
+          order: 'order-4',
+        }
+    }
+  }
+
+  const rankOrder: Record<number, number> = { 1: 0, 2: 1, 3: 2 }
+  const sortedTopThree = [...topThree]
+    .filter((entry) => [1, 2, 3].includes(entry.rank))
+    .sort((a, b) => rankOrder[a.rank] - rankOrder[b.rank])
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {[second, first, third].filter(Boolean).map((entry, index) => {
-        if (!entry) return null
+    <div className="w-full">
+      <div className="mb-16 flex flex-wrap items-end justify-center gap-6">
+        {sortedTopThree.map((entry, index) => {
+          const styles = getPodiumStyles(entry.rank)
+          const rankLabel =
+            entry.rank === 1 ? '1st place' : entry.rank === 2 ? '2nd place' : '3rd place'
+          const avatarFallback = entry.username?.slice(0, 1).toUpperCase() ?? String(entry.rank)
 
-        const order = [2, 1, 3][index]
-        const glow = order === 1
-          ? 'from-amber-300/18 to-amber-500/10 border-amber-300/18'
-          : order === 2
-          ? 'from-slate-300/12 to-slate-500/10 border-slate-200/12'
-          : 'from-amber-700/16 to-amber-500/10 border-amber-600/16'
+          return (
+            <motion.div
+              key={entry.id}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.08 }}
+              className={`flex flex-col items-center ${styles.order}`}
+            >
+              <div className="mb-4">
+                {entry.avatar ? (
+                  <img
+                    src={entry.avatar}
+                    alt={entry.username}
+                    className="h-20 w-20 rounded-full border-4 border-white object-cover shadow-lg"
+                  />
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-amber-300 to-orange-400 text-4xl shadow-lg">
+                    {avatarFallback}
+                  </div>
+                )}
+              </div>
 
-        return (
-          <motion.div
-            key={entry.id}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.08 }}
-            className={cn('glass rounded-[24px] border bg-gradient-to-b p-4 text-center sm:rounded-[32px] sm:p-6', glow)}
-          >
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 font-orbitron text-xl font-bold text-white sm:h-16 sm:w-16 sm:text-2xl">
-              {order}
-            </div>
-            <p className="mt-4 break-all font-orbitron text-xl text-white sm:text-2xl">{entry.username}</p>
-            <p className="mt-2 text-sm text-white/50">{entry.xp.toLocaleString()} XP</p>
-            <div className="mt-4 rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-white/60 sm:text-sm">
-              {entry.wins} wins | {entry.winRate.toFixed(1)}% win rate
-            </div>
-          </motion.div>
-        )
-      })}
+              <div
+                className={`${styles.bg} ${styles.textColor} ${styles.height} flex w-48 flex-col items-center justify-center rounded-3xl px-6 py-8 shadow-2xl`}
+              >
+                <div className="mb-6 rounded-full bg-black/80 px-4 py-2 text-sm font-bold text-white">
+                  {rankLabel}
+                </div>
+                <div className="text-center font-orbitron text-4xl font-bold">
+                  {entry.xp.toLocaleString()}
+                </div>
+                <div className="mt-1 text-xs opacity-75">XP</div>
+                <div className="mt-4 text-center text-sm font-semibold opacity-90">
+                  {entry.username}
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
     </div>
   )
 }

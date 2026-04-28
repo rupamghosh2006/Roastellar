@@ -11,7 +11,9 @@ import { MiniGame } from '@/components/MiniGame'
 import { WalletMintLoader } from '@/components/WalletMintLoader'
 import { WalletReveal } from '@/components/WalletReveal'
 import { apiRoutes, type Wallet } from '@/lib/api'
+import { signFreighterMessage } from '@/lib/freighter'
 import { setOnboardingComplete } from '@/lib/utils'
+import { setWalletAuthSession } from '@/lib/walletAuth'
 
 type Step = 'choice' | 'welcome' | 'game' | 'minting' | 'complete' | 'existingWallet'
 
@@ -21,6 +23,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('choice')
   const [wallet, setWallet] = useState<Wallet | null>(null)
   const [freighterConnected, setFreighterConnected] = useState(false)
+  const [freighterAddress, setFreighterAddress] = useState<string | null>(null)
 
   const handleGameComplete = async () => {
     if (!isSignedIn) {
@@ -56,20 +59,41 @@ export default function OnboardingPage() {
     router.push('/dashboard')
   }
 
-  const continueWithExistingWallet = () => {
+  const continueWithExistingWallet = async () => {
     if (!freighterConnected) {
       toast.error('Please connect your Freighter wallet first.')
       return
     }
-
-    setOnboardingComplete()
-    if (isSignedIn) {
-      router.push('/dashboard')
+    if (!freighterAddress) {
+      toast.error('Freighter wallet address is missing. Please reconnect and try again.')
       return
     }
 
-    toast.success('Freighter connected. You can add Google or email later from sign in.')
-    router.push('/')
+    try {
+      const challenge = await apiRoutes.auth.walletChallenge({
+        walletAddress: freighterAddress,
+      })
+
+      const signed = await signFreighterMessage(challenge.data.challenge, freighterAddress)
+      if (signed.error || !signed.signedMessage) {
+        throw new Error(signed.error || 'Freighter signature was empty')
+      }
+
+      const verified = await apiRoutes.auth.walletVerify({
+        walletAddress: freighterAddress,
+        nonce: challenge.data.nonce,
+        signedMessage: signed.signedMessage,
+        signerAddress: signed.signerAddress || freighterAddress,
+      })
+
+      setWalletAuthSession(verified.data.token, freighterAddress)
+      setOnboardingComplete()
+      toast.success('Freighter connected. Wallet identity unlocked.')
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Wallet login failed:', error)
+      toast.error('Unable to start wallet session. Please try again.')
+    }
   }
 
   return (
@@ -182,13 +206,14 @@ export default function OnboardingPage() {
                   </div>
                   <h2 className="mt-5 font-orbitron text-2xl font-bold text-white sm:text-3xl">Connect your Freighter wallet</h2>
                   <p className="mt-3 text-sm leading-6 text-white/55 sm:text-base">
-                    If you already use Web3, connect Freighter and continue. Google or email is optional during onboarding for this path.
+                    If you already use Web3, connect Freighter and continue anonymously. Sign in stays optional.
                   </p>
                 </div>
 
                 <FreighterConnectCard
                   onConnected={(state) => {
                     setFreighterConnected(Boolean(state.connected))
+                    setFreighterAddress(state.address ?? null)
                   }}
                 />
 

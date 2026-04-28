@@ -10,6 +10,7 @@ import { BattleList } from '@/components/BattleCard'
 import { PageLoader } from '@/components/LoadingScreen'
 import { apiRoutes, normalizeBattleList, type Battle, type User, type Wallet } from '@/lib/api'
 import { connectSocket, joinLobby, onOpenBattlesUpdated, removeAllSocketListeners } from '@/lib/socket'
+import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 
 export default function BattlesPage() {
   const router = useRouter()
@@ -26,7 +27,8 @@ export default function BattlesPage() {
     if (!isLoaded) {
       return
     }
-    if (!isSignedIn) {
+    const walletMode = isWalletAuthenticated()
+    if (!isSignedIn && !walletMode) {
       router.replace('/sign-in')
       return
     }
@@ -34,7 +36,7 @@ export default function BattlesPage() {
     let active = true
     ;(async () => {
       try {
-        const token = await getToken({ skipCache: true })
+        const token = walletMode ? getWalletAuthToken() : await getToken({ skipCache: true })
         if (!token) {
           throw new Error('Missing token')
         }
@@ -116,7 +118,7 @@ export default function BattlesPage() {
 
     try {
       setSubmitting(true)
-      const token = await getToken({ skipCache: true })
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
       if (!token) {
         throw new Error('Missing token')
       }

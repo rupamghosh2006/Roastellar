@@ -26,6 +26,7 @@ import {
   removeAllSocketListeners,
 } from '@/lib/socket'
 import { cn } from '@/lib/utils'
+import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 
 type TimerState = {
   phase: 'starting' | 'active' | 'voting' | null
@@ -65,7 +66,8 @@ export default function BattleRoomPage() {
     if (!isLoaded) {
       return
     }
-    if (!isSignedIn) {
+    const walletMode = isWalletAuthenticated()
+    if (!isSignedIn && !walletMode) {
       router.replace('/sign-in')
       return
     }
@@ -73,7 +75,7 @@ export default function BattleRoomPage() {
     let active = true
     ;(async () => {
       try {
-        const token = await getToken({ skipCache: true })
+        const token = walletMode ? getWalletAuthToken() : await getToken({ skipCache: true })
         if (!token) {
           throw new Error('Missing token')
         }
@@ -238,13 +240,14 @@ export default function BattleRoomPage() {
 
   const currentUserInBattle = useMemo(() => {
     if (!battle) return { isPlayer1: false, isPlayer2: false }
+    const identityId = me?.clerkId || userId
     const player1Clerk = battle.player1?.clerkId
     const player2Clerk = battle.player2?.clerkId
     return {
-      isPlayer1: Boolean(player1Clerk) && player1Clerk === userId,
-      isPlayer2: Boolean(player2Clerk) && player2Clerk === userId,
+      isPlayer1: Boolean(player1Clerk) && player1Clerk === identityId,
+      isPlayer2: Boolean(player2Clerk) && player2Clerk === identityId,
     }
-  }, [battle, userId])
+  }, [battle, me?.clerkId, userId])
 
   const canJoinOpenBattle = useMemo(() => {
     if (!battle || !me) return false
@@ -263,7 +266,7 @@ export default function BattleRoomPage() {
 
     try {
       setActionBusy(true)
-      const token = await getToken({ skipCache: true })
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
       if (!token) {
         throw new Error('Missing token')
       }
@@ -281,7 +284,7 @@ export default function BattleRoomPage() {
   const castVote = async (selectedPlayer: string) => {
     try {
       setActionBusy(true)
-      const token = await getToken({ skipCache: true })
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
       if (!token) {
         throw new Error('Missing token')
       }
@@ -298,7 +301,7 @@ export default function BattleRoomPage() {
   const joinOpenBattle = async () => {
     try {
       setActionBusy(true)
-      const token = await getToken({ skipCache: true })
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
       if (!token) {
         throw new Error('Missing token')
       }
@@ -315,7 +318,7 @@ export default function BattleRoomPage() {
   const placePrediction = async (selectedPlayer: string, amount: number) => {
     try {
       setPredictionBusy(true)
-      const token = await getToken({ skipCache: true })
+      const token = isWalletAuthenticated() ? getWalletAuthToken() : await getToken({ skipCache: true })
       if (!token) {
         throw new Error('Missing token')
       }

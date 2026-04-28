@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     sparse: true,
   },
+  identityWalletAddress: {
+    type: String,
+    default: '',
+  },
   walletEncryptedSecret: {
     type: String,
     default: '',
@@ -58,6 +62,18 @@ const userSchema = new mongoose.Schema({
   onboardingCompleted: {
     type: Boolean,
     default: false,
+  },
+  walletAuthNonce: {
+    type: String,
+    default: '',
+  },
+  walletAuthNonceExpiresAt: {
+    type: Date,
+    default: null,
+  },
+  walletAuthLastVerifiedAt: {
+    type: Date,
+    default: null,
   },
   xp: {
     type: Number,
@@ -116,6 +132,7 @@ userSchema.methods.toPublicJSON = function() {
     lastName: this.lastName,
     imageUrl: this.imageUrl,
     walletPublicKey: this.walletPublicKey,
+    identityWalletAddress: this.identityWalletAddress,
     walletCreatedAt: this.walletCreatedAt,
     walletFunded: this.walletFunded,
     onboardingCompleted: this.onboardingCompleted,

@@ -1,6 +1,6 @@
 'use client'
 
-import { getAddress, getNetwork, isConnected, requestAccess } from '@stellar/freighter-api'
+import { getAddress, getNetwork, isConnected, requestAccess, signMessage } from '@stellar/freighter-api'
 
 export interface FreighterState {
   available: boolean
@@ -109,6 +109,38 @@ export async function connectFreighter(): Promise<FreighterState> {
       address: null,
       network: null,
       networkPassphrase: null,
+      error: extractError(error),
+    }
+  }
+}
+
+export async function signFreighterMessage(message: string, address?: string): Promise<{ signedMessage: string; signerAddress: string; error: string | null }> {
+  try {
+    const result = await signMessage(message, { address })
+    if ('error' in result && result.error) {
+      return { signedMessage: '', signerAddress: '', error: extractError(result.error) }
+    }
+
+    const raw = result.signedMessage
+    if (!raw) {
+      return { signedMessage: '', signerAddress: result.signerAddress || '', error: 'Freighter returned an empty signature' }
+    }
+
+    const signedMessage = typeof raw === 'string'
+      ? raw
+      : typeof raw === 'object' && raw && 'data' in raw
+      ? btoa(String.fromCharCode(...((raw as { data: number[] }).data || [])))
+      : String(raw)
+
+    return {
+      signedMessage,
+      signerAddress: result.signerAddress || '',
+      error: null,
+    }
+  } catch (error) {
+    return {
+      signedMessage: '',
+      signerAddress: '',
       error: extractError(error),
     }
   }

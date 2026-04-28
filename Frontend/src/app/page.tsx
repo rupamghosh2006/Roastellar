@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Coins, Flame, ShieldCheck, Sparkles, Swords, Trophy, Wallet } from 'lucide-react'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/api'
 import { isOnboardingComplete } from '@/lib/utils'
+import { isWalletAuthenticated } from '@/lib/walletAuth'
 
 const features = [
   { icon: Swords, title: 'Live roast battles', copy: 'Fast-paced match rooms with real-time submissions, votes, and reactions.' },
@@ -29,7 +30,7 @@ export default function LandingPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
 
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!isSignedIn && !isWalletAuthenticated()) return
     router.replace(isOnboardingComplete() ? '/dashboard' : '/onboarding')
   }, [isSignedIn, router])
 

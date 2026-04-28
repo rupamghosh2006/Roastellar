@@ -9,6 +9,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { PageLoader } from '@/components/LoadingScreen'
 import { apiRoutes, type User } from '@/lib/api'
 import { formatAddress, formatDate } from '@/lib/utils'
+import { clearWalletAuthSession, getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -20,22 +21,21 @@ export default function ProfilePage() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [loading, setLoading] = useState(true)
+  const walletMode = isWalletAuthenticated()
 
   useEffect(() => {
     if (!isLoaded) {
       return
     }
 
-    if (!isSignedIn) {
+    if (!isSignedIn && !walletMode) {
       router.replace('/sign-in')
       return
     }
 
-    getToken({ skipCache: true })
+    Promise.resolve(walletMode ? getWalletAuthToken() : getToken({ skipCache: true }))
       .then((token) => {
-        if (!token) {
-          throw new Error('Missing Clerk session token')
-        }
+        if (!token) throw new Error('Missing auth token')
         return apiRoutes.users.me(token)
       })
       .then((response) => {
@@ -61,10 +61,8 @@ export default function ProfilePage() {
 
     try {
       setSaving(true)
-      const token = await getToken({ skipCache: true })
-      if (!token) {
-        throw new Error('Missing Clerk session token')
-      }
+      const token = walletMode ? getWalletAuthToken() : await getToken({ skipCache: true })
+      if (!token) throw new Error('Missing auth token')
 
       const response = await apiRoutes.users.updateProfile({
         username: normalizedUsername,
@@ -127,12 +125,26 @@ export default function ProfilePage() {
                   <PenSquare className="h-4 w-4" />
                   {isEditing ? 'Cancel Edit' : 'Edit Profile'}
                 </button>
-                <SignOutButton>
-                  <button className="inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-500/10 px-5 py-3 font-medium text-rose-100/90 transition-colors hover:bg-rose-500/20">
+                {walletMode ? (
+                  <button
+                    onClick={() => {
+                      clearWalletAuthSession()
+                      toast.success('Wallet session disconnected')
+                      router.push('/')
+                    }}
+                    className="inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-500/10 px-5 py-3 font-medium text-rose-100/90 transition-colors hover:bg-rose-500/20"
+                  >
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    Disconnect Wallet Session
                   </button>
-                </SignOutButton>
+                ) : (
+                  <SignOutButton>
+                    <button className="inline-flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-500/10 px-5 py-3 font-medium text-rose-100/90 transition-colors hover:bg-rose-500/20">
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </SignOutButton>
+                )}
               </div>
             </div>
 

@@ -377,62 +377,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="leaderboard-preview" className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="glass rounded-2xl border border-white/8 p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Leaderboard preview</p>
-              <h2 className="mt-3 font-orbitron text-4xl font-bold text-white">Competitive by default</h2>
-            </div>
-            <Link href="/onboarding" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors">
-              Join the leaderboard →
-            </Link>
-          </div>
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {topLeaderboard.length > 0 ? topLeaderboard.map((entry, index) => {
-              const rankColors = ['bg-yellow-500/10 border-l-yellow-500/40', 'bg-gray-500/10 border-l-gray-400/40', 'bg-orange-600/10 border-l-orange-700/40'];
-              const rankBg = rankColors[index];
-              const rankTextColor = index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : 'text-orange-400';
-              return (
-              <div key={entry.id} className={`glass rounded-xl p-5 border-l-4 ${rankBg}`}>
-                <div className="flex items-center justify-between">
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-full font-orbitron text-white font-bold ${
-                    index === 0 ? 'bg-yellow-500/20 text-yellow-300' :
-                    index === 1 ? 'bg-gray-500/20 text-gray-300' :
-                    'bg-orange-600/20 text-orange-300'
-                  }`}>
-                    #{index + 1}
-                  </div>
-                  <Trophy className={`h-5 w-5 ${rankTextColor}`} />
-                </div>
-                <p className="mt-5 font-orbitron text-2xl text-white">{entry.username}</p>
-                <p className="mt-2 text-sm text-slate-400">{entry.xp.toLocaleString()} XP</p>
-                <div className="mt-4 chip-fire">
-                  {entry.wins} wins
-                </div>
-              </div>
-            )}) : (
-              <div className="glass rounded-xl p-5 text-slate-400">
-                Leaderboard data will show here once players start competing.
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-3">
-          {arenaSignals.slice(0, 3).map((signal, idx) => {
-            const signalColors = ['border-l-orange-500/40', 'border-l-violet-500/40', 'border-l-cyan-500/40'];
-            return (
-            <div key={signal} className={`glass rounded-xl p-6 text-slate-300 border-l-4 ${signalColors[idx]}`}>
-              <p className="text-lg leading-8">{signal}</p>
-              <p className="mt-6 text-sm uppercase tracking-[0.28em] text-slate-500">Arena Signal</p>
-            </div>
-          )})}
-        </div>
-      </section>
 
       <footer className="border-t border-white/8 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">

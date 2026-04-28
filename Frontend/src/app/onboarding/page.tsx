@@ -132,9 +132,9 @@ export default function OnboardingPage() {
                 <h1 className="font-orbitron text-3xl font-black text-white sm:text-4xl md:text-5xl">
                   Are you new to Web3?
                 </h1>
-                <p className="mt-4 text-base leading-7 text-slate-400 sm:text-lg">
+                {/* <p className="mt-4 text-base leading-7 text-slate-400 sm:text-lg">
                   New users can get a managed wallet through our guided challenge. Existing Web3 users can connect Freighter directly.
-                </p>
+                </p> */}
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
                   <button
@@ -142,14 +142,14 @@ export default function OnboardingPage() {
                     className="glass rounded-xl border-l-4 border-l-orange-500/50 p-6 text-left transition-colors hover:bg-white/10 hover:border-l-orange-500/70"
                   >
                     <p className="font-orbitron text-xl text-white">Yes, I&apos;m new</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-400">Create my wallet in Roastellar and continue with the current onboarding flow.</p>
+                    {/* <p className="mt-3 text-sm leading-6 text-slate-400">Create my wallet in Roastellar and continue with the current onboarding flow.</p> */}
                   </button>
                   <button
                     onClick={() => setStep('existingWallet')}
                     className="glass rounded-xl border-l-4 border-l-violet-500/50 p-6 text-left transition-colors hover:bg-white/10 hover:border-l-violet-500/70"
                   >
                     <p className="font-orbitron text-xl text-white">No, I have a wallet</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-400">Connect Freighter now. Google or email can stay optional for this step.</p>
+                    {/* <p className="mt-3 text-sm leading-6 text-slate-400">Connect Freighter now. Google or email can stay optional for this step.</p> */}
                   </button>
                 </div>
               </div>

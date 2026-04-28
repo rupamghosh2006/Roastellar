@@ -12,7 +12,7 @@ import { BrandLogo } from '@/components/BrandLogo'
 const publicLinks = [
   { href: '#how-it-works', label: 'How It Works' },
   { href: '#features', label: 'Features' },
-  { href: '#leaderboard-preview', label: 'Leaderboard' },
+  // { href: '#leaderboard-preview', label: 'Leaderboard' },
 ]
 
 const appLinks = [

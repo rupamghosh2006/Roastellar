@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@/components/ClerkProvider'
 import { Navbar } from '@/components/Navbar'
-import { WarpBackground } from '@/components/WarpBackground'
+import { AppBackground } from '@/components/AppBackground'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function RootLayout({
     <html lang="en" className="dark" data-scroll-behavior="smooth">
       <body className="font-inter antialiased">
         <ClerkProvider>
-          <WarpBackground />
+          <AppBackground />
           <div className="relative z-10">
             <Navbar />
             {children}

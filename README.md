@@ -62,14 +62,6 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 
 **Full Feedback Data:** [Google Sheets Export](https://docs.google.com/spreadsheets/d/1bQhjQawRHuge7KuS5utRJ055WBbf2KfnXiU75W_4m1o/edit?usp=sharing)
 
-## Community Contribution
-
-**Tweet Link:** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
-
-**Screenshot:**
-
-![Community Contribution Screenshot](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777480736/communityContribution_hkhrcz.jpg)
-
 ### User Feedback Implementation
 
 | User Name | User Email | User Wallet Address | User Feedback | Commit ID (Where changes made according to the user feedback) |
@@ -80,7 +72,7 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 | Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | Improve UI/UX, reduce mock/demo parts. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
 | Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | Mobile menu button redundant; add Clerk logout button. | `6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1`, `fa368559be91147008b212585b30a98294be9c7c` |
 
-## Next Iteration Improvements
+<!-- ## Next Iteration Improvements
 
 Based on user feedback, the following improvements are planned:
 
@@ -99,7 +91,7 @@ Based on user feedback, the following improvements are planned:
 
 ### 4. Logout button
 - **Issue:** User needed a dedicated logout button
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/fa368559be91147008b212585b30a98294be9c7c
+- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/fa368559be91147008b212585b30a98294be9c7c -->
 
 ## Architecture
 
@@ -184,6 +176,15 @@ stellar contract deploy \
 - Automatic prize distribution (1% platform fee)
 - Draw refunds
 - Badge rewards (FirstWin, FiveWins, TenMatches)
+
+## Community Contribution
+
+**Tweet Link:** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
+
+**Screenshot:**
+
+![Community Contribution Screenshot](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777480736/communityContribution_hkhrcz.jpg)
+
 
 ## License
 

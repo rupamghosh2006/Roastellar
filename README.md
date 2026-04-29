@@ -8,6 +8,20 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 **Demo Video:** https://youtu.be/iDdfbYiBElk
 
+### Screenshots - Laptop View
+
+![Home Page](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471812/Screenshot_2026-04-29_193301_cdpq4l.png)
+
+![Dashboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471827/Screenshot_2026-04-29_193031_vh5hc3.png)
+
+![Battles](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471826/Screenshot_2026-04-29_193052_utxsyw.png)
+
+![Battle Room](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471810/Screenshot_2026-04-29_193230_kir3ce.png)
+
+![Leaderboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471810/Screenshot_2026-04-29_193219_upoxi9.png)
+
+![Profile](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471810/Screenshot_2026-04-29_193106_kpogwn.png)
+
 ## Smart Contract
 
 **Contract ID (Testnet):** `CARHXRUOPEG7X4JTRJ64JUJB2FCRBMUOYECTZTMOKCPPKZGLKW36XCQ2`

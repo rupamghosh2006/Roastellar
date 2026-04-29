@@ -1,6 +1,7 @@
 name: Backend CI/CD
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "Backend/**"

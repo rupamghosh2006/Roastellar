@@ -29,7 +29,7 @@ jobs:
         run: find src -name "*.js" -print0 | xargs -0 -n1 node --check
 
   deploy-render:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: ci
     runs-on: ubuntu-latest
     steps:

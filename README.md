@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Frontend/public/logo.jpeg" alt="Roastellar Logo" width="200" />
+</p>
+
 # Roastellar
 
 A fully on-chain roast battle platform built on Stellar Soroban.

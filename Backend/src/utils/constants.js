@@ -17,6 +17,9 @@ module.exports = {
   EVENT_TYPES: {
     LOGIN: 'login',
     WALLET_CREATED: 'wallet_created',
+    WALLET_FUNDED: 'wallet_funded',
+    ONBOARDING_COMPLETED: 'onboarding_completed',
+    PROFILE_UPDATED: 'profile_updated',
     BATTLE_CREATED: 'battle_created',
     BATTLE_JOINED: 'battle_joined',
     ROAST_SUBMITTED: 'roast_submitted',

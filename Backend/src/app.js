@@ -15,6 +15,7 @@ const leaderboardRoutes = require('./modules/leaderboard/routes/leaderboard.rout
 const clerkRoutes = require('./modules/auth/routes/clerk.routes');
 const walletAuthRoutes = require('./modules/auth/routes/wallet-auth.routes');
 const walletRoutes = require('./modules/wallet/wallet.routes');
+const analyticsRoutes = require('./modules/analytics/routes/analytics.routes');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -74,6 +75,7 @@ app.use('/api/battles', battleRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

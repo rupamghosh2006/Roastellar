@@ -108,6 +108,21 @@ export interface LeaderboardEntry extends User {
   winRate: number
 }
 
+export interface PublicMetrics {
+  trackingStartedAt: string
+  totalUsers: number
+  onboardedUsers: number
+  walletCreatedUsers: number
+  totalBattles: number
+  openBattles: number
+  activeBattles: number
+  votingBattles: number
+  endedBattles: number
+  totalVotes: number
+  totalPredictions: number
+  eventsLast24h: number
+}
+
 type ApiEnvelope<T> = {
   success?: boolean
   message?: string
@@ -418,5 +433,9 @@ export const apiRoutes = {
     refundTest: (token?: string) => getAndNormalize(api.post<BackendWallet>('/api/wallet/refund-test', undefined, authConfig(token)), normalizeWallet),
     exportSecret: (token?: string) =>
       getAndNormalize(api.post<BackendWalletSecretExport>('/api/wallet/export-secret', undefined, authConfig(token)), normalizeWalletSecretExport),
+  },
+  analytics: {
+    metrics: () =>
+      getAndNormalize(api.get<PublicMetrics>('/api/analytics/metrics'), (data) => data),
   },
 }

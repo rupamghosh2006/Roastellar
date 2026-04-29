@@ -2,6 +2,8 @@ const User = require('../users/models/user.model');
 const ApiResponse = require('../../utils/apiResponse');
 const walletService = require('./wallet.service');
 const logger = require('../../utils/logger');
+const { EVENT_TYPES } = require('../../utils/constants');
+const analyticsService = require('../analytics/services/analytics.service');
 
 function walletPayload(user, balance = 0) {
   const publicKey = user.identityWalletAddress || user.walletPublicKey;
@@ -47,6 +49,14 @@ exports.createWallet = async (req, res, next) => {
     user.walletFunded = false;
     user.onboardingCompleted = true;
     await user.save();
+    await analyticsService.trackEvent(EVENT_TYPES.WALLET_CREATED, user._id, {
+      clerkId: user.clerkId,
+      publicKey,
+    });
+    await analyticsService.trackEvent(EVENT_TYPES.ONBOARDING_COMPLETED, user._id, {
+      clerkId: user.clerkId,
+      onboardingCompleted: true,
+    });
 
     let balance = 0;
     let fundingPending = false;
@@ -54,6 +64,10 @@ exports.createWallet = async (req, res, next) => {
       await walletService.fundWithFriendbot(publicKey);
       user.walletFunded = true;
       await user.save();
+      await analyticsService.trackEvent(EVENT_TYPES.WALLET_FUNDED, user._id, {
+        clerkId: user.clerkId,
+        publicKey,
+      });
       balance = await walletService.getBalance(publicKey);
     } catch (fundingError) {
       fundingPending = true;
@@ -122,6 +136,11 @@ exports.refundTestWallet = async (req, res, next) => {
     await walletService.fundWithFriendbot(user.walletPublicKey);
     user.walletFunded = true;
     await user.save();
+    await analyticsService.trackEvent(EVENT_TYPES.WALLET_FUNDED, user._id, {
+      clerkId: user.clerkId,
+      publicKey: user.walletPublicKey,
+      trigger: 'refund_test',
+    });
 
     const balance = await walletService.getBalance(user.walletPublicKey);
     return ApiResponse.success(res, walletPayload(user, balance), 'Wallet re-funded');

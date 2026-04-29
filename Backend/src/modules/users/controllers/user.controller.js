@@ -1,6 +1,8 @@
 const User = require('../models/user.model');
 const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
+const { EVENT_TYPES } = require('../../../utils/constants');
+const analyticsService = require('../../analytics/services/analytics.service');
 
 function normalizeUsername(value) {
   if (typeof value !== 'string') {
@@ -91,6 +93,9 @@ exports.updateProfile = async (req, res) => {
       updates,
       { new: true, runValidators: true }
     );
+    await analyticsService.trackEvent(EVENT_TYPES.PROFILE_UPDATED, user._id, {
+      fields: Object.keys(updates),
+    });
 
     return ApiResponse.success(res, updatedUser.toPublicJSON(), 'Profile updated');
   } catch (error) {

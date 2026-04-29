@@ -48,14 +48,13 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 ## Testnet Users (Verified)
 
-| Name | Wallet Address | Rating |
-|------|----------------|--------|
-| Dipika Ghosh | `GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER` | 4/5 |
-| Bodhisatwa Dutta | `GA6LENTHFAG3UY2HK7V24RBGYKIQTPLPG42G5QT26VILKB7KXLUR2ACI` | 4/5 |
-| ABANTIKA KUNDU | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` | 5/5 |
-| Anubhab Rakshit | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | 3/5 |
-| Debasmit Bose | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | 4/5 |
-| Rakhi Kundu | `GDNNF4DU7LZF7SMXRCDCEQTBKV5733I2BUUDSOHDYK6NFUB4URN3XAJM` | 5/5 |
+| User Name | User Email | User Wallet Address |
+|------|-------|---------------------|
+| Dipika Ghosh | dipikaghosh791@gmail.com | `GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER` |
+| Bodhisatwa Dutta | bodhisatwadutta025@gmail.com | `GA6LENTHFAG3UY2HK7V24RBGYKIQTPLPG42G5QT26VILKB7KXLUR2ACI` |
+| ABANTIKA KUNDU | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` |
+| Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` |
+| Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` |
 
 View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
 
@@ -63,22 +62,15 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 
 **Full Feedback Data:** [Google Sheets Export](https://docs.google.com/spreadsheets/d/1bQhjQawRHuge7KuS5utRJ055WBbf2KfnXiU75W_4m1o/edit?usp=sharing)
 
-### Feedback Summary
+### User Feedback Implementation
 
-| User | Key Feedback |
-|------|--------------|
-| Dipika Ghosh | Loved the game - rated 5/5 on UI, fun factor, and onboarding. All features work. |
-| Bodhisatwa Dutta | UI feels hard-coded. Wallet reveal part needs improvement. |
-| ABANTIKA KUNDU | Web2-like onboarding excellent. Voting not working properly (shows draw). |
-| Anubhab Rakshit | Too many mock/demo parts in UI. Improve UX. |
-| Debasmit Bose | Mobile responsive menu button useless. Need Clerk logout button. |
-| Rakhi Kundu | Perfect experience - rated 5/5 on all aspects. Everything on point. |
-
-### Common Themes
-1. **Voting bugs** - Match shows draw even after voting
-2. **UI/UX improvements** - Too many hardcoded/demo parts
-3. **Mobile responsiveness** - Menu button redundancy
-4. **Authentication** - Need logout functionality
+| User Name | User Email | User Wallet Address | User Feedback | Commit ID (Where changes made according to the user feedback) |
+|----------|------------|---------------------|---------------|------------------------------|
+| Dipika Ghosh | dipikaghosh791@gmail.com | `GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER` | Overall positive experience, no specific issue reported. | N/A |
+| Bodhisatwa Dutta | bodhisatwadutta025@gmail.com | `GA6LENTHFAG3UY2HK7V24RBGYKIQTPLPG42G5QT26VILKB7KXLUR2ACI` | UI looks hard coded, wallet reveal part needs improvement. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
+| ABANTIKA KUNDU | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` | Voting issue: match still shows draw after voting. | `532bd9c094b76e9ef50bd06cd54098a2b7e47eb5` |
+| Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | Improve UI/UX, reduce mock/demo parts. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
+| Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | Mobile menu button redundant; add Clerk logout button. | `6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1`, `fa368559be91147008b212585b30a98294be9c7c` |
 
 ## Next Iteration Improvements
 

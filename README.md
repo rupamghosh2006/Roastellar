@@ -62,6 +62,14 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 
 **Full Feedback Data:** [Google Sheets Export](https://docs.google.com/spreadsheets/d/1bQhjQawRHuge7KuS5utRJ055WBbf2KfnXiU75W_4m1o/edit?usp=sharing)
 
+## Community Contribution
+
+**Tweet Link:** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
+
+**Screenshot:**
+
+![Community Contribution Screenshot](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777480736/communityContribution_hkhrcz.jpg)
+
 ### User Feedback Implementation
 
 | User Name | User Email | User Wallet Address | User Feedback | Commit ID (Where changes made according to the user feedback) |

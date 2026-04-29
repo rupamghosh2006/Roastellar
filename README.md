@@ -4,6 +4,10 @@
 
 # Roastellar
 
+[![Contracts CI](https://github.com/rupamghosh2006/Roastellar/actions/workflows/contracts-ci.yml/badge.svg)](https://github.com/rupamghosh2006/Roastellar/actions/workflows/contracts-ci.yml)
+[![Backend CI/CD](https://github.com/rupamghosh2006/Roastellar/actions/workflows/backend-ci-cd.yml/badge.svg)](https://github.com/rupamghosh2006/Roastellar/actions/workflows/backend-ci-cd.yml)
+[![Frontend CI/CD](https://github.com/rupamghosh2006/Roastellar/actions/workflows/frontend-ci-cd.yml/badge.svg)](https://github.com/rupamghosh2006/Roastellar/actions/workflows/frontend-ci-cd.yml)
+
 A fully on-chain roast battle platform built on Stellar Soroban.
 
 ## Live Demo
@@ -100,6 +104,29 @@ Based on user feedback, the following improvements are planned:
 ## Architecture
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system architecture documentation.
+
+## CI/CD Setup
+
+This repo now includes GitHub Actions for:
+- `contracts` CI: `/.github/workflows/contracts-ci.yml`
+- `Backend` CI/CD with Render deploy hook: `/.github/workflows/backend-ci-cd.yml`
+- `Frontend` CI/CD with Vercel CLI deploy: `/.github/workflows/frontend-ci-cd.yml`
+
+### Required GitHub Secrets
+
+Add these in your GitHub repo settings:
+- `RENDER_DEPLOY_HOOK_URL`: Render Web Service deploy hook URL for backend.
+- `VERCEL_TOKEN`: Vercel personal/team token with deploy access.
+
+### Render Connection (Backend)
+
+- `render.yaml` is added at repo root for Blueprint-based setup.
+- Service is configured with `rootDir: Backend`, `buildCommand: npm ci`, `startCommand: npm start`.
+
+### Vercel Connection (Frontend)
+
+- `Frontend/vercel.json` is added for reproducible Next.js build/install commands.
+- Link the `Frontend` folder to your Vercel project (`Root Directory = Frontend`).
 
 ## Quick Start
 

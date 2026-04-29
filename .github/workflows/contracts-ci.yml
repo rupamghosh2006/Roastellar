@@ -32,4 +32,4 @@ jobs:
           workspaces: contracts/roastellar
 
       - name: Run contract tests
-        run: cargo test --locked
+        run: cargo test

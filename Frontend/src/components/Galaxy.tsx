@@ -232,13 +232,11 @@ export default function Galaxy({
       gl.clearColor(0, 0, 0, 1)
     }
 
-    let program: Program | null = null
-
     function resize() {
       const scale = 1
       renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale)
-      if (program) {
-        program.uniforms.uResolution.value = new Color(
+      if (shaderProgram) {
+        shaderProgram.uniforms.uResolution.value = new Color(
           gl.canvas.width,
           gl.canvas.height,
           gl.canvas.width / gl.canvas.height
@@ -246,10 +244,10 @@ export default function Galaxy({
       }
     }
     window.addEventListener('resize', resize, false)
-    resize()
+    
 
     const geometry = new Triangle(gl)
-    program = new Program(gl, {
+    const shaderProgram = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
       uniforms: {
@@ -278,14 +276,16 @@ export default function Galaxy({
       },
     })
 
-    const mesh = new Mesh(gl, { geometry, program })
+    resize()
+
+    const mesh = new Mesh(gl, { geometry, program: shaderProgram })
     let animateId = 0
 
     function update(t: number) {
       animateId = requestAnimationFrame(update)
       if (!disableAnimation) {
-        program.uniforms.uTime.value = t * 0.001
-        program.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0
+        shaderProgram.uniforms.uTime.value = t * 0.001
+        shaderProgram.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0
       }
 
       const lerpFactor = 0.05
@@ -294,9 +294,9 @@ export default function Galaxy({
 
       smoothMouseActive.current += (targetMouseActive.current - smoothMouseActive.current) * lerpFactor
 
-      program.uniforms.uMouse.value[0] = smoothMousePos.current.x
-      program.uniforms.uMouse.value[1] = smoothMousePos.current.y
-      program.uniforms.uMouseActiveFactor.value = smoothMouseActive.current
+      shaderProgram.uniforms.uMouse.value[0] = smoothMousePos.current.x
+      shaderProgram.uniforms.uMouse.value[1] = smoothMousePos.current.y
+      shaderProgram.uniforms.uMouseActiveFactor.value = smoothMouseActive.current
 
       renderer.render({ scene: mesh })
     }

@@ -25,17 +25,21 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 ### Screenshots - Laptop View
 
-![Home Page](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471812/Screenshot_2026-04-29_193301_cdpq4l.png)
+![Home Page](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777580848/Screenshot_2026-05-01_015629_h0q3jf.png)
 
-![Dashboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471827/Screenshot_2026-04-29_193031_vh5hc3.png)
+![sign-in](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777580979/Screenshot_2026-05-01_015858_hmybsr.png)
 
-![Battles](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471826/Screenshot_2026-04-29_193052_utxsyw.png)
+![wallet](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581085/Screenshot_2026-05-01_014217_jowynb.png)
 
-![Battle Room](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471810/Screenshot_2026-04-29_193230_kir3ce.png)
+![Battles](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581315/Screenshot_2026-05-01_014242_irpvgg.png)
 
-![Leaderboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471810/Screenshot_2026-04-29_193219_upoxi9.png)
+![Battle Room](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581282/Screenshot_2026-05-01_015201_u8fk8o.png)
 
-![Profile](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777471810/Screenshot_2026-04-29_193106_kpogwn.png)
+![Leaderboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581166/Screenshot_2026-05-01_013604_cxtlce.png)
+
+![Profile](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581354/Screenshot_2026-05-01_014118_ed9fot.png)
+
+![wallet-auth](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581495/Screenshot_2026-05-01_020757_woz7tt.png)
 
 ### Screenshots - Mobile View
 

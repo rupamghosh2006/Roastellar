@@ -31,8 +31,8 @@ export function Sidebar() {
           <div className="mb-6 flex items-center gap-3">
             <BrandLogo size={48} className="rounded-2xl border-blue-400/20 bg-blue-500/10" />
             <div>
-              <p className="font-orbitron text-lg font-bold text-white">Arena Core</p>
-              <p className="text-xs uppercase tracking-[0.28em] text-white/35">Premium Access</p>
+              <p className="font-orbitron text-lg font-bold text-white">Roastellar</p>
+              {/* <p className="text-xs uppercase tracking-[0.28em] text-white/35">Premium Access</p> */}
             </div>
           </div>
 

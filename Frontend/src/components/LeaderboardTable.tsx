@@ -1,11 +1,45 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { TrendingUp } from 'lucide-react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ChampionIcon } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import type { LeaderboardEntry } from '@/lib/api'
+import ElectricBorder from '@/components/ElectricBorder'
+
+function AnimatedItem({
+  children,
+  delay = 0,
+  index,
+  onMouseEnter,
+  onClick,
+}: {
+  children: ReactNode
+  delay?: number
+  index: number
+  onMouseEnter: () => void
+  onClick: () => void
+}) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const inView = useInView(ref, { amount: 0.5, once: false })
+
+  return (
+    <motion.div
+      ref={ref}
+      data-index={index}
+      onMouseEnter={onMouseEnter}
+      onClick={onClick}
+      initial={{ scale: 0.7, opacity: 0 }}
+      animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
+      transition={{ duration: 0.2, delay }}
+      className="mb-4 cursor-pointer"
+    >
+      {children}
+    </motion.div>
+  )
+}
 
 export function LeaderboardTable({
   entries,
@@ -14,96 +48,128 @@ export function LeaderboardTable({
   entries: LeaderboardEntry[]
   currentUserId?: string
 }) {
-  return (
-    <div className="glass overflow-hidden rounded-[24px] sm:rounded-[32px]">
-      <div className="space-y-3 p-3 md:hidden">
-        {entries.map((entry) => (
-          <div
-            key={entry.id}
-            className={cn(
-              'rounded-2xl border border-white/10 bg-white/[0.03] p-4',
-              currentUserId === entry.clerkId && 'bg-blue-500/10'
-            )}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/22 to-violet-500/18 font-semibold text-white">
-                  {entry.username?.[0]?.toUpperCase() ?? '?'}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{entry.username}</p>
-                  <p className="text-xs text-white/50">#{entry.rank} rank</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-orbitron text-sm text-white">{entry.xp.toLocaleString()}</p>
-                <p className="text-[11px] text-white/45">XP</p>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between text-xs text-white/65">
-              <span>{entry.wins} wins</span>
-              <span>{entry.winRate.toFixed(1)}% win rate</span>
-            </div>
-          </div>
-        ))}
-      </div>
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [keyboardNav, setKeyboardNav] = useState(false)
+  const [topGradientOpacity, setTopGradientOpacity] = useState(0)
+  const [bottomGradientOpacity, setBottomGradientOpacity] = useState(1)
 
-      <div className="hidden overflow-x-auto md:block">
-        <table className="min-w-full">
-          <thead>
-            <tr className="border-b border-white/10 bg-white/[0.03] text-left">
-              {['Rank', 'User', 'XP', 'Wins', 'Win Rate'].map((heading) => (
-                <th key={heading} className="px-6 py-4 text-xs uppercase tracking-[0.2em] text-white/40">
-                  {heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((entry, index) => (
-              <motion.tr
-                key={entry.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03 }}
-                className={cn(
-                  'border-b border-white/8 transition-colors hover:bg-white/[0.03]',
-                  currentUserId === entry.clerkId && 'bg-blue-500/10'
-                )}
-              >
-                <td className="px-6 py-5">
+  const handleItemMouseEnter = useCallback((index: number) => {
+    setSelectedIndex(index)
+  }, [])
+
+  const handleItemClick = useCallback((index: number) => {
+    setSelectedIndex(index)
+  }, [])
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+    setTopGradientOpacity(Math.min(scrollTop / 50, 1))
+    const bottomDistance = scrollHeight - (scrollTop + clientHeight)
+    setBottomGradientOpacity(scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1))
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
+        e.preventDefault()
+        setKeyboardNav(true)
+        setSelectedIndex((prev) => Math.min(prev + 1, entries.length - 1))
+      } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
+        e.preventDefault()
+        setKeyboardNav(true)
+        setSelectedIndex((prev) => Math.max(prev - 1, 0))
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [entries.length])
+
+  useEffect(() => {
+    if (!keyboardNav || selectedIndex < 0 || !listRef.current) return
+
+    const container = listRef.current
+    const selectedItem = container.querySelector<HTMLElement>(`[data-index="${selectedIndex}"]`)
+    if (selectedItem) {
+      const extraMargin = 50
+      const containerScrollTop = container.scrollTop
+      const containerHeight = container.clientHeight
+      const itemTop = selectedItem.offsetTop
+      const itemBottom = itemTop + selectedItem.offsetHeight
+
+      if (itemTop < containerScrollTop + extraMargin) {
+        container.scrollTo({ top: itemTop - extraMargin, behavior: 'smooth' })
+      } else if (itemBottom > containerScrollTop + containerHeight - extraMargin) {
+        container.scrollTo({
+          top: itemBottom - containerHeight + extraMargin,
+          behavior: 'smooth',
+        })
+      }
+    }
+    setKeyboardNav(false)
+  }, [keyboardNav, selectedIndex])
+
+  useEffect(() => {
+    if (!listRef.current) return
+    const container = listRef.current
+    setBottomGradientOpacity(container.scrollHeight <= container.clientHeight ? 0 : 1)
+  }, [entries.length])
+
+  return (
+    <div className="glass relative w-full overflow-hidden rounded-[24px] p-4 sm:rounded-[32px]">
+      <div
+        ref={listRef}
+        className="max-h-[400px] overflow-y-auto p-2 [scrollbar-color:#222_#120F17] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#222] [&::-webkit-scrollbar-track]:bg-[#120F17] [&::-webkit-scrollbar]:w-[8px]"
+        onScroll={handleScroll}
+      >
+        {entries.map((entry, index) => (
+          <AnimatedItem
+            key={entry.id}
+            delay={0.1}
+            index={index}
+            onMouseEnter={() => handleItemMouseEnter(index)}
+            onClick={() => handleItemClick(index)}
+          >
+            <div
+              className={cn(
+                'rounded-xl border border-white/10 bg-[#111] p-4 transition-colors',
+                selectedIndex === index && 'bg-[#222]',
+                currentUserId === entry.clerkId && 'border-blue-400/40 bg-blue-500/10'
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
                   <RankBadge rank={entry.rank} />
-                </td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/22 to-violet-500/18 font-semibold text-white">
-                      {entry.username?.[0]?.toUpperCase() ?? '?'}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{entry.username}</p>
-                      <div className="mt-1 flex flex-wrap gap-2">
-                        {entry.badges?.slice(0, 2).map((badge) => (
-                          <span key={badge} className="rounded-full bg-white/6 px-2 py-1 text-[11px] uppercase tracking-[0.2em] text-white/45">
-                            {badge}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/22 to-violet-500/18 font-semibold text-white">
+                    {entry.username?.[0]?.toUpperCase() ?? '?'}
                   </div>
-                </td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-2 font-orbitron text-white">
+                  <div>
+                    <p className="font-semibold text-white">{entry.username}</p>
+                    <p className="text-xs text-white/50">{entry.wins} wins</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center justify-end gap-2 font-orbitron text-white">
                     <TrendingUp className="h-4 w-4 text-blue-200" />
                     {entry.xp.toLocaleString()}
                   </div>
-                </td>
-                <td className="px-6 py-5 text-white/85">{entry.wins}</td>
-                <td className="px-6 py-5 text-white/70">{entry.winRate.toFixed(1)}%</td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
+                  <p className="text-xs text-white/60">{entry.winRate.toFixed(1)}% win rate</p>
+                </div>
+              </div>
+            </div>
+          </AnimatedItem>
+        ))}
       </div>
+
+      <div
+        className="pointer-events-none absolute left-0 right-0 top-0 h-[50px] bg-gradient-to-b from-[#120F17] to-transparent transition-opacity duration-300 ease"
+        style={{ opacity: topGradientOpacity }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#120F17] to-transparent transition-opacity duration-300 ease"
+        style={{ opacity: bottomGradientOpacity }}
+      />
     </div>
   )
 }
@@ -140,6 +206,13 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
+  const getElectricColor = (rank: number) => {
+    if (rank === 1) return '#22e6b9'
+    if (rank === 2) return '#abd8da'
+    if (rank === 3) return '#a54b0f'
+    return '#5227FF'
+  }
+
   const getPodiumStyles = (rank: number) => {
     switch (rank) {
       case 1:
@@ -209,20 +282,28 @@ export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
                 )}
               </div>
 
-              <div
-                className={`${styles.bg} ${styles.textColor} ${styles.height} flex w-48 flex-col items-center justify-center rounded-3xl px-6 py-8 shadow-2xl`}
+              <ElectricBorder
+                color={getElectricColor(entry.rank)}
+                speed={1}
+                chaos={0.12}
+                borderRadius={24}
+                className="rounded-3xl"
               >
-                <div className="mb-6 rounded-full bg-black/80 px-4 py-2 text-sm font-bold text-white">
-                  {rankLabel}
+                <div
+                  className={`${styles.bg} ${styles.textColor} ${styles.height} flex w-48 flex-col items-center justify-center rounded-3xl px-6 py-8 shadow-2xl`}
+                >
+                  <div className="mb-6 rounded-full bg-black/80 px-4 py-2 text-sm font-bold text-white">
+                    {rankLabel}
+                  </div>
+                  <div className="text-center font-orbitron text-4xl font-bold">
+                    {entry.xp.toLocaleString()}
+                  </div>
+                  <div className="mt-1 text-xs opacity-75">XP</div>
+                  <div className="mt-4 text-center text-sm font-semibold opacity-90">
+                    {entry.username}
+                  </div>
                 </div>
-                <div className="text-center font-orbitron text-4xl font-bold">
-                  {entry.xp.toLocaleString()}
-                </div>
-                <div className="mt-1 text-xs opacity-75">XP</div>
-                <div className="mt-4 text-center text-sm font-semibold opacity-90">
-                  {entry.username}
-                </div>
-              </div>
+              </ElectricBorder>
             </motion.div>
           )
         })}

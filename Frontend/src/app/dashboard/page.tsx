@@ -13,6 +13,7 @@ import { apiRoutes, type Battle, type LeaderboardEntry, type User, type Wallet }
 import { setOnboardingComplete } from '@/lib/utils'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import { useRouter } from 'next/navigation'
+import ElectricBorder from '@/components/ElectricBorder'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -217,6 +218,7 @@ export default function DashboardPage() {
                       leaderboard[2] ?? null,
                     ].map((entry, idx) => {
                       const slot = idx === 0 ? 2 : idx === 1 ? 1 : 3
+                      const borderColor = slot === 1 ? '#22e6b9' : slot === 2 ? '#abd8da' : '#a54b0f'
                       const cardStyles =
                         slot === 1
                           ? 'bg-white/20 backdrop-blur-xl border border-white/30 text-white min-h-[220px]'
@@ -236,30 +238,34 @@ export default function DashboardPage() {
                           initial={{ opacity: 0, y: 18 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.08 }}
-                          className={`relative rounded-[28px] px-5 pb-7 pt-8 ${cardStyles}`}
+                          className="relative rounded-[28px]"
                         >
-                          <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                            {entry?.avatar ? (
-                              <img
-                                src={entry.avatar}
-                                alt={entry.username}
-                                className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/70 bg-[#1B1449] text-xs font-bold text-white">
-                                {entry?.username?.slice(0, 2).toUpperCase() ?? `#${slot}`}
+                          <ElectricBorder color={borderColor} speed={1} chaos={0.12} borderRadius={28} className="rounded-[28px]">
+                            <div className={`relative rounded-[28px] px-5 pb-7 pt-8 ${cardStyles}`}>
+                              <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                                {entry?.avatar ? (
+                                  <img
+                                    src={entry.avatar}
+                                    alt={entry.username}
+                                    className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/70 bg-[#1B1449] text-xs font-bold text-white">
+                                    {entry?.username?.slice(0, 2).toUpperCase() ?? `#${slot}`}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                          <div className={`mx-auto inline-flex rounded-full px-4 py-2 text-2xs font-bold uppercase tracking-[0.08em] ${chipStyles}`}>
-                            {slot === 1 ? '1st place' : slot === 2 ? '2nd place' : '3rd place'}
-                          </div>
-                          <p className="mt-10 text-center font-orbitron text-[2rem] font-black leading-none">
-                            {entry ? entry.xp.toLocaleString() : '0'}
-                          </p>
-                          <p className="mt-2 text-center text-sm font-semibold">
-                            {entry?.username ?? 'Waiting'}
-                          </p>
+                              <div className={`mx-auto inline-flex rounded-full px-4 py-2 text-2xs font-bold uppercase tracking-[0.08em] ${chipStyles}`}>
+                                {slot === 1 ? '1st place' : slot === 2 ? '2nd place' : '3rd place'}
+                              </div>
+                              <p className="mt-10 text-center font-orbitron text-[2rem] font-black leading-none">
+                                {entry ? entry.xp.toLocaleString() : '0'}
+                              </p>
+                              <p className="mt-2 text-center text-sm font-semibold">
+                                {entry?.username ?? 'Waiting'}
+                              </p>
+                            </div>
+                          </ElectricBorder>
                         </motion.div>
                       )
                     })}

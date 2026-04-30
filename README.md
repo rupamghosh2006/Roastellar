@@ -152,6 +152,35 @@ STELLAR_FEE_BUMP_BASE_FEE=100
 
 When enabled, Roastellar submits fee-bumped transactions for eligible Stellar payment and Soroban contract actions.
 
+## Data Indexing
+
+### Approach Description
+
+Roastellar uses MongoDB indexes focused on read-heavy paths (leaderboard, battle discovery, match lookups, analytics timelines) and integrity-critical paths (duplicate vote/prediction prevention, unique identities).
+
+Key indexes implemented:
+
+- User identity and leaderboard:
+  - `clerkId` unique index (auth identity lookup)
+  - `email` unique index
+  - leaderboard indexes on `xp`, `wins`, `rankPoints`
+- Battle performance:
+  - `matchId` unique index (fast battle lookup by public match id)
+  - `status + createdAt` compound index (open/active battle listing)
+  - `player1 + createdAt`, `player2 + createdAt`, `winner + createdAt` compound indexes
+- Prediction and vote integrity:
+  - `battleId + predictor` unique compound index (one prediction per user per battle)
+  - `battleId + voter` unique compound index (one vote per user per battle)
+- Analytics timelines:
+  - `eventType + timestamp` compound index
+  - `userId + timestamp` compound index
+
+This indexing strategy keeps common leaderboard and battle queries efficient while enforcing key anti-duplication rules at the database layer.
+
+### Endpoint / Dashboard Link
+
+- Public metrics endpoint (indexed analytics-backed): [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
+
 ## CI/CD Setup
 
 This repo now includes GitHub Actions for:

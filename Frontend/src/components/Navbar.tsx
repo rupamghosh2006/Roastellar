@@ -23,6 +23,9 @@ const appLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
+  if (pathname === '/sign-in' || pathname === '/sign-up') {
+    return null
+  }
   const { isSignedIn } = useAuth()
   const walletMode = isWalletAuthenticated()
   const isAuthenticated = isSignedIn || walletMode
@@ -116,9 +119,9 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="rounded-full bg-gradient-to-r from-amber-300 via-amber-600 to-violet-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_8px_24px_rgba(232,121,249,0.35)] transition-opacity hover:opacity-90">
+              {/* <Link href="/sign-in" className="rounded-full bg-gradient-to-r from-amber-300 via-amber-600 to-violet-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_8px_24px_rgba(232,121,249,0.35)] transition-opacity hover:opacity-90">
                 Sign In
-              </Link>
+              </Link> */}
               {/* <Link
                 href="/onboarding"
                 className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-opacity hover:opacity-90"

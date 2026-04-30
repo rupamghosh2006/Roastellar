@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 
 const { errorHandler, notFound } = require('./middlewares/error.middleware');
 const logger = require('./utils/logger');
@@ -16,6 +17,7 @@ const clerkRoutes = require('./modules/auth/routes/clerk.routes');
 const walletAuthRoutes = require('./modules/auth/routes/wallet-auth.routes');
 const walletRoutes = require('./modules/wallet/wallet.routes');
 const analyticsRoutes = require('./modules/analytics/routes/analytics.routes');
+const { HORIZON_URL, RPC_URL } = require('./config/stellar');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -67,7 +69,39 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const dbStateByCode = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+  const dbStateCode = mongoose.connection.readyState;
+  const dbState = dbStateByCode[dbStateCode] || 'unknown';
+  const dbConnected = dbStateCode === 1;
+
+  const payload = {
+    status: dbConnected ? 'ok' : 'degraded',
+    service: 'roastellar-backend',
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString(),
+    uptimeSec: Math.floor(process.uptime()),
+    dependencies: {
+      mongodb: {
+        status: dbState,
+        connected: dbConnected,
+      },
+      stellar: {
+        network: process.env.STELLAR_NETWORK || 'testnet',
+        horizonUrl: HORIZON_URL,
+        rpcUrl: RPC_URL,
+        contractConfigured: Boolean(process.env.STELLAR_CONTRACT_ID),
+        escrowConfigured: Boolean(process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET),
+      },
+    },
+  };
+
+  return res.status(dbConnected ? 200 : 503).json(payload);
 });
 
 app.use('/api/users', userRoutes);

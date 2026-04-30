@@ -5,6 +5,7 @@ const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 const { StellarSdk } = require('../../../config/stellar');
 const { signWalletToken } = require('../../../config/authToken');
+const { sanitizeText, sanitizeUsername, sanitizeWalletAddress } = require('../../../utils/inputSanitizer');
 
 const router = express.Router();
 const NONCE_TTL_MS = Number(process.env.WALLET_AUTH_NONCE_TTL_MS || 5 * 60 * 1000);
@@ -67,8 +68,8 @@ function parseSignedMessageCandidates(value) {
 
 router.post('/wallet/challenge', async (req, res) => {
   try {
-    const walletAddress = String(req.body?.walletAddress || '').trim();
-    const usernameInput = String(req.body?.username || '').trim();
+    const walletAddress = sanitizeWalletAddress(req.body?.walletAddress);
+    const usernameInput = sanitizeUsername(req.body?.username);
 
     if (!walletAddress) {
       return ApiResponse.badRequest(res, 'walletAddress is required');
@@ -127,10 +128,10 @@ router.post('/wallet/challenge', async (req, res) => {
 
 router.post('/wallet/verify', async (req, res) => {
   try {
-    const walletAddress = String(req.body?.walletAddress || '').trim();
+    const walletAddress = sanitizeWalletAddress(req.body?.walletAddress);
     const signedMessageRaw = req.body?.signedMessage;
-    const signerAddress = String(req.body?.signerAddress || '').trim();
-    const nonce = String(req.body?.nonce || '').trim();
+    const signerAddress = sanitizeWalletAddress(req.body?.signerAddress);
+    const nonce = sanitizeText(req.body?.nonce, 128);
 
     if (!walletAddress || !nonce || !signedMessageRaw) {
       return ApiResponse.badRequest(res, 'walletAddress, nonce, and signedMessage are required');

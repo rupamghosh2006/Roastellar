@@ -5,6 +5,7 @@ const { z } = require('zod');
 const battleController = require('../../battles/controllers/battle.controller');
 const { protect } = require('../../../middlewares/clerk.middleware');
 const ApiResponse = require('../../../utils/apiResponse');
+const { sanitizeText } = require('../../../utils/inputSanitizer');
 
 const writeLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -13,16 +14,16 @@ const writeLimiter = rateLimit({
 });
 
 const createSchema = z.object({
-  topic: z.string().trim().min(3).max(120),
+  topic: z.string().transform((value) => sanitizeText(value, 120)).refine((value) => value.length >= 3, 'Topic must be at least 3 characters'),
   entryFee: z.number().positive(),
 });
 
 const roastSchema = z.object({
-  text: z.string().trim().min(3).max(500),
+  text: z.string().transform((value) => sanitizeText(value, 500)).refine((value) => value.length >= 3, 'Roast must be at least 3 characters'),
 });
 
 const voteSchema = z.object({
-  selectedPlayer: z.string().min(1),
+  selectedPlayer: z.string().transform((value) => sanitizeText(value, 80)).refine((value) => value.length > 0, 'selectedPlayer is required'),
 });
 
 function validateBody(schema) {

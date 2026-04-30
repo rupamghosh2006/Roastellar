@@ -11,6 +11,7 @@ const escrowService = require('./battleEscrow.service');
 const timerService = require('./battleTimer.service');
 const { getIO } = require('../../../config/socket');
 const logger = require('../../../utils/logger');
+const { sanitizeText } = require('../../../utils/inputSanitizer');
 
 const ROAST_PHASE_SECONDS = Number(process.env.BATTLE_ROAST_SECONDS || 60);
 const VOTING_PHASE_SECONDS = Number(process.env.BATTLE_VOTING_SECONDS || 30);
@@ -19,14 +20,6 @@ const BATTLE_START_COUNTDOWN_SECONDS = Number(process.env.BATTLE_START_COUNTDOWN
 const VOTING_FINALIZE_GRACE_SECONDS = Number(process.env.BATTLE_VOTING_FINALIZE_GRACE_SECONDS || 0);
 const VOTING_FINALIZE_MAX_WAIT_SECONDS = Number(process.env.BATTLE_VOTING_FINALIZE_MAX_WAIT_SECONDS || 45);
 const VOTING_PENDING_POLL_MS = Number(process.env.BATTLE_VOTING_PENDING_POLL_MS || 500);
-
-function sanitizeText(value, max = 280) {
-  const text = String(value || '')
-    .replace(/[\u0000-\u001f\u007f]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  return text.slice(0, max);
-}
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);

@@ -3,13 +3,10 @@ const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 const { EVENT_TYPES } = require('../../../utils/constants');
 const analyticsService = require('../../analytics/services/analytics.service');
+const { sanitizeText, sanitizeUsername, sanitizeCid } = require('../../../utils/inputSanitizer');
 
 function normalizeUsername(value) {
-  if (typeof value !== 'string') {
-    return '';
-  }
-
-  return value.trim();
+  return sanitizeUsername(value);
 }
 
 function escapeRegex(text) {
@@ -75,14 +72,14 @@ exports.updateProfile = async (req, res) => {
     }
 
     if (firstName !== undefined) {
-      updates.firstName = String(firstName).trim().slice(0, 50);
+      updates.firstName = sanitizeText(firstName, 50);
     }
 
     if (lastName !== undefined) {
-      updates.lastName = String(lastName).trim().slice(0, 50);
+      updates.lastName = sanitizeText(lastName, 50);
     }
 
-    if (profileCid !== undefined) updates.profileCid = profileCid;
+    if (profileCid !== undefined) updates.profileCid = sanitizeCid(profileCid, 120);
 
     if (Object.keys(updates).length === 0) {
       return ApiResponse.badRequest(res, 'No profile fields provided');

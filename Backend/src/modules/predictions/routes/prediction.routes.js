@@ -5,6 +5,7 @@ const { z } = require('zod');
 const predictionController = require('../controllers/prediction.controller');
 const { protect } = require('../../../middlewares/clerk.middleware');
 const ApiResponse = require('../../../utils/apiResponse');
+const { sanitizeText } = require('../../../utils/inputSanitizer');
 
 const predictionLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -13,7 +14,7 @@ const predictionLimiter = rateLimit({
 });
 
 const placePredictionSchema = z.object({
-  selectedPlayer: z.string().min(1),
+  selectedPlayer: z.string().transform((value) => sanitizeText(value, 80)).refine((value) => value.length > 0, 'selectedPlayer is required'),
   amount: z.number().positive(),
 });
 

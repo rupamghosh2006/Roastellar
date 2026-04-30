@@ -18,7 +18,7 @@ This document tracks required security controls for Roastellar and maps each con
 | rate limiting | PASS | Global `/api` limiter plus tighter write/prediction limiters. |
 | env secrets | PASS | Secrets sourced from env vars; `.env` patterns are gitignored. |
 | duplicate vote prevention | PASS | App-level duplicate check plus DB unique compound index. |
-| input sanitization | PARTIAL PASS | Text sanitization exists for battle topic/roast; not uniformly centralized for all user-provided strings. |
+| input sanitization | PASS | Centralized sanitizer utility is applied across battle, prediction, wallet-auth, and profile update paths. |
 | wallet secret encryption | PASS | Managed wallet secrets encrypted at rest before persistence. |
 
 ---
@@ -150,18 +150,22 @@ PASS
 Sanitize free-form input to reduce unsafe payloads and malformed text.
 
 ### Evidence
-- `Backend/src/modules/battles/services/battle.service.js`
-  - `sanitizeText(value, max)` removes control chars, collapses whitespace, trims, length-limits.
-  - Applied to:
-    - `topic` in battle creation
-    - `text` in roast submission
-
-### Gap / Limitation
-- Sanitization is not a shared global middleware and is not applied uniformly across all textual/user-controlled fields across the entire app.
-- Current coverage is strong for battle text surfaces, but broader centralization would harden consistency.
+- Shared sanitizer utility:
+  - `Backend/src/utils/inputSanitizer.js`
+  - Centralized helpers: `sanitizeText`, `sanitizeUsername`, `sanitizeCid`, `sanitizeWalletAddress`
+- Route-level sanitization with schema transforms:
+  - `Backend/src/modules/battles/routes/battle.routes.js`
+  - `Backend/src/modules/predictions/routes/prediction.routes.js`
+  - `Backend/src/modules/users/routes/user.routes.js`
+- Wallet-auth input sanitization:
+  - `Backend/src/modules/auth/routes/wallet-auth.routes.js`
+  - Sanitizes `walletAddress`, `signerAddress`, `nonce`, and optional `username`
+- Service/controller defensive sanitization:
+  - `Backend/src/modules/battles/services/battle.service.js`
+  - `Backend/src/modules/users/controllers/user.controller.js`
 
 ### Verdict
-PARTIAL PASS
+PASS
 
 ---
 
@@ -201,6 +205,5 @@ These are not blockers for the current checklist completion, but improve posture
 
 The required checklist is implemented and documented.
 
-- Passed: 7 controls
-- Partial pass: 1 control (`input sanitization`)
-
+- Passed: 8 controls
+- Partial pass: 0 controls

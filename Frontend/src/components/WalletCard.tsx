@@ -7,7 +7,7 @@ import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-re
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
 
-const Dither = dynamic(() => import('@/components/Dither'), { ssr: false })
+const Galaxy = dynamic(() => import('@/components/Galaxy'), { ssr: false })
 
 interface WalletCardProps {
   address: string
@@ -49,16 +49,16 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
     >
       {variant === 'full' && (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <Dither
-            waveSpeed={0.05}
-            waveFrequency={3}
-            waveAmplitude={0.3}
-            waveColor={[0.45, 0.62, 0.52]}
-            colorNum={5}
-            pixelSize={2}
-            disableAnimation={false}
-            enableMouseInteraction={true}
-            mouseRadius={1}
+          <Galaxy
+            density={1.2}
+            glowIntensity={0.35}
+            hueShift={145}
+            saturation={0.35}
+            twinkleIntensity={0.45}
+            rotationSpeed={0.08}
+            repulsionStrength={1.8}
+            mouseRepulsion={true}
+            transparent={true}
           />
         </div>
       )}

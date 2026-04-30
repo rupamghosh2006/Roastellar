@@ -1,5 +1,6 @@
 const { StellarSdk, rpcServer, NETWORK_PASSPHRASE } = require('../../../config/stellar');
 const logger = require('../../../utils/logger');
+const { shouldSponsor, buildFeeBumpTx } = require('../../../utils/feeSponsor');
 
 const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ';
 const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET || '';
@@ -97,7 +98,8 @@ class BattleChainService {
       throw new Error('Prepared Soroban transaction has unsupported shape');
     }
 
-    const sent = await rpcServer.sendTransaction(signedTx);
+    const submitTx = shouldSponsor(accountPublic) ? buildFeeBumpTx(signedTx) : signedTx;
+    const sent = await rpcServer.sendTransaction(submitTx);
     if (sent.status === 'ERROR') {
       throw new Error(`Soroban send failed: ${sent.errorResultXdr || 'unknown error'}`);
     }

@@ -1,5 +1,6 @@
 const { StellarSdk, server, NETWORK_PASSPHRASE } = require('../../../config/stellar');
 const walletService = require('../../wallet/wallet.service');
+const { shouldSponsor, buildFeeBumpTx } = require('../../../utils/feeSponsor');
 
 const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET || '';
 const BASE_FEE = String(process.env.STELLAR_TX_FEE || 100);
@@ -52,7 +53,8 @@ class BattleEscrowService {
 
     const built = tx.build();
     built.sign(keypair);
-    const result = await server.submitTransaction(built);
+    const submitTx = shouldSponsor(keypair.publicKey()) ? buildFeeBumpTx(built) : built;
+    const result = await server.submitTransaction(submitTx);
     return result?.hash || '';
   }
 

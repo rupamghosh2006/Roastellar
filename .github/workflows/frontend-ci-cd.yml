@@ -3,7 +3,13 @@ name: Frontend CI/CD
 on:
   workflow_dispatch:
   pull_request:
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/frontend-ci-cd.yml'
   push:
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/frontend-ci-cd.yml'
 
 jobs:
   ci:

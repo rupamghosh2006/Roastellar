@@ -10,6 +10,22 @@
 
 A fully on-chain roast battle platform built on Stellar Soroban.
 
+## Quick Navigation
+
+- **Live Demo (Vercel):** [https://roastellar.vercel.app](https://roastellar.vercel.app)
+- **30+ User Wallet Addresses (Stellar-verifiable):**
+  - Table in this README: [Testnet Users (Verified)](#testnet-users-verified)
+  - Source sheet (30 users): [Google Sheet](https://docs.google.com/spreadsheets/d/1rSuNXtO64Es7leAAnP5zJ5c3lW_7HQTvoOU-yRK8lsc/edit?usp=sharing)
+  - Explorer sample: [Stellar Expert Account](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
+- **Metrics Dashboard (Screenshot/Link):**
+  - Screenshot section: [Metrics Dashboard](#metrics-dashboard)
+  - API endpoint: [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
+- **Monitoring Dashboard (Screenshot):** [Monitoring Active](#monitoring-active)
+- **Completed Security Checklist:** [security_checklist.md](./security_checklist.md)
+- **Community Contribution (Twitter/X Post):** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
+- **Advanced Feature (Description + Proof):** [Advanced Feature: Fee Sponsorship](#advanced-feature-fee-sponsorship-gasless-transactions-via-fee-bump)
+- **Data Indexing (Approach + Endpoint):** [Data Indexing](#data-indexing)
+
 ## Live Demo
 
 **URL:** https://roastellar.vercel.app

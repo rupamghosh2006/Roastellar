@@ -218,7 +218,7 @@ export default function DashboardPage() {
                       leaderboard[2] ?? null,
                     ].map((entry, idx) => {
                       const slot = idx === 0 ? 2 : idx === 1 ? 1 : 3
-                      const borderColor = slot === 1 ? '#22e6b9' : slot === 2 ? '#abd8da' : '#a54b0f'
+                      const borderColor = slot === 1 ? '#f1d039' : slot === 2 ? '#abd8da' : '#a54b0f'
                       const cardStyles =
                         slot === 1
                           ? 'bg-white/20 backdrop-blur-xl border border-white/30 text-white min-h-[220px]'

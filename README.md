@@ -187,7 +187,7 @@ Roastellar uses active uptime monitoring on the backend health route to continuo
 The health endpoint also exposes runtime and dependency readiness signals (MongoDB + Stellar config) for operational visibility.
 
 - Health check endpoint: [https://roastellar.onrender.com/health](https://roastellar.onrender.com/health)
-- Screenshot (monitoring dashboard): [https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png)
+- Screenshot (monitoring dashboard): ![https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png)
 
 ## CI/CD Setup
 

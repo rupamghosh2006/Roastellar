@@ -18,11 +18,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 ## Metrics Dashboard
 
-**Dashboard URL:** https://roastellar.vercel.app/metrics
-
-**Route Protection:** `/metrics` is an auth-protected route (login required).
-
-![Metrics Dashboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777566860/Screenshot_2026-04-30_220312_yi4zmq.png)
+![Metrics Dashboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777580625/Screenshot_2026-05-01_014932_ebwpai.png)
 
 
 <!-- **Tracking Started On:** April 29, 2026 -->

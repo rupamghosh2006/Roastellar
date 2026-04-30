@@ -47,19 +47,46 @@ jobs:
           cache-dependency-path: Frontend/package-lock.json
 
       - name: Install Vercel CLI
-        run: npm i -g vercel@latest
+        run: npm i -g vercel@51.6.1
 
-      - name: Pull Vercel environment
+      - name: Pull Vercel environment (with retry)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+        run: |
+          for i in 1 2 3; do
+            vercel pull --yes --environment=production --token="$VERCEL_TOKEN" && break
+            if [ "$i" -eq 3 ]; then
+              echo "vercel pull failed after 3 attempts"
+              exit 1
+            fi
+            echo "vercel pull failed (attempt $i), retrying in 10s..."
+            sleep 10
+          done
 
-      - name: Build Vercel artifacts
+      - name: Build Vercel artifacts (with retry)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel build --prod --token=$VERCEL_TOKEN
+        run: |
+          for i in 1 2 3; do
+            vercel build --prod --token="$VERCEL_TOKEN" && break
+            if [ "$i" -eq 3 ]; then
+              echo "vercel build failed after 3 attempts"
+              exit 1
+            fi
+            echo "vercel build failed (attempt $i), retrying in 10s..."
+            sleep 10
+          done
 
-      - name: Deploy to Vercel
+      - name: Deploy to Vercel (with retry)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+        run: |
+          for i in 1 2 3; do
+            vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" && break
+            if [ "$i" -eq 3 ]; then
+              echo "vercel deploy failed after 3 attempts"
+              exit 1
+            fi
+            echo "vercel deploy failed (attempt $i), retrying in 15s..."
+            sleep 15
+          done

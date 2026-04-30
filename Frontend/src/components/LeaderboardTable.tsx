@@ -1,7 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Award, Medal, Trophy, TrendingUp } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ChampionIcon } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import type { LeaderboardEntry } from '@/lib/api'
 
@@ -109,8 +111,8 @@ export function LeaderboardTable({
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
     return (
-      <div className="flex items-center gap-2 font-orbitron text-amber-200">
-        <Trophy className="h-5 w-5" />
+      <div className="flex items-center gap-2 font-orbitron text-[#F5C451]">
+        <HugeiconsIcon icon={ChampionIcon} size={20} color="currentColor" strokeWidth={1.5} />
         #{rank}
       </div>
     )
@@ -118,8 +120,8 @@ function RankBadge({ rank }: { rank: number }) {
 
   if (rank === 2) {
     return (
-      <div className="flex items-center gap-2 font-orbitron text-slate-200">
-        <Medal className="h-5 w-5" />
+      <div className="flex items-center gap-2 font-orbitron text-[#C0C7D1]">
+        <HugeiconsIcon icon={ChampionIcon} size={20} color="currentColor" strokeWidth={1.5} />
         #{rank}
       </div>
     )
@@ -127,8 +129,8 @@ function RankBadge({ rank }: { rank: number }) {
 
   if (rank === 3) {
     return (
-      <div className="flex items-center gap-2 font-orbitron text-amber-500">
-        <Award className="h-5 w-5" />
+      <div className="flex items-center gap-2 font-orbitron text-[#CD7F32]">
+        <HugeiconsIcon icon={ChampionIcon} size={20} color="currentColor" strokeWidth={1.5} />
         #{rank}
       </div>
     )

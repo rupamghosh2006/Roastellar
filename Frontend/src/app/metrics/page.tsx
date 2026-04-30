@@ -1,5 +1,6 @@
-import { BarChart3, Coins, Swords, UserCheck, Wallet } from 'lucide-react'
+import { Coins, Swords, UserCheck, Wallet } from 'lucide-react'
 import { apiRoutes, type PublicMetrics } from '@/lib/api'
+import { BrandLogo } from '@/components/BrandLogo'
 
 async function getMetrics(): Promise<PublicMetrics | null> {
   try {
@@ -38,7 +39,7 @@ export default async function MetricsPage() {
       <section className="mx-auto max-w-6xl">
         <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/60 p-8">
           <div className="flex flex-wrap items-center gap-3">
-            <BarChart3 className="h-6 w-6 text-cyan-300" />
+            <BrandLogo size={36} className="relative" />
             <h1 className="text-3xl font-semibold">Roastellar Metrics Dashboard</h1>
           </div>
           <p className="mt-3 text-sm text-slate-300">

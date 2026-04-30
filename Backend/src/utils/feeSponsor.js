@@ -11,7 +11,11 @@ function getSponsorKeypair() {
 }
 
 function getFeeBumpBaseFee() {
-  return String(process.env.STELLAR_FEE_BUMP_BASE_FEE || StellarSdk.BASE_FEE || 100);
+  const configured = Number(process.env.STELLAR_FEE_BUMP_BASE_FEE || 0);
+  const sdkBase = Number(StellarSdk.BASE_FEE || 0);
+  const safeFloor = Number(process.env.STELLAR_TX_FEE_MIN || 30000);
+  const resolved = Math.max(configured > 0 ? configured : 0, sdkBase > 0 ? sdkBase : 0, safeFloor);
+  return String(resolved);
 }
 
 function shouldSponsor(sourcePublicKey = '') {
@@ -42,4 +46,3 @@ module.exports = {
   shouldSponsor,
   buildFeeBumpTx,
 };
-

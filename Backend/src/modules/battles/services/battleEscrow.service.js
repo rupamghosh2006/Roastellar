@@ -3,7 +3,7 @@ const walletService = require('../../wallet/wallet.service');
 const { shouldSponsor, buildFeeBumpTx } = require('../../../utils/feeSponsor');
 
 const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET || '';
-const BASE_FEE = String(process.env.STELLAR_TX_FEE || 100);
+const DEFAULT_MIN_BASE_FEE = Number(process.env.STELLAR_TX_FEE_MIN || 30000);
 
 function formatAmount(amountXlm) {
   const value = Number(amountXlm);
@@ -14,6 +14,20 @@ function formatAmount(amountXlm) {
 }
 
 class BattleEscrowService {
+  async resolveBaseFee() {
+    const configuredFee = Number(process.env.STELLAR_TX_FEE || 0);
+    const minFee = Number.isFinite(configuredFee) && configuredFee > 0 ? configuredFee : DEFAULT_MIN_BASE_FEE;
+
+    try {
+      const networkFee = Number(await server.fetchBaseFee());
+      if (Number.isFinite(networkFee) && networkFee > 0) {
+        return String(Math.max(networkFee, minFee));
+      }
+    } catch (_) {}
+
+    return String(minFee);
+  }
+
   getEscrowKeypair() {
     if (!ESCROW_SECRET) {
       throw new Error('STELLAR_ESCROW_SECRET (or TREASURY_SECRET) is required for real XLM flow');
@@ -35,9 +49,10 @@ class BattleEscrowService {
   async transferFromSecret({ fromSecret, toPublicKey, amountXlm, memo }) {
     const keypair = StellarSdk.Keypair.fromSecret(fromSecret);
     const sourceAccount = await server.loadAccount(keypair.publicKey());
+    const baseFee = await this.resolveBaseFee();
 
     const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
-      fee: BASE_FEE,
+      fee: baseFee,
       networkPassphrase: NETWORK_PASSPHRASE,
     })
       .addOperation(StellarSdk.Operation.payment({

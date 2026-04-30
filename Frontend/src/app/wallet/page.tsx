@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { WalletBalance, WalletCard } from '@/components/WalletCard'
-import { PageLoader } from '@/components/LoadingScreen'
 import { AnimatedList } from '@/components/AnimatedList'
 import { apiRoutes, type Wallet, type WalletSecretExport } from '@/lib/api'
 import { formatDate, getExplorerUrl } from '@/lib/utils'
@@ -70,8 +69,24 @@ export default function WalletPage() {
     return (
       <div className="flex min-h-screen pt-16 md:pt-0">
         <Sidebar />
-        <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-          <PageLoader message="Loading wallet" />
+        <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8 animate-pulse">
+          <div className="mx-auto max-w-6xl space-y-8">
+            <div className="glass h-32 rounded-[36px]" />
+            <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
+              <div className="glass min-h-[600px] rounded-[28px]" />
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
+                <div className="glass h-28 rounded-[24px]" />
+                <div className="glass h-28 rounded-[24px]" />
+                <div className="glass h-64 rounded-[28px]" />
+                <div className="glass h-40 rounded-[28px]" />
+              </div>
+            </div>
+            <div className="glass rounded-[36px] p-6">
+              {[0, 1, 2].map((idx) => (
+                <div key={idx} className="mb-3 h-14 rounded-[20px] bg-white/10 last:mb-0" />
+              ))}
+            </div>
+          </div>
         </main>
       </div>
     )

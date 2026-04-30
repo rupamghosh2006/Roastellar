@@ -6,7 +6,6 @@ import { Award, LogOut, PenSquare, ShieldCheck, Swords, Trophy } from 'lucide-re
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
-import { PageLoader } from '@/components/LoadingScreen'
 import { apiRoutes, type User } from '@/lib/api'
 import { formatAddress, formatDate } from '@/lib/utils'
 import { clearWalletAuthSession, getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
@@ -91,8 +90,19 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-screen pt-16 md:pt-0">
         <Sidebar />
-        <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
-          <PageLoader message="Loading profile" />
+        <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8 animate-pulse">
+          <div className="mx-auto max-w-6xl space-y-8">
+            <div className="glass h-56 rounded-2xl border-l-4 border-l-violet-500/30" />
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+              {[0, 1, 2, 3].map((idx) => (
+                <div key={idx} className="glass h-32 rounded-2xl border-l-4 border-l-white/20" />
+              ))}
+            </div>
+            <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
+              <div className="glass h-36 rounded-2xl border-l-4 border-l-cyan-500/30" />
+              <div className="glass h-36 rounded-2xl border-l-4 border-l-violet-500/30" />
+            </div>
+          </div>
         </main>
       </div>
     )

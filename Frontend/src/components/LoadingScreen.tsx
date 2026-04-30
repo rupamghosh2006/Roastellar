@@ -7,7 +7,7 @@ interface LoadingScreenProps {
   message?: string
 }
 
-export function LoadingScreen({ message = 'Booting the arena...' }: LoadingScreenProps) {
+export function LoadingScreen({ message: _message = 'Booting the arena...' }: LoadingScreenProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_30%),radial-gradient(circle_at_bottom,_rgba(168,85,247,0.14),_transparent_24%)]" />
@@ -21,7 +21,6 @@ export function LoadingScreen({ message = 'Booting the arena...' }: LoadingScree
           <BrandLogo size={56} className="rounded-full border-blue-300/30 bg-transparent" />
         </div>
       </motion.div>
-      <p className="mt-8 font-orbitron text-xl text-white">{message}</p>
       <div className="mt-4 flex gap-2">
         {[0, 1, 2].map((dot) => (
           <motion.div
@@ -37,7 +36,7 @@ export function LoadingScreen({ message = 'Booting the arena...' }: LoadingScree
   )
 }
 
-export function PageLoader({ message = 'Loading data' }: { message?: string }) {
+export function PageLoader({ message: _message = 'Loading data' }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20">
       <div className="flex gap-2">
@@ -50,7 +49,6 @@ export function PageLoader({ message = 'Loading data' }: { message?: string }) {
           />
         ))}
       </div>
-      <p className="mt-4 text-sm text-white/50">{message}</p>
     </div>
   )
 }

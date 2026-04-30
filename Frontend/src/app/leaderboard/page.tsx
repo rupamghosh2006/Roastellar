@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Trophy } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
 import { LeaderboardTable, Podium } from '@/components/LeaderboardTable'
-import { PageLoader } from '@/components/LoadingScreen'
 import { apiRoutes, type LeaderboardEntry } from '@/lib/api'
 import { useAuth } from '@clerk/nextjs'
 
@@ -36,7 +35,18 @@ export default function LeaderboardPage() {
           </div>
 
           {loading ? (
-            <PageLoader message="Loading leaderboard" />
+            <div className="mt-8 space-y-8 animate-pulse">
+              <div className="grid gap-6 sm:grid-cols-3">
+                {[0, 1, 2].map((idx) => (
+                  <div key={idx} className="h-64 rounded-3xl border border-white/10 bg-white/5" />
+                ))}
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                {[0, 1, 2, 3, 4, 5].map((idx) => (
+                  <div key={idx} className="mb-4 h-20 rounded-xl bg-white/10 last:mb-0" />
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="mt-8 space-y-8">
               <Podium topThree={entries.slice(0, 3)} />

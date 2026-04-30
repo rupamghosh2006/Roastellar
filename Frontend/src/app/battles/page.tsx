@@ -7,7 +7,7 @@ import { Flame, Plus, Swords, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { BattleList } from '@/components/BattleCard'
-import { PageLoader } from '@/components/LoadingScreen'
+import { SkeletonCard } from '@/components/LoadingScreen'
 import { apiRoutes, normalizeBattleList, type Battle, type User, type Wallet } from '@/lib/api'
 import { connectSocket, joinLobby, onOpenBattlesUpdated, removeAllSocketListeners } from '@/lib/socket'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
@@ -173,8 +173,19 @@ export default function BattlesPage() {
     return (
       <div className="flex min-h-screen pt-16 md:pt-0">
         <Sidebar />
-        <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
-          <PageLoader message="Loading battles" />
+        <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8 animate-pulse">
+          <div className="mx-auto max-w-7xl space-y-8">
+            <div className="glass h-40 rounded-2xl border-l-4 border-l-orange-500/30" />
+            <div className="glass h-52 rounded-2xl border-l-4 border-l-violet-500/30" />
+            <div className="glass rounded-2xl border-l-4 border-l-cyan-500/30 p-5">
+              <div className="mb-4 h-8 w-56 rounded bg-white/10" />
+              <div className="grid gap-5 xl:grid-cols-2">
+                {[0, 1, 2, 3].map((item) => (
+                  <SkeletonCard key={item} />
+                ))}
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     )
@@ -208,30 +219,35 @@ export default function BattlesPage() {
               <Plus className="h-5 w-5 text-violet-300" />
               <h2 className="font-orbitron text-2xl text-white">Create Contest</h2>
             </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-[1fr_180px_auto]">
-              <input
-                value={topic}
-                onChange={(event) => setTopic(event.target.value)}
-                placeholder="Example: Roast Web3 influencers in one line"
-                className="input-glass"
-              />
-              <input
-                value={entryFee}
-                onChange={(event) => setEntryFee(event.target.value)}
-                type="number"
-                min={1}
-                placeholder="Entry fee"
-                className="input-glass"
-              />
-              <button
-                onClick={createBattle}
-                disabled={submitting}
-                className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Swords className="h-4 w-4" />
-                {submitting ? 'Creating...' : 'Create Battle'}
-              </button>
-            </div>
+<div className="mt-5 grid gap-4 md:grid-cols-2">
+  <input
+    value={topic}
+    onChange={(event) => setTopic(event.target.value)}
+    placeholder="Example: Roast Web3 influencers in one line"
+    className="input-glass"
+  />
+
+  <div className="flex items-center gap-2">
+    <input
+      value={entryFee}
+      onChange={(event) => setEntryFee(event.target.value)}
+      type="number"
+      min={1}
+      placeholder="Entry fee"
+      className="input-glass w-full"
+    />
+    <span className="text-sm text-gray-400">XLM</span>
+  </div>
+
+  <button
+    onClick={createBattle}
+    disabled={submitting}
+    className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    <Swords className="h-4 w-4" />
+    {submitting ? 'Creating...' : 'Create Battle'}
+  </button>
+</div>
             <p className="mt-3 text-xs text-slate-500">
               Signed in as {user?.username ?? 'Player'} | Wallet {(wallet?.publicKey || user?.walletAddress) ? 'ready' : 'missing'}
             </p>

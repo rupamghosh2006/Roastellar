@@ -113,6 +113,10 @@ export default function OnboardingPage() {
       : null
     if (step === 'choice' && isSignedIn && flow === 'new') {
       setStep('game')
+      return
+    }
+    if (step === 'choice' && flow === 'wallet') {
+      setStep('existingWallet')
     }
   }, [isSignedIn, step])
 

@@ -128,10 +128,10 @@ export default function LandingPage() {
               className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
             >
               <Link
-                href="/onboarding"
+                href="/sign-in"
                 className="inline-flex items-center justify-center gap-2 rounded-[10px] border-2 border-[#725AC1] bg-transparent px-[30px] py-[15px] text-[18px] font-medium tracking-[1px] text-[#725AC1] transition-all duration-500 ease-out [box-shadow:inset_0_0_0_0_#725AC1] hover:text-white hover:[box-shadow:inset_0_-100px_0_0_#725AC1] active:scale-90"
               >
-                Start Free
+                Get Started
                 <ArrowRight className="h-4 w-4" />
               </Link>
               {/* <a

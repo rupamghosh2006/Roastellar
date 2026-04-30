@@ -181,6 +181,14 @@ This indexing strategy keeps common leaderboard and battle queries efficient whi
 
 - Public metrics endpoint (indexed analytics-backed): [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
 
+## Monitoring Active
+
+Roastellar uses active uptime monitoring on the backend health route to continuously verify service availability and response-time behavior.  
+The health endpoint also exposes runtime and dependency readiness signals (MongoDB + Stellar config) for operational visibility.
+
+- Health check endpoint: [https://roastellar.onrender.com/health](https://roastellar.onrender.com/health)
+- Screenshot (monitoring dashboard): [https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png)
+
 ## CI/CD Setup
 
 This repo now includes GitHub Actions for:

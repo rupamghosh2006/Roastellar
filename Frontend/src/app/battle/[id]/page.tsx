@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { PredictionPanel } from '@/components/PredictionPanel'
 import { PageLoader } from '@/components/LoadingScreen'
+import { AnimatedList } from '@/components/AnimatedList'
 import { apiRoutes, normalizeBattle, type Battle, type PredictionSummary, type User } from '@/lib/api'
 import {
   connectSocket,
@@ -472,18 +473,25 @@ export default function BattleRoomPage() {
               <Swords className="h-5 w-5 text-emerald-300" />
               <h2 className="font-orbitron text-xl text-white sm:text-2xl">Live Activity Feed</h2>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4">
               {activity.length === 0 ? (
                 <p className="text-sm text-slate-400">No activity yet.</p>
               ) : (
-                activity.map((line, index) => (
-                  <div
-                    key={`${line}-${index}`}
-                    className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-slate-400"
-                  >
-                    {line}
-                  </div>
-                ))
+                <AnimatedList
+                  items={activity}
+                  showGradients={false}
+                  enableArrowNavigation={false}
+                  displayScrollbar={false}
+                  containerClassName="max-h-none overflow-visible p-0"
+                  renderItem={(line, index) => (
+                    <div
+                      key={`${line}-${index}`}
+                      className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-slate-400"
+                    >
+                      {line}
+                    </div>
+                  )}
+                />
               )}
             </div>
           </section>

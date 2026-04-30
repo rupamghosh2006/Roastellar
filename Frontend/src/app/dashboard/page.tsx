@@ -14,6 +14,7 @@ import { setOnboardingComplete } from '@/lib/utils'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import { useRouter } from 'next/navigation'
 import ElectricBorder from '@/components/ElectricBorder'
+import { AnimatedList } from '@/components/AnimatedList'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -193,12 +194,19 @@ export default function DashboardPage() {
             <section className="space-y-8">
               <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
                 <p className="text-sm uppercase tracking-[0.24em] text-white/35">Live activity feed</p>
-                <div className="mt-5 space-y-4">
-                  {liveActivity.map((item) => (
-                    <div key={item} className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
-                      {item}
-                    </div>
-                  ))}
+                <div className="mt-5">
+                  <AnimatedList
+                    items={liveActivity}
+                    showGradients={false}
+                    enableArrowNavigation={false}
+                    displayScrollbar={false}
+                    containerClassName="max-h-none overflow-visible p-0"
+                    renderItem={(item) => (
+                      <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
+                        {item}
+                      </div>
+                    )}
+                  />
                 </div>
               </div>
 
@@ -271,27 +279,28 @@ export default function DashboardPage() {
                     })}
                   </div>
 
-                  <div className="mt-5 space-y-3">
-                    {leaderboard.slice(3, 6).map((entry, index) => (
-                      <motion.div
-                        key={entry.id}
-                        initial={{ opacity: 0, x: -14 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.03] px-4 py-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/8 font-orbitron text-white">
-                            {entry.rank}
+                  <div className="mt-5">
+                    <AnimatedList
+                      items={leaderboard.slice(3, 6)}
+                      showGradients={false}
+                      enableArrowNavigation={false}
+                      displayScrollbar={false}
+                      containerClassName="max-h-none overflow-visible p-0"
+                      renderItem={(entry) => (
+                        <div className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/8 font-orbitron text-white">
+                              {entry.rank}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-white">{entry.username}</p>
+                              <p className="text-xs text-white/45">{entry.wins} wins</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold text-white">{entry.username}</p>
-                            <p className="text-xs text-white/45">{entry.wins} wins</p>
-                          </div>
+                          <p className="font-orbitron text-white">{entry.xp.toLocaleString()} XP</p>
                         </div>
-                        <p className="font-orbitron text-white">{entry.xp.toLocaleString()} XP</p>
-                      </motion.div>
-                    ))}
+                      )}
+                    />
                   </div>
                 </div>
                 <Link href="/leaderboard" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-200">

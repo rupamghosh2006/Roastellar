@@ -207,7 +207,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
   const getElectricColor = (rank: number) => {
-    if (rank === 1) return '#22e6b9'
+    if (rank === 1) return '#f1d039'
     if (rank === 2) return '#abd8da'
     if (rank === 3) return '#a54b0f'
     return '#5227FF'

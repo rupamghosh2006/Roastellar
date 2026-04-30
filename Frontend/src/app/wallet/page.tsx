@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { WalletBalance, WalletCard } from '@/components/WalletCard'
 import { PageLoader } from '@/components/LoadingScreen'
+import { AnimatedList } from '@/components/AnimatedList'
 import { apiRoutes, type Wallet, type WalletSecretExport } from '@/lib/api'
 import { formatDate, getExplorerUrl } from '@/lib/utils'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
@@ -234,12 +235,19 @@ export default function WalletPage() {
               <Clock3 className="h-5 w-5 text-blue-200" />
               <h2 className="font-orbitron text-2xl text-white">Reward history</h2>
             </div>
-            <div className="mt-6 space-y-3">
-              {rewardHistory.map((item) => (
-                <div key={item} className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
-                  {item}
-                </div>
-              ))}
+            <div className="mt-6">
+              <AnimatedList
+                items={rewardHistory}
+                showGradients={false}
+                enableArrowNavigation={false}
+                displayScrollbar={false}
+                containerClassName="max-h-none overflow-visible p-0"
+                renderItem={(item) => (
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
+                    {item}
+                  </div>
+                )}
+              />
             </div>
           </div>
         </div>

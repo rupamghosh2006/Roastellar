@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Clock3, Eye, Flame, Sparkles, Swords, Users } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import type { Battle } from '@/lib/api'
+import { AnimatedItem } from '@/components/AnimatedList'
 
 interface BattleCardProps {
   battle: Battle
@@ -143,7 +144,9 @@ export function BattleList({ battles, title, emptyMessage = 'No battles found' }
       ) : (
         <div className="grid gap-5 xl:grid-cols-2">
           {battles.map((battle, index) => (
-            <BattleCard key={battle.id} battle={battle} index={index} />
+            <AnimatedItem key={battle.id} index={index} delay={0.06} className="mb-0">
+              <BattleCard battle={battle} index={index} />
+            </AnimatedItem>
           ))}
         </div>
       )}

@@ -109,6 +109,49 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system architecture documentat
 
 Link: [completed security checklist](./security_checklist.md)
 
+## Advanced Feature: Fee Sponsorship (Gasless Transactions via Fee Bump)
+
+### Description
+
+Roastellar implements **Fee Sponsorship** so end-user actions can run in a gasless UX mode where a sponsor account pays network fees using Stellar **fee-bump transactions**.
+
+In this model:
+- The user still authorizes/signs the inner transaction.
+- The backend wraps that signed transaction in a fee-bump envelope.
+- A dedicated sponsor account signs the fee-bump and pays the transaction fee.
+
+### Proof of Implementation
+
+Implementation evidence in code:
+- Fee sponsorship utility:
+  - `Backend/src/utils/feeSponsor.js`
+  - Uses `TransactionBuilder.buildFeeBumpTransaction(...)`
+  - Controls sponsorship with env flags and sponsor key handling
+- Horizon payment flow sponsorship:
+  - `Backend/src/modules/battles/services/battleEscrow.service.js`
+  - Wraps payment tx before `server.submitTransaction(...)`
+- Soroban contract flow sponsorship:
+  - `Backend/src/modules/battles/services/battleChain.service.js`
+  - Wraps prepared/signed contract tx before `rpcServer.sendTransaction(...)`
+
+Configuration proof:
+- `Backend/.env.example` includes:
+  - `STELLAR_ENABLE_FEE_SPONSORSHIP=true`
+  - `STELLAR_FEE_SPONSOR_SECRET=`
+  - `STELLAR_FEE_BUMP_BASE_FEE=100`
+
+### Enable in Deployment
+
+Set the following backend environment variables:
+
+```bash
+STELLAR_ENABLE_FEE_SPONSORSHIP=true
+STELLAR_FEE_SPONSOR_SECRET=<funded sponsor secret key>
+STELLAR_FEE_BUMP_BASE_FEE=100
+```
+
+When enabled, Roastellar submits fee-bumped transactions for eligible Stellar payment and Soroban contract actions.
+
 ## CI/CD Setup
 
 This repo now includes GitHub Actions for:

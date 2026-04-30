@@ -1,39 +1,29 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
-import DotField from '@/components/DotField'
-import { WarpBackground } from '@/components/WarpBackground'
+import FaultyTerminal from '@/components/FaultyTerminal'
 
 export function AppBackground() {
-  const pathname = usePathname()
-  const [clientPathname, setClientPathname] = useState<string>('')
-
-  useEffect(() => {
-    setClientPathname(window.location.pathname)
-  }, [pathname])
-
-  const activePathname = clientPathname || pathname
-
-  if (activePathname === '/') {
-    return <WarpBackground />
-  }
-
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10">
-      <DotField
-        dotRadius={1.5}
-        dotSpacing={14}
-        cursorRadius={500}
-        cursorForce={0.1}
-        bulgeOnly
-        bulgeStrength={67}
-        glowRadius={160}
-        sparkle={false}
-        waveAmplitude={0}
-        gradientFrom="rgba(168, 85, 247, 0.35)"
-        gradientTo="rgba(180, 151, 207, 0.25)"
-        glowColor="#120F17"
+    <div className="pointer-events-none fixed inset-0 -z-20">
+      <FaultyTerminal
+        className="h-full w-full"
+        scale={1.5}
+        gridMul={[2, 1]}
+        digitSize={1.2}
+        timeScale={0.5}
+        pause={false}
+        scanlineIntensity={0.5}
+        glitchAmount={1}
+        flickerAmount={1}
+        noiseAmp={1}
+        chromaticAberration={0}
+        dither={0}
+        curvature={0.1}
+        tint="#A7EF9E"
+        mouseReact
+        mouseStrength={0.5}
+        pageLoadAnimation
+        brightness={0.6}
       />
     </div>
   )

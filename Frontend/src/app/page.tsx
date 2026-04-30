@@ -10,7 +10,6 @@ import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/
 import { isOnboardingComplete } from '@/lib/utils'
 import { isWalletAuthenticated } from '@/lib/walletAuth'
 import { BrandLogo } from '@/components/BrandLogo'
-import TextPressure from '@/components/TextPressure'
 
 const features = [
   { icon: Swords, title: 'Live roast battles', copy: 'Fast-paced match rooms with real-time submissions, votes, and reactions.' },
@@ -24,6 +23,28 @@ const steps = [
   'Beat the onboarding mini-game to reveal your new Stellar wallet.',
   'Join battles, vote on winners, and climb the leaderboard.',
 ]
+
+function GlitchWord({ text }: { text: string }) {
+  return (
+    <span className="hero-glitch">
+      {Array.from(text).map((char, index) => {
+        if (char === ' ') {
+          return <span key={`space-${index}`} className="inline-block w-[0.42em]" aria-hidden="true" />
+        }
+        return (
+          <span
+            key={`${char}-${index}`}
+            data-char={char}
+            className="hero-glitch-char"
+            style={{ transitionDelay: `${index * 26}ms` }}
+          >
+            {char}
+          </span>
+        )
+      })}
+    </span>
+  )
+}
 
 export default function LandingPage() {
   const { isSignedIn } = useAuth()
@@ -95,20 +116,33 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
-              className="mx-auto mt-6 w-full max-w-5xl"
+              className="mx-auto mt-6 flex w-full max-w-5xl flex-col items-center"
             >
-              <TextPressure
-                text="Roast Battle Earn"
-                textColor="#f8fafc"
-                minFontSize={52}
-                width
-                weight
-                italic
-                alpha={false}
-                flex
-                scale={false}
-                className="font-orbitron tracking-tight"
-              />
+              {/* <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-1 text-[10px] uppercase tracking-[0.35em] text-white/80">
+                <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border border-orange-400/70 text-[8px] text-orange-300">*</span>
+                Roast Prediction Arena
+              </div> */}
+
+              <div className="matrix-container mt-6">
+                <div className="matrix-rain" />
+                <h1
+                  data-text="Roast Battle Earn."
+                  className="matrix-text group cursor-default text-center uppercase transition-all duration-500 ease-out hover:text-[#b7ffb7]"
+                  style={{
+                    fontFamily: 'var(--font-orbitron)',
+                    fontSize: 'clamp(2rem, 7vw, 5.8rem)',
+                    letterSpacing: '0.06em',
+                    lineHeight: 1.04,
+                  }}
+                >
+                  <span className="block transition-all duration-500">
+                    <GlitchWord text="Roast Battle" />
+                  </span>
+                  <span className="mt-2 block transition-all duration-500">
+                    <GlitchWord text="Earn." />
+                  </span>
+                </h1>
+              </div>
             </motion.div>
 
             {/* <motion.p
@@ -129,7 +163,7 @@ export default function LandingPage() {
             >
               <Link
                 href="/sign-in"
-                className="inline-flex items-center justify-center gap-2 rounded-[10px] border-2 border-[#725AC1] bg-transparent px-[30px] py-[15px] text-[18px] font-medium tracking-[1px] text-[#725AC1] transition-all duration-500 ease-out [box-shadow:inset_0_0_0_0_#725AC1] hover:text-white hover:[box-shadow:inset_0_-100px_0_0_#725AC1] active:scale-90"
+                className="mech-btn-purple inline-flex items-center justify-center gap-2 px-[30px] py-[15px] text-[18px] font-medium tracking-[1px]"
               >
                 Get Started
                 <ArrowRight className="h-4 w-4" />
@@ -390,4 +424,5 @@ export default function LandingPage() {
     </main>
   )
 }
+
 

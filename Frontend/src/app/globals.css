@@ -1,12 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Jura:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --font-inter: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --font-orbitron: "Orbitron", "Eurostile", "Bank Gothic", "Segoe UI", sans-serif;
-    --font-space: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+    --font-inter: "Jura", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-orbitron: "Syncopate", "Eurostile", "Bank Gothic", "Segoe UI", sans-serif;
+    --font-space: "Share Tech Mono", "Avenir Next", "Segoe UI", monospace;
     /* Deep space black background */
     --background: 210 15% 4%;
     --foreground: 0 0% 100%;
@@ -44,6 +45,7 @@
 
   body {
     @apply min-h-screen bg-transparent text-foreground antialiased;
+    font-family: var(--font-inter);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -82,6 +84,150 @@
   /* Secondary glass button */
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 transition-all duration-200;
+  }
+
+  /* AlgoWager-inspired mechanical hover button, tuned for Roastellar purple */
+  .mech-btn-purple {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #725AC1;
+    border-radius: 10px;
+    background: transparent;
+    color: #a78bfa;
+    box-shadow:
+      inset 0 0 0 0 #725AC1,
+      0 0 0 rgba(114, 90, 193, 0);
+    transition: all 0.45s var(--ease-mech, cubic-bezier(0.86, 0, 0.07, 1));
+  }
+
+  .mech-btn-purple::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.28) 45%, transparent 100%);
+    transform: translateX(-115%);
+    transition: transform 0.45s ease;
+    pointer-events: none;
+  }
+
+  .mech-btn-purple:hover {
+    color: #ffffff;
+    box-shadow:
+      inset 0 -100px 0 0 #725AC1,
+      0 0 24px rgba(139, 92, 246, 0.42),
+      0 0 56px rgba(139, 92, 246, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .mech-btn-purple:hover::before {
+    transform: translateX(115%);
+  }
+
+  .mech-btn-purple:active {
+    transform: scale(0.96);
+  }
+
+  /* AlgoWager-style RGB glitch text hover */
+  .hero-glitch {
+    position: relative;
+    display: inline-flex;
+    gap: 0.01em;
+  }
+
+  .hero-glitch-char {
+    position: relative;
+    display: inline-block;
+    transform: translateY(0);
+    transition: transform 0.25s ease, text-shadow 0.25s ease;
+    transition-delay: calc(var(--i) * 20ms);
+  }
+
+  .hero-glitch-char::before,
+  .hero-glitch-char::after {
+    content: attr(data-char);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .hero-glitch-char::before {
+    color: #ff2a1e;
+    text-shadow: 0 0 14px rgba(255, 42, 30, 0.55);
+  }
+
+  .hero-glitch-char::after {
+    color: #ffee00;
+    text-shadow: 0 0 14px rgba(214, 155, 4, 0.781);
+  }
+
+  .group:hover .hero-glitch-char,
+  .hero-glitch-char:hover {
+    transform: translateY(-6px);
+    text-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
+  }
+
+  .group:hover .hero-glitch-char::before,
+  .hero-glitch-char:hover::before {
+    opacity: 0.95;
+    transform: translate(-0.045em, 0.015em);
+  }
+
+  .group:hover .hero-glitch-char::after,
+  .hero-glitch-char:hover::after {
+    opacity: 0.95;
+    transform: translate(0.045em, -0.015em);
+  }
+
+  .matrix-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-inline: clamp(1rem, 4vw, 3rem);
+    overflow: visible;
+    z-index: 2;
+  }
+
+  .matrix-text {
+    color: #0f0;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+  }
+
+  .matrix-text::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    animation: matrix-glitch 2s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    transform: translate(-2px, -2px);
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0, 0 0 15px #0f0;
+    pointer-events: none;
+  }
+
+  .matrix-rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 0, 0.1) 0,
+      rgba(0, 255, 0, 0.2) 2px,
+      transparent 4px
+    );
+    animation: matrix-rain 10s linear infinite;
+    z-index: 1;
+    pointer-events: none;
   }
 
   /* Input styling */
@@ -145,6 +291,72 @@
   .chip-red {
     @apply bg-red-500/15 text-red-400 border border-red-500/30 rounded-full px-3 py-1 text-xs font-semibold;
   }
+
+  .faulty-terminal {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 30%, rgba(10, 35, 18, 0.85), rgba(2, 8, 5, 0.98) 55%, rgba(0, 0, 0, 1) 100%);
+    transform: scale(var(--ft-scale));
+    transform-origin: center center;
+    filter: saturate(1.08) brightness(var(--ft-glow));
+    border-radius: max(0px, calc(var(--ft-bend) * 48px));
+    animation: faulty-appear var(--ft-appear-ms) ease-out both;
+  }
+
+  .faulty-terminal-grid,
+  .faulty-terminal-scanlines,
+  .faulty-terminal-noise,
+  .faulty-terminal-glow,
+  .faulty-terminal-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .faulty-terminal-grid {
+    background-image:
+      linear-gradient(rgba(167, 239, 158, 0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(167, 239, 158, 0.09) 1px, transparent 1px);
+    background-size: var(--ft-grid-x) var(--ft-grid-y);
+    opacity: 0.35;
+  }
+
+  .faulty-terminal-scanlines {
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(167, 239, 158, var(--ft-scan-opacity)) 0px,
+        rgba(167, 239, 158, calc(var(--ft-scan-opacity) * 0.7)) 2px,
+        transparent 4px
+      );
+    mix-blend-mode: screen;
+    animation: faulty-scan var(--ft-speed) linear infinite;
+    animation-play-state: var(--ft-paused);
+  }
+
+  .faulty-terminal-noise {
+    background-image:
+      radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.2) 0.6px, transparent 1px),
+      radial-gradient(circle at 72% 66%, rgba(255, 255, 255, 0.16) 0.6px, transparent 1px),
+      radial-gradient(circle at 40% 84%, rgba(255, 255, 255, 0.13) 0.6px, transparent 1px);
+    background-size: 4px 4px, 5px 5px, 6px 6px;
+    opacity: var(--ft-grain-opacity);
+    animation: faulty-flicker 180ms steps(2, end) infinite;
+    animation-play-state: var(--ft-paused);
+  }
+
+  .faulty-terminal-glow {
+    box-shadow:
+      inset 0 0 80px rgba(167, 239, 158, 0.1),
+      inset 0 0 180px rgba(84, 195, 82, 0.08);
+    filter: blur(var(--ft-blur));
+  }
+
+  .faulty-terminal-vignette {
+    background: radial-gradient(circle at center, transparent 45%, rgba(0, 0, 0, 0.62) 100%);
+    opacity: 0.8;
+  }
 }
 
 @layer utilities {
@@ -190,6 +402,60 @@
   50% {
     opacity: 1;
     filter: drop-shadow(0 0 14px rgba(96, 165, 250, 0.45));
+  }
+}
+
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes matrix-glitch {
+  0%,
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    transform: translate(0);
+  }
+  33% {
+    clip-path: polygon(0 0, 100% 0, 100% 15%, 0 15%);
+    transform: translate(-5px, -5px);
+  }
+  66% {
+    clip-path: polygon(0 85%, 100% 85%, 100% 100%, 0 100%);
+    transform: translate(5px, 5px);
+  }
+}
+
+@keyframes faulty-scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes faulty-flicker {
+  0% {
+    opacity: calc(var(--ft-grain-opacity) * 0.7);
+  }
+  100% {
+    opacity: calc(var(--ft-grain-opacity) + var(--ft-flicker-opacity));
+  }
+}
+
+@keyframes faulty-appear {
+  0% {
+    opacity: 0;
+    transform: scale(calc(var(--ft-scale) * 1.02));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(var(--ft-scale));
   }
 }
 

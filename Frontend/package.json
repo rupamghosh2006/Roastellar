@@ -22,6 +22,8 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@react-three/fiber": "^8.17.10",
+    "@react-three/postprocessing": "^2.16.3",
     "@stellar/freighter-api": "^6.0.1",
     "axios": "^1.6.5",
     "class-variance-authority": "^0.7.0",

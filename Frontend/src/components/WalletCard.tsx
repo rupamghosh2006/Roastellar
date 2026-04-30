@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-react'
-import { SmokeRing } from '@paper-design/shaders-react'
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
+import Dither from '@/components/Dither'
 
 interface WalletCardProps {
   address: string
@@ -47,18 +47,16 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
     >
       {variant === 'full' && (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <SmokeRing
-            width={1280}
-            height={720}
-            colors={['#ffffff']}
-            colorBack="#000000"
-            noiseScale={3}
-            noiseIterations={8}
-            radius={0.25}
-            thickness={0.65}
-            innerShape={0.7}
-            speed={0.5}
-            scale={0.8}
+          <Dither
+            waveSpeed={0.05}
+            waveFrequency={3}
+            waveAmplitude={0.3}
+            waveColor={[0.45, 0.62, 0.52]}
+            colorNum={5}
+            pixelSize={2}
+            disableAnimation={false}
+            enableMouseInteraction={true}
+            mouseRadius={1}
           />
         </div>
       )}

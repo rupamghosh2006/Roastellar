@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-react'
+import { SmokeRing } from '@paper-design/shaders-react'
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
-import LightRays from '@/components/LightRays'
 
 interface WalletCardProps {
   address: string
@@ -46,21 +46,19 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
       )}
     >
       {variant === 'full' && (
-        <div style={{ width: '100%', height: '600px', position: 'absolute', inset: 0 }}>
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#ffffff"
-            raysSpeed={1.3}
-            lightSpread={0.5}
-            rayLength={3}
-            followMouse={true}
-            mouseInfluence={0.2}
-            noiseAmount={0.38}
-            distortion={0}
-            className="custom-rays"
-            pulsating
-            fadeDistance={1.8}
-            saturation={1.1}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <SmokeRing
+            width={1280}
+            height={720}
+            colors={['#ffffff']}
+            colorBack="#000000"
+            noiseScale={3}
+            noiseIterations={8}
+            radius={0.25}
+            thickness={0.65}
+            innerShape={0.7}
+            speed={0.5}
+            scale={0.8}
           />
         </div>
       )}

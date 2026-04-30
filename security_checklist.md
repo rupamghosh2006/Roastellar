@@ -190,14 +190,14 @@ PASS
 
 ---
 
-## Additional Hardening Recommendations
+<!-- ## Additional Hardening Recommendations
 
 These are not blockers for the current checklist completion, but improve posture:
 
 1. Centralize sanitization and output-encoding rules across all text inputs, not only battle topic/roast.
 2. Consider stricter frontend route gate defaults in `Frontend/src/proxy.ts` to reduce accidental exposure of authenticated UX.
 3. Replace any development fallback secrets/default keys in production paths with fail-fast enforcement everywhere.
-4. Add automated security tests for duplicate-vote rejection, rate-limit behavior, and auth bypass attempts.
+4. Add automated security tests for duplicate-vote rejection, rate-limit behavior, and auth bypass attempts. -->
 
 ---
 

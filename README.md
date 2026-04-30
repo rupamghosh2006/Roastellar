@@ -19,7 +19,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
   - Explorer sample: [Stellar Expert Account](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
 - **Metrics Dashboard (Screenshot/Link):**
   - Screenshot section: [Metrics Dashboard](#metrics-dashboard)
-  - API endpoint: [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
+  <!-- - API endpoint: [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics) -->
 - **Monitoring Dashboard (Screenshot):** [Monitoring Active](#monitoring-active)
 - **Completed Security Checklist:** [security_checklist.md](./security_checklist.md)
 - **Community Contribution (Twitter/X Post):** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)

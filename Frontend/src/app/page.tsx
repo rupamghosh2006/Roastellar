@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
-import { ArrowRight, Coins, Flame, ShieldCheck, Swords, Trophy, Wallet } from 'lucide-react'
+import { Coins, Flame, ShieldCheck, Swords, Trophy, Wallet } from 'lucide-react'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/api'
 import { isOnboardingComplete } from '@/lib/utils'
 import { isWalletAuthenticated } from '@/lib/walletAuth'
@@ -154,27 +154,6 @@ export default function LandingPage() {
               Roastellar turns competitive social banter into a premium multiplayer experience with live battles,
               instant wallet onboarding, spectator predictions, and reward-ready Stellar rails.
             </motion.p> */}
-
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.24 }}
-              className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-            >
-              <Link
-                href="/sign-in"
-                className="mech-btn-purple inline-flex items-center justify-center gap-2 px-[30px] py-[15px] text-[18px] font-medium tracking-[1px]"
-              >
-                Get Started
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              {/* <a
-                href="#how-it-works"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-3 transition-all duration-200"
-              >
-                Watch Demo
-              </a> */}
-            </motion.div>
 
             <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
               {[

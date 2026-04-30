@@ -63,15 +63,15 @@ export function FreighterConnectCard({ className, compact = false, onConnected }
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
-            <PlugZap className="h-4 w-4 text-blue-200" />
+            {/* <PlugZap className="h-4 w-4 text-blue-200" /> */}
             Freighter Companion Wallet
           </div>
-          <h3 className={cn('mt-3 font-orbitron text-white', compact ? 'text-lg' : 'text-xl sm:text-2xl')}>
+          {/* <h3 className={cn('mt-3 font-orbitron text-white', compact ? 'text-lg' : 'text-xl sm:text-2xl')}>
             Connect Freighter after onboarding
-          </h3>
-          <p className="mt-2 text-sm leading-6 text-white/55">
+          </h3> */}
+          {/* <p className="mt-2 text-sm leading-6 text-white/55">
             Your Roastellar arena wallet stays managed by the app. Freighter adds an external wallet connection for signing and future wallet-native actions.
-          </p>
+          </p> */}
         </div>
         <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70">
           {loading ? 'Checking' : state.connected ? 'Connected' : state.available ? 'Ready' : 'Not installed'}
@@ -87,7 +87,7 @@ export function FreighterConnectCard({ className, compact = false, onConnected }
               : state.available
               ? state.connected
                 ? 'Freighter is installed and connected to this app.'
-                : 'Freighter is installed. Connect it to continue with wallet-aware actions.'
+                : 'Freighter is installed. '
               : 'Freighter is not detected in this browser yet.'}
           </p>
         </div>
@@ -130,7 +130,7 @@ export function FreighterConnectCard({ className, compact = false, onConnected }
         <button
           onClick={handleConnect}
           disabled={connecting || loading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-5 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          className="mech-btn-purple inline-flex w-full items-center justify-center px-5 py-2.5 text-sm font-medium tracking-[0.04em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {connecting ? 'Connecting...' : state.connected ? 'Reconnect Freighter' : 'Connect Freighter'}
         </button>

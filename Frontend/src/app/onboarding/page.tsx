@@ -224,14 +224,14 @@ export default function OnboardingPage() {
             >
               <div className="mx-auto max-w-3xl">
                 <div className="mb-6 text-center">
-                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200">
+                  {/* <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200">
                     <WalletIcon className="h-4 w-4" />
                     Existing wallet flow
-                  </div>
+                  </div> */}
                   <h2 className="mt-5 font-orbitron text-2xl font-bold text-white sm:text-3xl">Connect your Freighter wallet</h2>
-                  <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
+                  {/* <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
                     If you already use Web3, connect Freighter and continue anonymously. Sign in stays optional.
-                  </p>
+                  </p> */}
                 </div>
 
                 <FreighterConnectCard

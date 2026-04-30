@@ -11,7 +11,14 @@ export default function SignUpPage() {
         <BrandLogo size={32} />
         <span className="font-orbitron font-bold text-xl text-gradient">Roastellar</span>
       </Link>
-      <SignUp />
+      <SignUp
+        appearance={{
+          elements: {
+            formButtonPrimary:
+              'mech-btn-purple inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium tracking-[0.04em]',
+          },
+        }}
+      />
     </div>
   )
 }

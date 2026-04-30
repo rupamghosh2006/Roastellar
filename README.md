@@ -105,6 +105,10 @@ Based on user feedback, the following improvements are planned:
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system architecture documentation.
 
+## Security
+
+Link: [completed security checklist](./security_checklist.md)
+
 ## CI/CD Setup
 
 This repo now includes GitHub Actions for:

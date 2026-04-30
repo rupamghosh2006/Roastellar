@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
-import Dither from '@/components/Dither'
+
+const Dither = dynamic(() => import('@/components/Dither'), { ssr: false })
 
 interface WalletCardProps {
   address: string

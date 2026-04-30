@@ -15,6 +15,7 @@ import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import { useRouter } from 'next/navigation'
 import ElectricBorder from '@/components/ElectricBorder'
 import { AnimatedList } from '@/components/AnimatedList'
+import PrismaticTiltCard from '@/components/PrismaticTiltCard'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -318,21 +319,25 @@ export default function DashboardPage() {
 
 function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[28px] sm:p-5">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
-        {icon}
-        {label}
+    <PrismaticTiltCard radius={28}>
+      <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[28px] sm:p-5">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
+          {icon}
+          {label}
+        </div>
+        <p className="mt-4 font-orbitron text-2xl text-white sm:text-3xl">{value}</p>
       </div>
-      <p className="mt-4 font-orbitron text-2xl text-white sm:text-3xl">{value}</p>
-    </div>
+    </PrismaticTiltCard>
   )
 }
 
 function QuickAction({ href, title, copy }: { href: string; title: string; copy: string }) {
   return (
-    <Link href={href} className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06] sm:rounded-[28px] sm:p-5">
-      <p className="font-orbitron text-lg text-white sm:text-xl">{title}</p>
-      <p className="mt-3 text-sm leading-6 text-white/50">{copy}</p>
-    </Link>
+    <PrismaticTiltCard radius={28}>
+      <Link href={href} className="block rounded-[22px] border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06] sm:rounded-[28px] sm:p-5">
+        <p className="font-orbitron text-lg text-white sm:text-xl">{title}</p>
+        <p className="mt-3 text-sm leading-6 text-white/50">{copy}</p>
+      </Link>
+    </PrismaticTiltCard>
   )
 }

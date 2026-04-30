@@ -219,7 +219,7 @@ export default function BattlesPage() {
               <Plus className="h-5 w-5 text-violet-300" />
               <h2 className="font-orbitron text-2xl text-white">Create Contest</h2>
             </div>
-<div className="mt-5 grid gap-4 md:grid-cols-2">
+<div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px_auto] lg:items-center">
   <input
     value={topic}
     onChange={(event) => setTopic(event.target.value)}
@@ -242,7 +242,7 @@ export default function BattlesPage() {
   <button
     onClick={createBattle}
     disabled={submitting}
-    className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+    className="btn-primary disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
   >
     <Swords className="h-4 w-4" />
     {submitting ? 'Creating...' : 'Create Battle'}

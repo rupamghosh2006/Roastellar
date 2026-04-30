@@ -9,6 +9,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { apiRoutes, type User } from '@/lib/api'
 import { formatAddress, formatDate } from '@/lib/utils'
 import { clearWalletAuthSession, getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
+import PrismaticTiltCard from '@/components/PrismaticTiltCard'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -242,12 +243,14 @@ function Stat({ label, value, icon, accentColor = 'blue' }: { label: string; val
     emerald: 'border-l-emerald-500/50',
   };
   return (
-    <div className={`glass rounded-2xl p-5 border-l-4 ${borderColors[accentColor] || 'border-l-blue-500/50'}`}>
-      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
-        {icon}
-        {label}
+    <PrismaticTiltCard radius={16}>
+      <div className={`glass rounded-2xl p-5 border-l-4 ${borderColors[accentColor] || 'border-l-blue-500/50'}`}>
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+          {icon}
+          {label}
+        </div>
+        <p className="mt-4 font-orbitron text-3xl text-white">{value}</p>
       </div>
-      <p className="mt-4 font-orbitron text-3xl text-white">{value}</p>
-    </div>
+    </PrismaticTiltCard>
   )
 }

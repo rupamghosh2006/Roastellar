@@ -10,18 +10,19 @@ import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/
 import { isOnboardingComplete } from '@/lib/utils'
 import { isWalletAuthenticated } from '@/lib/walletAuth'
 import { BrandLogo } from '@/components/BrandLogo'
+import PrismaticTiltCard from '@/components/PrismaticTiltCard'
 
 const features = [
-  { icon: Swords, title: 'Live roast battles', copy: 'Fast-paced match rooms with real-time submissions, votes, and reactions.' },
-  { icon: Wallet, title: 'Wallets created for users', copy: 'Every player gets a Stellar wallet experience baked directly into onboarding.' },
-  { icon: Coins, title: 'Reward-ready economy', copy: 'Predict outcomes, win contests, and track rewards without leaving the app.' },
-  { icon: ShieldCheck, title: 'Fintech-grade confidence', copy: 'A dark, premium UI built to make the product feel investable and real.' },
+  { icon: Swords, title: 'Live roast battles', copy: '' },
+  { icon: Wallet, title: 'Wallets created for users', copy: '' },
+  { icon: Coins, title: 'Reward-ready economy', copy: '' },
+  { icon: ShieldCheck, title: 'Fintech-grade confidence', copy: '' },
 ]
 
 const steps = [
-  'Sign in with Clerk and enter the arena in seconds.',
-  'Beat the onboarding mini-game to reveal your new Stellar wallet.',
-  'Join battles, vote on winners, and climb the leaderboard.',
+  'Sign in and choose your path: create a managed Roastellar wallet or connect Freighter.',
+  'Complete onboarding to activate your wallet mode and unlock battle-ready access.',
+  'Create or join battles, submit roasts, vote, and climb the leaderboard for rewards.',
 ]
 
 function GlitchWord({ text }: { text: string }) {
@@ -161,10 +162,12 @@ export default function LandingPage() {
                 { value: String(openBattles.length), label: 'Open battles now' },
                 { value: `${totalPot.toFixed(2)} XLM`, label: 'Open prize pool' },
               ].map((stat) => (
-                <div key={stat.label} className="glass rounded-2xl p-4 border-l-2 border-l-violet-500/50">
-                  <p className="font-orbitron text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="mt-1 text-sm text-slate-400">{stat.label}</p>
-                </div>
+                <PrismaticTiltCard key={stat.label} className="h-full" radius={16}>
+                  <div className="glass h-full rounded-2xl border-l-2 border-l-violet-500/50 p-4">
+                    <p className="font-orbitron text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="mt-1 text-sm text-slate-400">{stat.label}</p>
+                  </div>
+                </PrismaticTiltCard>
               ))}
             </div>
           </div>
@@ -285,12 +288,12 @@ export default function LandingPage() {
       className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
     >
       <div>
-        <p className="text-xs font-medium uppercase tracking-[0.38em] text-slate-500">
+        {/* <p className="text-xs font-medium uppercase tracking-[0.38em] text-slate-500">
           How it works
-        </p>
+        </p> */}
 
         <h2 className="mt-3 max-w-3xl font-orbitron text-4xl font-bold leading-tight text-white sm:text-5xl">
-          One flow from sign-up to reward
+          Two wallet paths, one battle arena
         </h2>
       </div>
 
@@ -310,34 +313,31 @@ export default function LandingPage() {
             ease: [0.22, 1, 0.36, 1],
           }}
           whileHover={{ y: -6, scale: 1.015 }}
-          className="group relative overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] p-7 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.28)]"
         >
-          {/* subtle shine */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent opacity-70" />
+          <PrismaticTiltCard className="h-full" radius={24}>
+            <div className="group relative h-full overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] p-7 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.28)]">
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent opacity-70" />
 
-          {/* soft hover glow */}
-          <div className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_45%)]" />
+              <div className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_45%)]" />
 
-          {/* Number */}
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-inner">
-            <span className="font-orbitron text-lg font-bold text-white/90">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-          </div>
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-inner">
+                <span className="font-orbitron text-lg font-bold text-white/90">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
 
-          {/* Divider */}
-          <div className="relative mt-6 h-px w-full bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
+              <div className="relative mt-6 h-px w-full bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
 
-          {/* Content */}
-          <p className="relative mt-6 text-lg leading-8 text-slate-200">
-            {step}
-          </p>
+              <p className="relative mt-6 text-lg leading-8 text-slate-200">
+                {step}
+              </p>
 
-          {/* footer accent */}
-          <div className="relative mt-8 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-slate-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
-            Step {index + 1}
-          </div>
+              <div className="relative mt-8 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-slate-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                Step {index + 1}
+              </div>
+            </div>
+          </PrismaticTiltCard>
         </motion.div>
       ))}
     </div>
@@ -376,13 +376,17 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.06 }}
-                  className={`glass glass-hover rounded-2xl p-6 border-l-4 ${borderColorClass}`}
+                  className="h-full"
                 >
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${bgColorClass}`}>
-                    <Icon className={`h-5 w-5 ${textColorClass}`} />
-                  </div>
-                  <h3 className="mt-6 font-orbitron text-xl text-white">{feature.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-400">{feature.copy}</p>
+                  <PrismaticTiltCard className="h-full" radius={16}>
+                    <div className={`glass glass-hover h-full rounded-2xl border-l-4 p-6 ${borderColorClass}`}>
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${bgColorClass}`}>
+                        <Icon className={`h-5 w-5 ${textColorClass}`} />
+                      </div>
+                      <h3 className="mt-6 font-orbitron text-xl text-white">{feature.title}</h3>
+                      <p className="mt-3 text-sm leading-6 text-slate-400">{feature.copy}</p>
+                    </div>
+                  </PrismaticTiltCard>
                 </motion.div>
               )
             })}

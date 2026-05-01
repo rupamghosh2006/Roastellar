@@ -59,10 +59,18 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 ### Screenshots - Mobile View
 
 <p align="center">
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777472412/WhatsApp_Image_2026-04-29_at_7.45.44_PM_cizdt2.jpg" width="180" />
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777472413/WhatsApp_Image_2026-04-29_at_7.45.45_PM_1_wvip4x.jpg" width="180" />
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777472412/WhatsApp_Image_2026-04-29_at_7.45.45_PM_eeu8lw.jpg" width="180" />
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777472421/WhatsApp_Image_2026-04-29_at_7.45.44_PM_1_mwlch5.jpg" width="180" />
+  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114435_anapof.jpg" width="180" />
+  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114448_aljk9x.jpg" width="180" />
+</p>
+
+<p align="center">
+  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114937_cnordq.jpg" width="180" />
+  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114945_vbnleu.jpg" width="180" />
+</p>
+
+<p align="center">
+  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114835_l9jhao.jpg" width="180" />
+  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114723_bc3z93.jpg" width="180" />
 </p>
 
 ## Smart Contract

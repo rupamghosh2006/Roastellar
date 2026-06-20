@@ -108,10 +108,10 @@ impl Roastellar {
         }
     }
 
-    pub fn create_match(e: Env, entry_fee: i128, topic_cid: String, user: Address) -> u32 {
+    pub fn create_match(e: Env, entry_fee: i128, topic_cid: String, user: Address) -> Result<u32, String> {
         user.require_auth();
         if entry_fee <= 0 {
-            panic!("entry fee must be positive");
+            return Err("entry fee must be positive".to_string());
         }
         let key = DataKey::MatchCount;
         let match_count: u32 = e.storage().instance().get(&key).unwrap_or(0);
@@ -134,7 +134,7 @@ impl Roastellar {
             created_at: e.ledger().timestamp(),
         };
         e.storage().instance().set(&match_key, &new_match);
-        new_match_id
+        Ok(new_match_id)
     }
 
     pub fn get_match(e: Env, match_id: u32) -> Option<Match> {

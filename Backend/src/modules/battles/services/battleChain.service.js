@@ -28,35 +28,35 @@ function parseReturnValue(returnValue) {
         const native = StellarSdk.scValToNative(scVal);
         if (native && typeof native === 'object' && 'switch' in native) {
           if (native.switch === 0 && native.value !== undefined) {
-            return native.value;
+            return { ok: true, value: native.value };
           }
           if (native.switch === 1) {
             logger.error('Contract returned Err variant', { returnValue: JSON.stringify(native) });
-            throw new Error(`Contract error: ${JSON.stringify(native.value)}`);
+            return { ok: false, value: native.value };
           }
         }
-        return native;
+        return { ok: true, value: native };
       }
-      return scVal;
+      return { ok: true, value: scVal };
     }
     if (typeof StellarSdk.scValToNative === 'function') {
       const native = StellarSdk.scValToNative(returnValue);
       if (native && typeof native === 'object' && 'switch' in native) {
         if (native.switch === 0 && native.value !== undefined) {
-          return native.value;
+          return { ok: true, value: native.value };
         }
         if (native.switch === 1) {
           logger.error('Contract returned Err variant', { returnValue: JSON.stringify(native) });
-          throw new Error(`Contract error: ${JSON.stringify(native.value)}`);
+          return { ok: false, value: native.value };
         }
       }
-      return native;
+      return { ok: true, value: native };
     }
   } catch (e) {
     logger.error('parseReturnValue failed', { message: e?.message, returnValue });
     throw e;
   }
-  return null;
+  return { ok: true, value: null };
 }
 
 class BattleChainService {
@@ -94,11 +94,18 @@ class BattleChainService {
       throw new Error(`Soroban simulate failed: ${simulated.error}`);
     }
     logger.info('Soroban simulate result', { method, simulated: JSON.stringify(simulated, null, 2) });
-    const simulatedReturnValue =
-      parseReturnValue(simulated?.result?.retval) ??
-      parseReturnValue(simulated?.retval) ??
-      parseReturnValue(simulated?.result?.result?.retval);
+    let simulatedReturnValue = null;
+    if (simulated?.result?.retval) {
+      simulatedReturnValue = parseReturnValue(simulated?.result?.retval);
+    } else if (simulated?.retval) {
+      simulatedReturnValue = parseReturnValue(simulated?.retval);
+    } else if (simulated?.result?.result?.retval) {
+      simulatedReturnValue = parseReturnValue(simulated?.result?.result?.retval);
+    }
     logger.info('Parsed simulated return value', { method, simulatedReturnValue });
+    if (simulatedReturnValue && !simulatedReturnValue.ok) {
+      throw new Error(`Contract error: ${JSON.stringify(simulatedReturnValue.value)}`);
+    }
 
     const assemble =
       StellarSdk?.SorobanRpc?.assembleTransaction ||
@@ -143,19 +150,26 @@ class BattleChainService {
           txHash: hash,
           message: error?.message,
         });
-        return {
-          txHash: hash,
-          returnValue: simulatedReturnValue,
-          raw: null,
-        };
+        if (simulatedReturnValue && simulatedReturnValue.ok) {
+          return {
+            txHash: hash,
+            returnValue: simulatedReturnValue.value,
+            raw: null,
+          };
+        } else {
+          throw new Error(`Contract error: ${JSON.stringify(simulatedReturnValue.value)}`);
+        }
       }
       if (txResult?.status === 'SUCCESS') {
         logger.info('Soroban tx result', { method, txResult: JSON.stringify(txResult, null, 2) });
-        const parsed = parseReturnValue(txResult.returnValue) ?? simulatedReturnValue;
-        logger.info('Parsed tx return value', { method, parsed });
+        const parsedReturnValue = parseReturnValue(txResult.returnValue);
+        if (!parsedReturnValue.ok) {
+          throw new Error(`Contract error: ${JSON.stringify(parsedReturnValue.value)}`);
+        }
+        logger.info('Parsed tx return value', { method, parsed: parsedReturnValue.value });
         return {
           txHash: hash,
-          returnValue: parsed,
+          returnValue: parsedReturnValue.value,
           raw: txResult,
         };
       }
@@ -165,7 +179,11 @@ class BattleChainService {
       await sleep(pollIntervalMs);
     }
 
-    return { txHash: hash, returnValue: simulatedReturnValue, raw: null };
+    if (simulatedReturnValue && simulatedReturnValue.ok) {
+      return { txHash: hash, returnValue: simulatedReturnValue.value, raw: null };
+    } else {
+      throw new Error(`Contract error: ${JSON.stringify(simulatedReturnValue.value)}`);
+    }
   }
 
   async createMatchOnChain({ entryFee, topicCid, sourceSecret, sourcePublic }) {

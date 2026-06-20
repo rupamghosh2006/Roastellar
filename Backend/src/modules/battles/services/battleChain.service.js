@@ -25,14 +25,37 @@ function parseReturnValue(returnValue) {
     if (typeof returnValue === 'string' && StellarSdk?.xdr?.ScVal?.fromXDR) {
       const scVal = StellarSdk.xdr.ScVal.fromXDR(returnValue, 'base64');
       if (typeof StellarSdk.scValToNative === 'function') {
-        return StellarSdk.scValToNative(scVal);
+        const native = StellarSdk.scValToNative(scVal);
+        if (native && typeof native === 'object' && 'switch' in native) {
+          if (native.switch === 0 && native.value !== undefined) {
+            return native.value;
+          }
+          if (native.switch === 1) {
+            logger.error('Contract returned Err variant', { returnValue: JSON.stringify(native) });
+            throw new Error(`Contract error: ${JSON.stringify(native.value)}`);
+          }
+        }
+        return native;
       }
       return scVal;
     }
     if (typeof StellarSdk.scValToNative === 'function') {
-      return StellarSdk.scValToNative(returnValue);
+      const native = StellarSdk.scValToNative(returnValue);
+      if (native && typeof native === 'object' && 'switch' in native) {
+        if (native.switch === 0 && native.value !== undefined) {
+          return native.value;
+        }
+        if (native.switch === 1) {
+          logger.error('Contract returned Err variant', { returnValue: JSON.stringify(native) });
+          throw new Error(`Contract error: ${JSON.stringify(native.value)}`);
+        }
+      }
+      return native;
     }
-  } catch (_) {}
+  } catch (e) {
+    logger.error('parseReturnValue failed', { message: e?.message, returnValue });
+    throw e;
+  }
   return null;
 }
 
@@ -70,10 +93,12 @@ class BattleChainService {
     if (simulated?.error) {
       throw new Error(`Soroban simulate failed: ${simulated.error}`);
     }
+    logger.info('Soroban simulate result', { method, simulated: JSON.stringify(simulated, null, 2) });
     const simulatedReturnValue =
       parseReturnValue(simulated?.result?.retval) ??
       parseReturnValue(simulated?.retval) ??
       parseReturnValue(simulated?.result?.result?.retval);
+    logger.info('Parsed simulated return value', { method, simulatedReturnValue });
 
     const assemble =
       StellarSdk?.SorobanRpc?.assembleTransaction ||
@@ -125,9 +150,12 @@ class BattleChainService {
         };
       }
       if (txResult?.status === 'SUCCESS') {
+        logger.info('Soroban tx result', { method, txResult: JSON.stringify(txResult, null, 2) });
+        const parsed = parseReturnValue(txResult.returnValue) ?? simulatedReturnValue;
+        logger.info('Parsed tx return value', { method, parsed });
         return {
           txHash: hash,
-          returnValue: parseReturnValue(txResult.returnValue) ?? simulatedReturnValue,
+          returnValue: parsed,
           raw: txResult,
         };
       }

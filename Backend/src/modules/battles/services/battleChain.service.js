@@ -2,7 +2,7 @@ const { StellarSdk, rpcServer, NETWORK_PASSPHRASE } = require('../../../config/s
 const logger = require('../../../utils/logger');
 const { shouldSponsor, buildFeeBumpTx } = require('../../../utils/feeSponsor');
 
-const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CAD2N32J72CAIN5E7OSI3FKTRI6UEHUCF6HCHSAYDAKZK2ZPTR5A77ZJ';
+const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CAM52RLHRWG57CCDSI5BKZAYI3KLMHCOOJRXPCG2PSYNKXZFFPB4S3SV';
 const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET || '';
 const ESCROW_PUBLIC = process.env.STELLAR_ESCROW_PUBLIC || '';
 

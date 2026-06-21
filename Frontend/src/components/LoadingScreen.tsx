@@ -10,7 +10,7 @@ interface LoadingScreenProps {
 export function LoadingScreen({ message: _message = 'Booting the arena...' }: LoadingScreenProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_30%),radial-gradient(circle_at_bottom,_rgba(168,85,247,0.14),_transparent_24%)]" />
+      <div className="absolute inset-0 bg-[#020617]" />
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}

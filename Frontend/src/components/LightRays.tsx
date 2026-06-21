@@ -57,8 +57,8 @@ export default function LightRays({
   }, [raysOrigin])
 
   const xShift = followMouse ? (mouse.x - 50) * mouseInfluence : 0
-  const spread = 14 + lightSpread * 24
   const fade = Math.max(0.45, Math.min(1, 1 / Math.max(1, fadeDistance)))
+  const solidOpacity = Math.min(fade, Math.min(1, rayLength / 3)) * Math.max(0.4, Math.min(1, lightSpread))
 
   return (
     <div
@@ -83,15 +83,9 @@ export default function LightRays({
         )}
         style={{
           transform: `translateX(var(--lr-x))`,
-          opacity: fade,
+          opacity: solidOpacity,
           filter: 'blur(var(--lr-blur)) saturate(var(--lr-sat))',
-          backgroundImage: `repeating-conic-gradient(
-            from 180deg at ${originPosition},
-            color-mix(in oklab, var(--lr-color) 0%, transparent) 0deg,
-            color-mix(in oklab, var(--lr-color) 45%, transparent) ${spread}deg,
-            color-mix(in oklab, var(--lr-color) 0%, transparent) ${spread + 8}deg
-          )`,
-          maskImage: `linear-gradient(to bottom, rgba(0,0,0,${Math.min(1, rayLength / 3)}) 0%, rgba(0,0,0,0.7) 45%, transparent 100%)`,
+          background: 'color-mix(in oklab, var(--lr-color) 12%, transparent)',
           animationDuration: 'var(--lr-speed)',
         }}
       />
@@ -99,13 +93,7 @@ export default function LightRays({
         className="absolute inset-0"
         style={{
           opacity: 0.35,
-          backgroundImage: `radial-gradient(circle at ${originPosition}, color-mix(in oklab, var(--lr-color) 30%, transparent) 0%, transparent 60%),
-            repeating-linear-gradient(
-              0deg,
-              rgba(255,255,255,var(--lr-noise)) 0px,
-              rgba(255,255,255,0) 2px,
-              rgba(255,255,255,0) 4px
-            )`,
+          background: 'rgba(255,255,255,var(--lr-noise))',
         }}
       />
     </div>

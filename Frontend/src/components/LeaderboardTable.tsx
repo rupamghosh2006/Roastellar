@@ -51,8 +51,8 @@ export function LeaderboardTable({
   const listRef = useRef<HTMLDivElement | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [keyboardNav, setKeyboardNav] = useState(false)
-  const [topGradientOpacity, setTopGradientOpacity] = useState(0)
-  const [bottomGradientOpacity, setBottomGradientOpacity] = useState(1)
+  const [topShadeOpacity, setTopShadeOpacity] = useState(0)
+  const [bottomShadeOpacity, setBottomShadeOpacity] = useState(1)
 
   const handleItemMouseEnter = useCallback((index: number) => {
     setSelectedIndex(index)
@@ -64,9 +64,9 @@ export function LeaderboardTable({
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
-    setTopGradientOpacity(Math.min(scrollTop / 50, 1))
+    setTopShadeOpacity(Math.min(scrollTop / 50, 1))
     const bottomDistance = scrollHeight - (scrollTop + clientHeight)
-    setBottomGradientOpacity(scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1))
+    setBottomShadeOpacity(scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1))
   }, [])
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function LeaderboardTable({
   useEffect(() => {
     if (!listRef.current) return
     const container = listRef.current
-    setBottomGradientOpacity(container.scrollHeight <= container.clientHeight ? 0 : 1)
+    setBottomShadeOpacity(container.scrollHeight <= container.clientHeight ? 0 : 1)
   }, [entries.length])
 
   return (
@@ -141,7 +141,7 @@ export function LeaderboardTable({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <RankBadge rank={entry.rank} />
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/22 to-violet-500/18 font-semibold text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1D4ED8]/20 font-semibold text-white">
                     {entry.username?.[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div>
@@ -163,12 +163,12 @@ export function LeaderboardTable({
       </div>
 
       <div
-        className="pointer-events-none absolute left-0 right-0 top-0 h-[50px] bg-gradient-to-b from-[#120F17] to-transparent transition-opacity duration-300 ease"
-        style={{ opacity: topGradientOpacity }}
+        className="pointer-events-none absolute left-0 right-0 top-0 h-[50px] bg-[#120F17]/85 transition-opacity duration-300 ease"
+        style={{ opacity: topShadeOpacity }}
       />
       <div
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#120F17] to-transparent transition-opacity duration-300 ease"
-        style={{ opacity: bottomGradientOpacity }}
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-[100px] bg-[#120F17]/85 transition-opacity duration-300 ease"
+        style={{ opacity: bottomShadeOpacity }}
       />
     </div>
   )
@@ -276,7 +276,7 @@ export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
                     className="h-20 w-20 rounded-full border-4 border-white object-cover shadow-lg"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-amber-300 to-orange-400 text-4xl shadow-lg">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-[#B88A35] text-4xl shadow-lg">
                     {avatarFallback}
                   </div>
                 )}

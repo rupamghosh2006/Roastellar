@@ -29,7 +29,7 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
         isOpen && 'border-blue-400/20',
         isActive && 'border-violet-400/20'
       )}>
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-blue-500/12 via-violet-500/10 to-amber-300/8 opacity-70" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-[#101828]/80 opacity-70" />
 
         <div className="relative">
           <div className="mb-5 flex items-start justify-between gap-3">
@@ -91,7 +91,7 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
               className={cn(
                 'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-opacity',
                 isOpen
-                  ? 'bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:opacity-90'
+                  ? 'bg-[#B88A35] text-slate-950 hover:bg-[#D1A24A]'
                   : 'bg-white/8 text-white hover:bg-white/12'
               )}
             >
@@ -107,12 +107,12 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
 
 function AvatarChip({ name, tone }: { name?: string; tone: 'blue' | 'violet' }) {
   const classes = tone === 'blue'
-    ? 'from-blue-500/30 to-blue-300/20 text-blue-100'
-    : 'from-violet-500/30 to-fuchsia-300/20 text-violet-100'
+    ? 'bg-blue-500/16 text-blue-100'
+    : 'bg-violet-500/16 text-violet-100'
 
   return (
     <div className={cn(
-      'flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r px-3 py-2 text-sm',
+      'flex min-w-0 items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm',
       classes
     )}>
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 font-semibold">

@@ -38,7 +38,7 @@ export function WalletReveal({ wallet, onEnterArena, onViewWallet }: WalletRevea
         </p>
 
         <div className="mt-8 grid gap-5 sm:mt-10 sm:gap-6 lg:grid-cols-[1fr_0.9fr]">
-          <div className="gradient-border glass rounded-[24px] p-5 text-left sm:rounded-[28px] sm:p-6 md:rounded-[32px]">
+          <div className="premium-border glass rounded-[24px] p-5 text-left sm:rounded-[28px] sm:p-6 md:rounded-[32px]">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
               <WalletIcon className="h-4 w-4 text-amber-200" />
               Arena Wallet
@@ -93,7 +93,7 @@ export function WalletReveal({ wallet, onEnterArena, onViewWallet }: WalletRevea
         <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
           <button
             onClick={onEnterArena}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-6 py-3 font-semibold text-slate-950 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#B88A35] px-6 py-3 font-semibold text-slate-950 transition-colors hover:bg-[#D1A24A] sm:w-auto"
           >
             Enter Arena
             <ArrowRight className="h-4 w-4" />

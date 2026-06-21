@@ -48,7 +48,7 @@ export function Sidebar() {
                     className={cn(
                       'rounded-2xl border px-4 py-3 transition-all',
                       isActive
-                        ? 'border-blue-400/30 bg-gradient-to-r from-blue-500/18 via-violet-500/14 to-amber-300/10 text-white'
+                        ? 'border-[#B88A35]/35 bg-[#B88A35]/12 text-white'
                         : 'border-transparent bg-white/[0.03] text-white/60 hover:border-white/10 hover:bg-white/[0.06] hover:text-white'
                     )}
                   >
@@ -68,7 +68,7 @@ export function Sidebar() {
           </nav>
         </div>
 
-        {/* <div className="mt-4 rounded-[28px] border border-amber-300/12 bg-gradient-to-br from-amber-300/10 via-white/[0.03] to-violet-500/10 p-5">
+        {/* <div className="mt-4 rounded-[28px] border border-amber-300/12 bg-amber-300/10 p-5">
           <div className="flex items-center gap-2 text-amber-200">
             <Waves className="h-4 w-4" />
             <span className="text-xs uppercase tracking-[0.28em]">Reward Loop</span>

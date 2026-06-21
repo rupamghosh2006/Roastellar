@@ -14,8 +14,7 @@ type DotFieldProps = React.HTMLAttributes<HTMLDivElement> & {
   glowRadius?: number
   sparkle?: boolean
   waveAmplitude?: number
-  gradientFrom?: string
-  gradientTo?: string
+  dotColor?: string
   glowColor?: string
 }
 
@@ -40,13 +39,11 @@ const DotField = memo(({
   glowRadius = 160,
   sparkle = false,
   waveAmplitude = 0,
-  gradientFrom = 'rgba(168, 85, 247, 0.35)',
-  gradientTo = 'rgba(180, 151, 207, 0.25)',
+  dotColor = 'rgba(184, 138, 53, 0.32)',
   glowColor = '#120F17',
   ...rest
 }: DotFieldProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const svgRef = useRef<SVGSVGElement | null>(null)
   const glowRef = useRef<SVGCircleElement | null>(null)
   const dotsRef = useRef<Dot[]>([])
   const mouseRef = useRef({ x: -9999, y: -9999, prevX: -9999, prevY: -9999, speed: 0 })
@@ -55,9 +52,8 @@ const DotField = memo(({
   const glowOpacity = useRef(0)
   const engagement = useRef(0)
   const propsRef = useRef({})
-  propsRef.current = { dotRadius, dotSpacing, cursorRadius, cursorForce, bulgeOnly, bulgeStrength, sparkle, waveAmplitude, gradientFrom, gradientTo }
+  propsRef.current = { dotRadius, dotSpacing, cursorRadius, cursorForce, bulgeOnly, bulgeStrength, sparkle, waveAmplitude, dotColor }
   const rebuildRef = useRef<null | (() => void)>(null)
-  const glowIdRef = useRef(`dot-field-glow-${Math.random().toString(36).slice(2, 9)}`)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -162,10 +158,7 @@ const DotField = memo(({
 
       context.clearRect(0, 0, w, h)
 
-      const grad = context.createLinearGradient(0, 0, w, h)
-      grad.addColorStop(0, p.gradientFrom ?? 'rgba(168, 85, 247, 0.35)')
-      grad.addColorStop(1, p.gradientTo ?? 'rgba(180, 151, 207, 0.25)')
-      context.fillStyle = grad
+      context.fillStyle = p.dotColor ?? 'rgba(184, 138, 53, 0.32)'
 
       const cr = p.cursorRadius ?? 500
       const crSq = cr * cr
@@ -270,7 +263,6 @@ const DotField = memo(({
         }}
       />
       <svg
-        ref={svgRef}
         style={{
           position: 'absolute',
           inset: 0,
@@ -279,18 +271,12 @@ const DotField = memo(({
           pointerEvents: 'none',
         }}
       >
-        <defs>
-          <radialGradient id={glowIdRef.current}>
-            <stop offset="0%" stopColor={glowColor} />
-            <stop offset="100%" stopColor="transparent" />
-          </radialGradient>
-        </defs>
         <circle
           ref={glowRef}
           cx="-9999"
           cy="-9999"
           r={glowRadius}
-          fill={`url(#${glowIdRef.current})`}
+          fill={glowColor}
           style={{ opacity: 0, willChange: 'opacity' }}
         />
       </svg>

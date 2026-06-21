@@ -150,7 +150,7 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
             </p>
             <button
               onClick={startGame}
-              className="px-8 py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:opacity-90 transition-opacity glow-primary"
+              className="px-8 py-3 rounded-xl bg-[#B88A35] text-slate-950 font-semibold transition-colors hover:bg-[#D1A24A] glow-primary"
             >
               Start Game
             </button>
@@ -183,7 +183,7 @@ export function MiniGame({ onComplete, onSkip }: MiniGameProps) {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+                  className="h-full rounded-full bg-[#B88A35]"
                 />
               </div>
             </div>
@@ -294,7 +294,7 @@ export function ChestRewardAnimation({ onComplete }: { onComplete?: () => void }
       >
         <div className={cn(
           'w-full h-full rounded-2xl flex items-center justify-center',
-          'bg-gradient-to-br from-accent/40 to-amber-600/30',
+          'bg-[#B88A35]/25',
           'border-2 border-accent/50',
           'transition-all duration-300',
           state === 'opened' && 'opacity-50'

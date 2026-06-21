@@ -119,7 +119,7 @@ export default function ProfilePage() {
           <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-8 border-l-4 border-l-violet-500/40">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-5">
-                <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-orange-500/15 font-orbitron text-4xl font-bold text-white">
+                <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-[#B88A35]/18 font-orbitron text-4xl font-bold text-white">
                   {user?.username?.[0]?.toUpperCase() ?? '?'}
                 </div>
                 <div>

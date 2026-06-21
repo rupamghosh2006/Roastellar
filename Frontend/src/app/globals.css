@@ -54,12 +54,8 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-    background-size: 80px 80px;
-    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-    opacity: 0.3;
+    background: rgba(255, 255, 255, 0.012);
+    opacity: 0.18;
   }
 }
 
@@ -78,7 +74,7 @@
 
   /* Primary CTA button style */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#B88A35] hover:bg-[#D1A24A] text-slate-950 font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-[#B88A35]/20 hover:shadow-[#B88A35]/30 hover:scale-[1.02];
   }
 
   /* Secondary glass button */
@@ -104,7 +100,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.28) 45%, transparent 100%);
+    background: rgba(255, 255, 255, 0.14);
     transform: translateX(-115%);
     transition: transform 0.45s ease;
     pointer-events: none;
@@ -219,12 +215,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0, 255, 0, 0.1) 0,
-      rgba(0, 255, 0, 0.2) 2px,
-      transparent 4px
-    );
+    background: rgba(0, 255, 0, 0.08);
     animation: matrix-rain 10s linear infinite;
     z-index: 1;
     pointer-events: none;
@@ -235,12 +226,12 @@
     @apply bg-white/5 border border-white/10 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 rounded-xl text-white placeholder:text-slate-600 px-4 py-3 outline-none transition-all;
   }
 
-  .panel-gradient {
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  .panel-solid {
+    background: rgba(255, 255, 255, 0.055);
   }
 
-  .text-gradient {
-    @apply bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent;
+  .text-premium {
+    @apply text-slate-100;
   }
 
   .glow-primary {
@@ -257,17 +248,17 @@
       0 0 60px rgba(251, 191, 36, 0.14);
   }
 
-  .gradient-border {
+  .premium-border {
     position: relative;
   }
 
-  .gradient-border::before {
+  .premium-border::before {
     content: "";
     position: absolute;
     inset: -1px;
     z-index: -1;
     border-radius: inherit;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.45), rgba(59, 130, 246, 0.28), rgba(250, 204, 21, 0.2));
+    background: rgba(184, 138, 53, 0.38);
     opacity: 0.7;
   }
 
@@ -296,7 +287,7 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 30%, rgba(10, 35, 18, 0.85), rgba(2, 8, 5, 0.98) 55%, rgba(0, 0, 0, 1) 100%);
+    background: rgba(2, 8, 5, 0.98);
     transform: scale(var(--ft-scale));
     transform-origin: center center;
     filter: saturate(1.08) brightness(var(--ft-glow));
@@ -315,32 +306,19 @@
   }
 
   .faulty-terminal-grid {
-    background-image:
-      linear-gradient(rgba(167, 239, 158, 0.14) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(167, 239, 158, 0.09) 1px, transparent 1px);
-    background-size: var(--ft-grid-x) var(--ft-grid-y);
+    background: rgba(167, 239, 158, 0.06);
     opacity: 0.35;
   }
 
   .faulty-terminal-scanlines {
-    background:
-      repeating-linear-gradient(
-        0deg,
-        rgba(167, 239, 158, var(--ft-scan-opacity)) 0px,
-        rgba(167, 239, 158, calc(var(--ft-scan-opacity) * 0.7)) 2px,
-        transparent 4px
-      );
+    background: rgba(167, 239, 158, var(--ft-scan-opacity));
     mix-blend-mode: screen;
     animation: faulty-scan var(--ft-speed) linear infinite;
     animation-play-state: var(--ft-paused);
   }
 
   .faulty-terminal-noise {
-    background-image:
-      radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.2) 0.6px, transparent 1px),
-      radial-gradient(circle at 72% 66%, rgba(255, 255, 255, 0.16) 0.6px, transparent 1px),
-      radial-gradient(circle at 40% 84%, rgba(255, 255, 255, 0.13) 0.6px, transparent 1px);
-    background-size: 4px 4px, 5px 5px, 6px 6px;
+    background: rgba(255, 255, 255, 0.08);
     opacity: var(--ft-grain-opacity);
     animation: faulty-flicker 180ms steps(2, end) infinite;
     animation-play-state: var(--ft-paused);
@@ -354,7 +332,7 @@
   }
 
   .faulty-terminal-vignette {
-    background: radial-gradient(circle at center, transparent 45%, rgba(0, 0, 0, 0.62) 100%);
+    background: rgba(0, 0, 0, 0.42);
     opacity: 0.8;
   }
 }

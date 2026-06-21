@@ -304,7 +304,7 @@ export default function ElectricBorder({
           className="pointer-events-none absolute inset-0 -z-[1] scale-110 rounded-[inherit] opacity-30"
           style={{
             filter: 'blur(32px)',
-            background: `linear-gradient(-30deg, ${color}, transparent, ${color})`,
+            background: hexToRgba(color, 0.24),
           }}
         />
       </div>

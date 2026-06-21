@@ -110,7 +110,7 @@ export default function LandingPage() {
   return (
     <main className="overflow-hidden pt-16">
       <section className="relative px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pt-36">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.15)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 -z-10 bg-[#020617]" />
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-16">
           <div className="w-full max-w-5xl text-center">
             <motion.div
@@ -182,7 +182,7 @@ export default function LandingPage() {
               <div className="flex items-start justify-between gap-4">
   <div className="space-y-3">
     {/* Premium Badge */}
-    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-gradient-to-r from-emerald-500/12 via-emerald-400/8 to-transparent px-4 py-1.5 shadow-[0_0_18px_rgba(16,185,129,0.12)] backdrop-blur-xl">
+    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/12 px-4 py-1.5 shadow-[0_0_18px_rgba(16,185,129,0.12)] backdrop-blur-xl">
       <span className="relative flex h-2.5 w-2.5">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60"></span>
         <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
@@ -215,7 +215,7 @@ export default function LandingPage() {
         : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.14)]"
     }`}
   >
-    <span className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></span>
+    <span className="absolute inset-0 bg-white/5"></span>
     <span className="relative">
       {featuredBattle ? featuredBattle.status.toUpperCase() : "IDLE"}
     </span>
@@ -316,9 +316,9 @@ export default function LandingPage() {
         >
           <PrismaticTiltCard className="h-full" radius={24}>
             <div className="group relative h-full overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] p-7 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.28)]">
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent opacity-70" />
+              <div className="pointer-events-none absolute inset-0 bg-white/[0.04] opacity-70" />
 
-              <div className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_45%)]" />
+              <div className="absolute inset-0 rounded-3xl bg-white/[0.05] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
               <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-inner">
                 <span className="font-orbitron text-lg font-bold text-white/90">
@@ -326,7 +326,7 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              <div className="relative mt-6 h-px w-full bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
+              <div className="relative mt-6 h-px w-full bg-white/10" />
 
               <p className="relative mt-6 text-lg leading-8 text-slate-200">
                 {step}

@@ -30,7 +30,7 @@ export function HowItWorks() {
   return (
     <section className="relative py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Background gradients */}
+        {/* Background accents */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full filter blur-3xl opacity-20" />
         </div>

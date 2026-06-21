@@ -86,7 +86,7 @@ export function Navbar() {
                 {isActive && (
                   <motion.span
                     layoutId="desktop-nav-active"
-                    className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-cyan-400/20 via-violet-400/16 to-amber-300/18 ring-1 ring-white/12"
+                    className="absolute inset-0 -z-10 rounded-full bg-[#B88A35]/16 ring-1 ring-white/12"
                     transition={{ type: 'spring', stiffness: 380, damping: 34 }}
                   />
                 )}

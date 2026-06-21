@@ -390,7 +390,7 @@ export default function BattleRoomPage() {
                   <button
                     onClick={joinOpenBattle}
                     disabled={actionBusy}
-                    className="rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-2 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-55"
+                    className="rounded-full bg-[#B88A35] px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-55"
                   >
                     Join Battle
                   </button>
@@ -556,7 +556,7 @@ function PlayerCard({
         <button
           onClick={onVote}
           disabled={disabled}
-          className="mt-4 w-full rounded-xi bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-semibold px-4 py-2.5 transition-all disabled:cursor-not-allowed disabled:opacity-55"
+          className="mt-4 w-full rounded-xi bg-[#B88A35] px-4 py-2.5 font-semibold text-slate-950 transition-all hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-55"
         >
           Vote for {player?.username || 'Player'}
         </button>

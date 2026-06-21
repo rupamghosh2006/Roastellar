@@ -45,8 +45,8 @@ export function Hero() {
           variants={itemVariants}
           className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-balance"
         >
-          <span className="gradient-primary bg-clip-text text-transparent">Roast.</span>{' '}
-          <span className="gradient-accent bg-clip-text text-transparent">Battle.</span>{' '}
+          <span className="text-[#D1A24A]">Roast.</span>{' '}
+          <span className="text-[#E6EDF7]">Battle.</span>{' '}
           <span className="text-foreground">Earn.</span>
         </motion.h1>
 

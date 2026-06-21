@@ -9,7 +9,7 @@ export default function SignUpPage() {
     <div className="min-h-screen pt-6 flex flex-col items-center justify-center px-4">
       <Link href="/" className="flex items-center gap-2 mb-8">
         <BrandLogo size={32} />
-        <span className="font-orbitron font-bold text-xl text-gradient">Roastellar</span>
+        <span className="font-orbitron font-bold text-xl text-premium">Roastellar</span>
       </Link>
       <SignUp
         appearance={{

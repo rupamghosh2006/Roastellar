@@ -158,11 +158,11 @@ export function AnimatedList<T>({
       {showGradients && (
         <>
           <div
-            className="pointer-events-none absolute left-0 right-0 top-0 h-[50px] bg-gradient-to-b from-[#120F17] to-transparent transition-opacity duration-300 ease"
+            className="pointer-events-none absolute left-0 right-0 top-0 h-[50px] bg-[#120F17]/85 transition-opacity duration-300 ease"
             style={{ opacity: topGradientOpacity }}
           />
           <div
-            className="pointer-events-none absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#120F17] to-transparent transition-opacity duration-300 ease"
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-[100px] bg-[#120F17]/85 transition-opacity duration-300 ease"
             style={{ opacity: bottomGradientOpacity }}
           />
         </>

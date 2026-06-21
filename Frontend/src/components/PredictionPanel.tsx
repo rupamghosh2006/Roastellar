@@ -56,8 +56,8 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
   }
 
   const options = [
-    { id: player1Id || player1Name, label: player1Name, accent: 'from-blue-500/16 to-blue-300/10 border-blue-400/18' },
-    { id: player2Id || player2Name, label: player2Name, accent: 'from-violet-500/16 to-fuchsia-300/10 border-violet-400/18' },
+    { id: player1Id || player1Name, label: player1Name, accent: 'bg-blue-500/12 border-blue-400/18' },
+    { id: player2Id || player2Name, label: player2Name, accent: 'bg-violet-500/12 border-violet-400/18' },
   ]
 
   return (
@@ -79,7 +79,7 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
             disabled={submitting || disabled}
             onClick={() => setSelectedPlayer(option.id)}
             className={cn(
-              'w-full rounded-2xl border bg-gradient-to-r p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
+              'w-full rounded-2xl border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
               option.accent,
               selectedPlayer === option.id ? 'ring-2 ring-blue-400/45' : 'opacity-80 hover:opacity-100'
             )}
@@ -107,7 +107,7 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
       <button
         onClick={submitPrediction}
         disabled={submitting || disabled}
-        className="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-500 via-violet-500 to-amber-300 px-4 py-3 font-semibold text-slate-950 transition-opacity hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 w-full rounded-2xl bg-[#B88A35] px-4 py-3 font-semibold text-slate-950 transition-colors hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting ? 'Placing prediction...' : 'Predict Winner'}
       </button>

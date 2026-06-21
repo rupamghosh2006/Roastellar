@@ -53,7 +53,7 @@ export function Features() {
   return (
     <section id="how-it-works" className="relative py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Background gradients */}
+        {/* Background accents */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl opacity-20" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full filter blur-3xl opacity-20" />

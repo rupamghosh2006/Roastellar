@@ -37,7 +37,7 @@ export default async function MetricsPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <section className="mx-auto max-w-6xl">
-        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/60 p-8">
+        <div className="rounded-3xl border border-white/10 bg-slate-900 p-8">
           <div className="flex flex-wrap items-center gap-3">
             <BrandLogo size={36} className="relative" />
             <h1 className="text-3xl font-semibold">Roastellar Metrics Dashboard</h1>

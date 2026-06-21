@@ -11,7 +11,7 @@ export default function SignInPage() {
       <div className="mx-auto max-w-5xl">
         <Link href="/" className="mx-auto mb-8 flex w-fit items-center gap-2">
           <BrandLogo size={32} />
-          <span className="font-orbitron text-xl font-bold text-gradient">Roastellar</span>
+          <span className="font-orbitron text-xl font-bold text-premium">Roastellar</span>
         </Link>
 
       <div className="flex flex-col items-center gap-3">

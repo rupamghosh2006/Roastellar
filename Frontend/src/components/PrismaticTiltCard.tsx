@@ -117,15 +117,13 @@ export default function PrismaticTiltCard({
           style={{
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            background:
-              'radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(10,14,24,0.14) 0%, rgba(10,14,24,0.34) 55%, rgba(10,14,24,0.5) 100%)',
+            background: 'rgba(10,14,24,0.34)',
           }}
         />
         <div
           className="pointer-events-none absolute inset-0 z-[3] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
           style={{
-            backgroundImage:
-              'radial-gradient(farthest-corner circle at var(--pointer-x) var(--pointer-y), rgba(184,197,255,0.22) 8%, rgba(52,75,123,0.15) 55%, rgba(0,0,0,0) 80%)',
+            background: 'rgba(184,197,255,0.14)',
             mixBlendMode: 'overlay',
           }}
         />

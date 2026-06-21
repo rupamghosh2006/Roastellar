@@ -183,7 +183,7 @@ export default function OnboardingPage() {
                   </p>
                   <button
                     onClick={() => setStep('game')}
-                    className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] sm:mt-10 sm:w-auto"
+                    className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B88A35] px-6 py-3 font-bold text-slate-950 shadow-lg shadow-[#B88A35]/20 transition-all duration-200 hover:scale-[1.02] hover:bg-[#D1A24A] hover:shadow-[#B88A35]/30 sm:mt-10 sm:w-auto"
                   >
                     Start Challenge
                     <ArrowRight className="h-4 w-4" />
@@ -245,7 +245,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={continueWithExistingWallet}
                     disabled={!freighterConnected}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold px-6 py-3 transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#B88A35] px-6 py-3 font-bold text-slate-950 shadow-lg shadow-[#B88A35]/20 transition-all duration-200 hover:scale-[1.02] hover:bg-[#D1A24A] hover:shadow-[#B88A35]/30 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Continue with Freighter
                     <ArrowRight className="h-4 w-4" />

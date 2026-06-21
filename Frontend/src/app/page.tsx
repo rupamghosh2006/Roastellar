@@ -25,6 +25,28 @@ const steps = [
   'Create or join battles, submit roasts, vote, and climb the leaderboard for rewards.',
 ]
 
+function GlitchWord({ text }: { text: string }) {
+  return (
+    <span className="hero-glitch">
+      {Array.from(text).map((char, index) => {
+        if (char === ' ') {
+          return <span key={`space-${index}`} className="inline-block w-[0.42em]" aria-hidden="true" />
+        }
+        return (
+          <span
+            key={`${char}-${index}`}
+            data-char={char}
+            className="hero-glitch-char"
+            style={{ transitionDelay: `${index * 26}ms` }}
+          >
+            {char}
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
 export default function LandingPage() {
   const { isSignedIn } = useAuth()
   const router = useRouter()
@@ -87,57 +109,52 @@ export default function LandingPage() {
 
   return (
     <main className="overflow-hidden pt-16">
-      <section className="relative px-4 pb-20 pt-24 sm:px-6 lg:px-8 lg:pt-32">
-        <div className="absolute inset-0 -z-10 bg-[#020617]" />
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-14">
-          <div className="w-full max-w-6xl text-center">
+      <section className="relative px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pt-36">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.15)_0%,transparent_70%)]" />
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-16">
+          <div className="w-full max-w-5xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
               className="mx-auto mt-6 flex w-full max-w-5xl flex-col items-center"
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#B88A35]/25 bg-[#B88A35]/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.34em] text-[#F0D492] shadow-[0_18px_50px_rgba(184,138,53,0.08)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#F0D492] shadow-[0_0_12px_rgba(240,212,146,0.7)]" />
+              {/* <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-1 text-[10px] uppercase tracking-[0.35em] text-white/80">
+                <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border border-orange-400/70 text-[8px] text-orange-300">*</span>
                 Roast Prediction Arena
-              </div>
+              </div> */}
 
-              <h1 className="mt-8 max-w-5xl text-balance font-orbitron text-5xl font-black uppercase leading-[0.94] tracking-[0.03em] text-white sm:text-6xl lg:text-8xl">
-                <span className="block text-[#F0D492]">Roast.</span>
-                <span className="block text-white">Battle.</span>
-                <span className="block text-slate-300">Earn.</span>
-              </h1>
+              <div className="matrix-container mt-6">
+                <div className="matrix-rain" />
+                <h1
+                  data-text="Roast Battle Earn."
+                  className="matrix-text group cursor-default text-center uppercase transition-all duration-500 ease-out hover:text-[#b7ffb7]"
+                  style={{
+                    fontFamily: 'var(--font-orbitron)',
+                    fontSize: 'clamp(2rem, 7vw, 5.8rem)',
+                    letterSpacing: '0.06em',
+                    lineHeight: 1.04,
+                  }}
+                >
+                  <span className="block transition-all duration-500">
+                    <GlitchWord text="Roast Battle" />
+                  </span>
+                  <span className="mt-2 block transition-all duration-500">
+                    <GlitchWord text="Earn." />
+                  </span>
+                </h1>
+              </div>
             </motion.div>
 
-            <motion.p
+            {/* <motion.p
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.16 }}
-              className="mx-auto mt-6 max-w-3xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8"
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-white/60"
             >
               Roastellar turns competitive social banter into a premium multiplayer experience with live battles,
               instant wallet onboarding, spectator predictions, and reward-ready Stellar rails.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.22 }}
-              className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
-            >
-              <Link
-                href="/sign-in"
-                className="inline-flex min-w-44 items-center justify-center rounded-2xl bg-[#B88A35] px-6 py-3 font-bold text-slate-950 shadow-[0_18px_44px_rgba(184,138,53,0.22)] transition-colors hover:bg-[#D1A24A]"
-              >
-                Get Started
-              </Link>
-              <Link
-                href="#how-it-works"
-                className="inline-flex min-w-44 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] px-6 py-3 font-semibold text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white"
-              >
-                See How It Works
-              </Link>
-            </motion.div>
+            </motion.p> */}
 
             <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
               {[
@@ -165,7 +182,7 @@ export default function LandingPage() {
               <div className="flex items-start justify-between gap-4">
   <div className="space-y-3">
     {/* Premium Badge */}
-    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/12 px-4 py-1.5 shadow-[0_0_18px_rgba(16,185,129,0.12)] backdrop-blur-xl">
+    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-gradient-to-r from-emerald-500/12 via-emerald-400/8 to-transparent px-4 py-1.5 shadow-[0_0_18px_rgba(16,185,129,0.12)] backdrop-blur-xl">
       <span className="relative flex h-2.5 w-2.5">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60"></span>
         <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
@@ -198,7 +215,7 @@ export default function LandingPage() {
         : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.14)]"
     }`}
   >
-    <span className="absolute inset-0 bg-white/5"></span>
+    <span className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></span>
     <span className="relative">
       {featuredBattle ? featuredBattle.status.toUpperCase() : "IDLE"}
     </span>
@@ -299,9 +316,9 @@ export default function LandingPage() {
         >
           <PrismaticTiltCard className="h-full" radius={24}>
             <div className="group relative h-full overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] p-7 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.28)]">
-              <div className="pointer-events-none absolute inset-0 bg-white/[0.04] opacity-70" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent opacity-70" />
 
-              <div className="absolute inset-0 rounded-3xl bg-white/[0.05] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_45%)]" />
 
               <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-inner">
                 <span className="font-orbitron text-lg font-bold text-white/90">
@@ -309,7 +326,7 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              <div className="relative mt-6 h-px w-full bg-white/10" />
+              <div className="relative mt-6 h-px w-full bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
 
               <p className="relative mt-6 text-lg leading-8 text-slate-200">
                 {step}

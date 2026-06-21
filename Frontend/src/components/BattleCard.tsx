@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Clock3, Coins, Eye, Flame, Sparkles, Swords, Users } from 'lucide-react'
+import { Clock3, Coins, Eye, Flame, Swords } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import type { Battle } from '@/lib/api'
 import { AnimatedItem } from '@/components/AnimatedList'
@@ -33,7 +33,7 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
       className="group"
     >
       <div className={cn(
-        'relative h-full overflow-hidden rounded-[30px] border bg-[#111820]/92 p-[1px] shadow-[0_24px_80px_rgba(0,0,0,0.42)] transition-all duration-300',
+        'relative h-full overflow-hidden rounded-[28px] border bg-[#10161D]/95 p-[1px] shadow-[0_24px_80px_rgba(0,0,0,0.42)] transition-all duration-300',
         isOpen && 'border-sky-300/24',
         isActive && 'border-violet-300/24',
         !isOpen && !isActive && 'border-[#B88A35]/24'
@@ -41,9 +41,9 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
         <div className="absolute inset-x-5 top-0 h-px bg-white/18" />
         <div className="absolute bottom-0 left-8 right-8 h-px bg-[#B88A35]/35" />
 
-        <div className="relative flex h-full flex-col rounded-[29px] bg-[#0B0F14]/96 p-5 sm:p-6">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
+        <div className="relative flex h-full flex-col rounded-[27px] bg-[#0B0F14]/96 p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
               <div className={cn(
                 'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em]',
                 statusClasses
@@ -51,11 +51,11 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
                 <span className="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_12px_currentColor]" />
                 {battle.status}
               </div>
-              <h3 className="mt-4 line-clamp-2 font-orbitron text-2xl font-black leading-tight text-white tracking-[0.02em] transition-colors group-hover:text-[#F0D492] sm:text-3xl">
+              <h3 className="mt-4 line-clamp-2 font-orbitron text-3xl font-black leading-[0.98] text-white tracking-[0.02em] transition-colors group-hover:text-[#F0D492] sm:text-4xl">
                 {battle.topic}
               </h3>
             </div>
-            <div className="shrink-0 rounded-2xl border border-[#B88A35]/24 bg-[#B88A35]/12 px-3 py-2 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <div className="shrink-0 rounded-2xl border border-[#B88A35]/24 bg-[#B88A35]/12 px-3 py-2 text-right">
               <div className="flex items-center justify-end gap-1.5 text-[10px] uppercase tracking-[0.18em] text-[#F0D492]/70">
                 <Coins className="h-3.5 w-3.5" />
                 Pot
@@ -64,43 +64,32 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
             </div>
           </div>
 
-          <p className="max-w-xl text-sm leading-6 text-white/54">
-            Crowd-fueled roast battle with live votes, predictions, and instant Stellar rewards.
-          </p>
-
-          <div className="mt-6 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="rounded-[22px] border border-white/10 bg-[#151B21] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-              <div className="mb-4 flex items-center justify-between">
+          <div className="mt-7 grid gap-3 lg:grid-cols-[1fr_auto]">
+            <div className="rounded-[22px] border border-white/10 bg-[#141A21] p-4">
+              <div className="mb-4 flex items-center justify-between gap-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/38">Players</p>
-                <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-[10px] text-white/45">Duel lobby</span>
+                <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-[10px] text-white/45">Lobby</span>
               </div>
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
                 <PlayerSlot name={playerOneName} tone="blue" />
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#B88A35]/25 bg-[#B88A35]/12 font-orbitron text-[10px] font-bold text-[#F0D492]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#B88A35]/25 bg-[#B88A35]/12 font-orbitron text-[10px] font-bold text-[#F0D492]">
                   VS
                 </div>
                 <PlayerSlot name={playerTwoName} tone="gold" isEmpty={!battle.player2} />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+            <div className="grid grid-cols-2 gap-3 lg:w-56 lg:grid-cols-1">
               <MetricTile icon={Clock3} label="Ends" value={formatRelativeTime(battle.expiresAt)} tone="gold" />
               <MetricTile icon={Eye} label="Votes" value={votes.toLocaleString()} tone="blue" />
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.035] px-4 py-3 text-xs text-white/48">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B88A35]/12 text-[#F0D492]">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <span>Instant settlement after final vote</span>
-            </div>
-
+          <div className="mt-5 flex justify-end">
             <Link
               href={`/battle/${battle.matchId || battle.id}`}
               className={cn(
-                'inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition-all duration-200',
+                'inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200',
                 isOpen
                   ? 'bg-[#B88A35] text-slate-950 shadow-[0_14px_34px_rgba(184,138,53,0.22)] hover:bg-[#D1A24A]'
                   : 'border border-white/10 bg-white/8 text-white hover:bg-white/12'

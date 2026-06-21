@@ -25,28 +25,6 @@ const steps = [
   'Create or join battles, submit roasts, vote, and climb the leaderboard for rewards.',
 ]
 
-function GlitchWord({ text }: { text: string }) {
-  return (
-    <span className="hero-glitch">
-      {Array.from(text).map((char, index) => {
-        if (char === ' ') {
-          return <span key={`space-${index}`} className="inline-block w-[0.42em]" aria-hidden="true" />
-        }
-        return (
-          <span
-            key={`${char}-${index}`}
-            data-char={char}
-            className="hero-glitch-char"
-            style={{ transitionDelay: `${index * 26}ms` }}
-          >
-            {char}
-          </span>
-        )
-      })}
-    </span>
-  )
-}
-
 export default function LandingPage() {
   const { isSignedIn } = useAuth()
   const router = useRouter()
@@ -109,52 +87,57 @@ export default function LandingPage() {
 
   return (
     <main className="overflow-hidden pt-16">
-      <section className="relative px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pt-36">
+      <section className="relative px-4 pb-20 pt-24 sm:px-6 lg:px-8 lg:pt-32">
         <div className="absolute inset-0 -z-10 bg-[#020617]" />
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-16">
-          <div className="w-full max-w-5xl text-center">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-14">
+          <div className="w-full max-w-6xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
               className="mx-auto mt-6 flex w-full max-w-5xl flex-col items-center"
             >
-              {/* <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-1 text-[10px] uppercase tracking-[0.35em] text-white/80">
-                <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border border-orange-400/70 text-[8px] text-orange-300">*</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#B88A35]/25 bg-[#B88A35]/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.34em] text-[#F0D492] shadow-[0_18px_50px_rgba(184,138,53,0.08)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#F0D492] shadow-[0_0_12px_rgba(240,212,146,0.7)]" />
                 Roast Prediction Arena
-              </div> */}
-
-              <div className="matrix-container mt-6">
-                <div className="matrix-rain" />
-                <h1
-                  data-text="Roast Battle Earn."
-                  className="matrix-text group cursor-default text-center uppercase transition-all duration-500 ease-out hover:text-[#b7ffb7]"
-                  style={{
-                    fontFamily: 'var(--font-orbitron)',
-                    fontSize: 'clamp(2rem, 7vw, 5.8rem)',
-                    letterSpacing: '0.06em',
-                    lineHeight: 1.04,
-                  }}
-                >
-                  <span className="block transition-all duration-500">
-                    <GlitchWord text="Roast Battle" />
-                  </span>
-                  <span className="mt-2 block transition-all duration-500">
-                    <GlitchWord text="Earn." />
-                  </span>
-                </h1>
               </div>
+
+              <h1 className="mt-8 max-w-5xl text-balance font-orbitron text-5xl font-black uppercase leading-[0.94] tracking-[0.03em] text-white sm:text-6xl lg:text-8xl">
+                <span className="block text-[#F0D492]">Roast.</span>
+                <span className="block text-white">Battle.</span>
+                <span className="block text-slate-300">Earn.</span>
+              </h1>
             </motion.div>
 
-            {/* <motion.p
+            <motion.p
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.16 }}
-              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-white/60"
+              className="mx-auto mt-6 max-w-3xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8"
             >
               Roastellar turns competitive social banter into a premium multiplayer experience with live battles,
               instant wallet onboarding, spectator predictions, and reward-ready Stellar rails.
-            </motion.p> */}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22 }}
+              className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            >
+              <Link
+                href="/sign-in"
+                className="inline-flex min-w-44 items-center justify-center rounded-2xl bg-[#B88A35] px-6 py-3 font-bold text-slate-950 shadow-[0_18px_44px_rgba(184,138,53,0.22)] transition-colors hover:bg-[#D1A24A]"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="#how-it-works"
+                className="inline-flex min-w-44 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] px-6 py-3 font-semibold text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white"
+              >
+                See How It Works
+              </Link>
+            </motion.div>
 
             <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
               {[

@@ -51,31 +51,31 @@ export function BattleCard({ battle, index = 0 }: BattleCardProps) {
           <div className="absolute -top-1 -right-1 w-24 h-24 bg-[#B88A35]/5 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-1 -left-1 w-32 h-32 bg-sky-300/3 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative flex items-start justify-between gap-4">
-            <div className="min-w-0">
+          <div className="relative flex items-start justify-between gap-4 min-w-0">
+            <div className="min-w-0 flex-1">
               <div className={cn(
                 'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.32em] backdrop-blur-sm',
                 'transition-all duration-300',
                 statusClasses
               )}>
                 <span className={cn(
-                  'h-1.5 w-1.5 rounded-full animate-pulse',
+                  'h-1.5 w-1.5 rounded-full animate-pulse shrink-0',
                   isOpen && 'bg-sky-300 shadow-[0_0_16px_rgba(148,163,244,0.6)]',
                   isActive && 'bg-violet-300 shadow-[0_0_16px_rgba(167,139,250,0.6)]',
                   !isOpen && !isActive && 'bg-[#F0D492] shadow-[0_0_16px_rgba(240,212,146,0.6)]'
                 )} />
-                {battle.status}
+                <span className="shrink-0">{battle.status}</span>
               </div>
-              <h3 className="mt-5 line-clamp-2 font-orbitron text-3xl font-black leading-[0.98] text-white tracking-[0.02em] transition-all duration-300 group-hover:text-[#F0D492] group-hover:drop-shadow-[0_0_20px_rgba(240,212,146,0.4)] sm:text-4xl">
+              <h3 className="mt-5 line-clamp-2 font-orbitron text-2xl sm:text-3xl font-black leading-tight text-white tracking-[0.02em] transition-all duration-300 group-hover:text-[#F0D492] group-hover:drop-shadow-[0_0_20px_rgba(240,212,146,0.4)] break-words">
                 {battle.topic}
               </h3>
             </div>
             <div className="shrink-0 rounded-2xl border border-[#B88A35]/40 bg-gradient-to-br from-[#B88A35]/20 to-[#8B5C1E]/10 px-4 py-2.5 text-right backdrop-blur-md shadow-[0_8px_32px_rgba(184,138,53,0.15)]">
-              <div className="flex items-center justify-end gap-1.5 text-[9px] uppercase tracking-[0.2em] text-[#F0D492]/80 font-semibold">
-                <Coins className="h-4 w-4" />
+              <div className="flex items-center justify-end gap-1.5 text-[9px] uppercase tracking-[0.2em] text-[#F0D492]/80 font-semibold whitespace-nowrap">
+                <Coins className="h-4 w-4 shrink-0" />
                 Pot
               </div>
-              <p className="mt-1.5 font-orbitron text-lg font-bold bg-gradient-to-r from-[#F0D492] to-[#E8C063] bg-clip-text text-transparent">{battle.pot} XLM</p>
+              <p className="mt-1.5 font-orbitron text-base sm:text-lg font-bold bg-gradient-to-r from-[#F0D492] to-[#E8C063] bg-clip-text text-transparent truncate">{battle.pot} XLM</p>
             </div>
           </div>
 
@@ -145,10 +145,10 @@ function PlayerSlot({ name, tone, isEmpty = false }: { name: string; tone: Playe
         )}>
           {isEmpty ? <Flame className="h-5 w-5 animate-pulse" /> : name[0]?.toUpperCase()}
         </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{name}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs sm:text-sm font-semibold text-white">{name}</p>
           <p className={cn(
-            'mt-0.5 text-[9px] uppercase tracking-[0.2em] font-semibold',
+            'mt-0.5 text-[8px] sm:text-[9px] uppercase tracking-[0.2em] font-semibold whitespace-nowrap',
             isEmpty ? 'text-white/40' : isBlueTone ? 'text-sky-200/60' : 'text-[#F0D492]/60'
           )}>
             {isEmpty ? 'Awaiting' : 'Locked'}

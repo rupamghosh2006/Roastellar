@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Battle Cards - Roastellar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .bg-premium {
+            background: linear-gradient(135deg, #0B0F14 0%, #0D1117 50%, #050608 100%);
+        }
+        
+        .card-border {
+            border: 1.5px solid rgba(184, 138, 53, 0.4);
+            box-shadow: 0 0 60px rgba(184, 138, 53, 0.15), 0 20px 60px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .card-border:hover {
+            box-shadow: 0 0 80px rgba(184, 138, 53, 0.25), 0 30px 80px rgba(0, 0, 0, 0.6);
+            transform: translateY(-8px);
+        }
+        
+        .card-inner {
+            background: linear-gradient(135deg, #0F1419 0%, #0B0F14 50%, rgba(5, 6, 8, 0.98) 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .gradient-top {
+            position: absolute;
+            inset-x: 20px;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+        
+        .gradient-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 32px;
+            right: 32px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(184, 138, 53, 0.4), transparent);
+        }
+        
+        .pot-gradient {
+            background: linear-gradient(to right, #F0D492, #E8C063);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .button-gradient {
+            background: linear-gradient(to right, #B88A35, #D1A24A);
+            box-shadow: 0 0 30px rgba(184, 138, 53, 0.4), 0 12px 32px rgba(184, 138, 53, 0.25);
+            transition: all 0.3s ease;
+        }
+        
+        .button-gradient:hover {
+            box-shadow: 0 0 50px rgba(184, 138, 53, 0.6), 0 20px 48px rgba(184, 138, 53, 0.35);
+            transform: scale(1.05);
+        }
+        
+        .button-gradient:active {
+            transform: scale(0.95);
+        }
+        
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-rotate {
+            transition: transform 0.3s ease;
+        }
+        
+        .button-gradient:hover .animate-rotate {
+            transform: rotate(12deg);
+        }
+        
+        .corner-accent {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .corner-accent-gold {
+            top: -4px;
+            right: -4px;
+            width: 96px;
+            height: 96px;
+            background: radial-gradient(circle, rgba(184, 138, 53, 0.1) 0%, transparent 70%);
+            filter: blur(32px);
+            border-radius: 50%;
+        }
+        
+        .corner-accent-blue {
+            bottom: -4px;
+            left: -4px;
+            width: 128px;
+            height: 128px;
+            background: radial-gradient(circle, rgba(148, 163, 244, 0.08) 0%, transparent 70%);
+            filter: blur(48px);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-premium text-white">
+    <div class="min-h-screen p-8">
+        <div class="mx-auto max-w-7xl">
+            <!-- Header -->
+            <div class="mb-12 text-center">
+                <h1 class="font-orbitron text-5xl font-black mb-4">Premium Battle Cards</h1>
+                <p class="text-xl text-white/60">Enhanced design with luxury aesthetics</p>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid gap-8 lg:grid-cols-2 mb-16">
+                <!-- Card 1 -->
+                <div class="group card-border rounded-[28px] overflow-hidden">
+                    <div class="absolute inset-0 rounded-[27px] bg-gradient-to-br from-white/8 via-transparent to-transparent pointer-events-none"></div>
+                    <div class="gradient-top"></div>
+                    <div class="gradient-bottom"></div>
+                    
+                    <div class="relative flex h-full flex-col rounded-[27px] card-inner p-6">
+                        <div class="corner-accent corner-accent-gold"></div>
+                        <div class="corner-accent corner-accent-blue"></div>
+                        
+                        <div class="relative flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <div class="inline-flex items-center gap-2 rounded-full border border-sky-300/25 bg-sky-300/10 px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-widest backdrop-blur-sm transition-all">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-lg status-pulse"></span>
+                                    OPEN
+                                </div>
+                                <h3 class="mt-5 font-orbitron text-3xl sm:text-4xl font-black leading-tight text-white transition-all duration-300 group-hover:text-[#F0D492]">
+                                    Roast AI Web3 Influencers
+                                </h3>
+                            </div>
+                            <div class="shrink-0 rounded-2xl border border-[#B88A35]/40 bg-gradient-to-br from-[#B88A35]/20 to-[#8B5C1E]/10 px-4 py-2.5 text-right backdrop-blur-md shadow-[0_8px_32px_rgba(184,138,53,0.15)]">
+                                <div class="flex items-center justify-end gap-1.5 text-[9px] uppercase tracking-wider text-[#F0D492]/80 font-semibold">
+                                    💰 POT
+                                </div>
+                                <p class="mt-1.5 font-orbitron text-lg font-bold pot-gradient">15 XLM</p>
+                            </div>
+                        </div>
+
+                        <!-- Players Section -->
+                        <div class="mt-8 grid gap-4 lg:grid-cols-[1fr_auto]">
+                            <div class="rounded-[22px] border border-white/15 bg-gradient-to-br from-white/8 to-white/3 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                <div class="mb-4 flex items-center justify-between gap-3">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-white/50">Players</p>
+                                    <span class="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[9px] text-white/50 font-semibold backdrop-blur-sm">Lobby</span>
+                                </div>
+                                <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+                                    <!-- Player 1 -->
+                                    <div class="rounded-2xl border border-sky-300/30 bg-gradient-to-br from-sky-300/15 to-sky-300/5 p-3.5 backdrop-blur-sm shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300/30 to-sky-300/10 text-sky-200 font-orbitron text-xs font-bold shadow-[0_0_16px_rgba(148,163,244,0.2)]">C</div>
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold text-white">Creator</p>
+                                                <p class="mt-0.5 text-[9px] uppercase tracking-wider text-sky-200/60 font-semibold">Locked</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- VS -->
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#B88A35]/40 bg-gradient-to-br from-[#B88A35]/20 to-[#8B5C1E]/5 font-orbitron text-[9px] font-bold text-[#F0D492] shadow-[0_0_20px_rgba(184,138,53,0.2)] backdrop-blur-sm">VS</div>
+                                    
+                                    <!-- Player 2 (Empty) -->
+                                    <div class="rounded-2xl border-2 border-dashed border-[#B88A35]/35 bg-gradient-to-br from-[#B88A35]/15 to-[#8B5C1E]/5 p-3.5 backdrop-blur-sm opacity-70 shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#B88A35]/30 to-[#8B5C1E]/10 text-[#F0D492] font-orbitron text-xs font-bold shadow-[0_0_16px_rgba(184,138,53,0.2)] status-pulse">🔥</div>
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold text-white">Open seat</p>
+                                                <p class="mt-0.5 text-[9px] uppercase tracking-wider text-white/40 font-semibold">Awaiting</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Metrics -->
+                            <div class="grid grid-cols-2 gap-4 lg:w-56 lg:grid-cols-1">
+                                <div class="rounded-[22px] border border-white/15 bg-gradient-to-br from-white/10 to-white/4 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-white/50">Ends</p>
+                                    <div class="mt-3.5 flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#B88A35]/25 to-[#8B5C1E]/8 text-[#F0D492] shadow-[0_0_16px_rgba(184,138,53,0.15)]">⏱️</div>
+                                        <p class="text-sm font-bold text-white">55s</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="rounded-[22px] border border-white/15 bg-gradient-to-br from-white/10 to-white/4 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-white/50">Votes</p>
+                                    <div class="mt-3.5 flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300/25 to-sky-300/8 text-sky-200 shadow-[0_0_16px_rgba(148,163,244,0.15)]">👁️</div>
+                                        <p class="text-sm font-bold text-white">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="mt-6 flex justify-end">
+                            <button class="inline-flex items-center justify-center gap-2.5 rounded-2xl px-7 py-3.5 text-sm font-bold button-gradient text-slate-950 relative overflow-hidden">
+                                Join Battle ⚔️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="group card-border rounded-[28px] overflow-hidden">
+                    <div class="absolute inset-0 rounded-[27px] bg-gradient-to-br from-white/8 via-transparent to-transparent pointer-events-none"></div>
+                    <div class="gradient-top"></div>
+                    <div class="gradient-bottom"></div>
+                    
+                    <div class="relative flex h-full flex-col rounded-[27px] card-inner p-6">
+                        <div class="corner-accent corner-accent-gold"></div>
+                        <div class="corner-accent corner-accent-blue"></div>
+                        
+                        <div class="relative flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <div class="inline-flex items-center gap-2 rounded-full border border-sky-300/25 bg-sky-300/10 px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-widest backdrop-blur-sm transition-all">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-lg status-pulse"></span>
+                                    OPEN
+                                </div>
+                                <h3 class="mt-5 font-orbitron text-3xl sm:text-4xl font-black leading-tight text-white transition-all duration-300 group-hover:text-[#F0D492]">
+                                    Roast Web3 Communities
+                                </h3>
+                            </div>
+                            <div class="shrink-0 rounded-2xl border border-[#B88A35]/40 bg-gradient-to-br from-[#B88A35]/20 to-[#8B5C1E]/10 px-4 py-2.5 text-right backdrop-blur-md shadow-[0_8px_32px_rgba(184,138,53,0.15)]">
+                                <div class="flex items-center justify-end gap-1.5 text-[9px] uppercase tracking-wider text-[#F0D492]/80 font-semibold">
+                                    💰 POT
+                                </div>
+                                <p class="mt-1.5 font-orbitron text-lg font-bold pot-gradient">5 XLM</p>
+                            </div>
+                        </div>
+
+                        <!-- Players Section -->
+                        <div class="mt-8 grid gap-4 lg:grid-cols-[1fr_auto]">
+                            <div class="rounded-[22px] border border-white/15 bg-gradient-to-br from-white/8 to-white/3 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                <div class="mb-4 flex items-center justify-between gap-3">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-white/50">Players</p>
+                                    <span class="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[9px] text-white/50 font-semibold backdrop-blur-sm">Lobby</span>
+                                </div>
+                                <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+                                    <div class="rounded-2xl border border-sky-300/30 bg-gradient-to-br from-sky-300/15 to-sky-300/5 p-3.5 backdrop-blur-sm shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300/30 to-sky-300/10 text-sky-200 font-orbitron text-xs font-bold shadow-[0_0_16px_rgba(148,163,244,0.2)]">C</div>
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold text-white">Creator</p>
+                                                <p class="mt-0.5 text-[9px] uppercase tracking-wider text-sky-200/60 font-semibold">Locked</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#B88A35]/40 bg-gradient-to-br from-[#B88A35]/20 to-[#8B5C1E]/5 font-orbitron text-[9px] font-bold text-[#F0D492] shadow-[0_0_20px_rgba(184,138,53,0.2)] backdrop-blur-sm">VS</div>
+                                    
+                                    <div class="rounded-2xl border border-[#B88A35]/30 bg-gradient-to-br from-[#B88A35]/15 to-[#8B5C1E]/5 p-3.5 backdrop-blur-sm shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#B88A35]/30 to-[#8B5C1E]/10 text-[#F0D492] font-orbitron text-xs font-bold shadow-[0_0_16px_rgba(184,138,53,0.2)]">Ch</div>
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold text-white">Challenger</p>
+                                                <p class="mt-0.5 text-[9px] uppercase tracking-wider text-[#F0D492]/60 font-semibold">Locked</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Metrics -->
+                            <div class="grid grid-cols-2 gap-4 lg:w-56 lg:grid-cols-1">
+                                <div class="rounded-[22px] border border-white/15 bg-gradient-to-br from-white/10 to-white/4 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-white/50">Ends</p>
+                                    <div class="mt-3.5 flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#B88A35]/25 to-[#8B5C1E]/8 text-[#F0D492] shadow-[0_0_16px_rgba(184,138,53,0.15)]">⏱️</div>
+                                        <p class="text-sm font-bold text-white">50s</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="rounded-[22px] border border-white/15 bg-gradient-to-br from-white/10 to-white/4 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-white/50">Votes</p>
+                                    <div class="mt-3.5 flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300/25 to-sky-300/8 text-sky-200 shadow-[0_0_16px_rgba(148,163,244,0.15)]">👁️</div>
+                                        <p class="text-sm font-bold text-white">423</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="mt-6 flex justify-end">
+                            <button class="inline-flex items-center justify-center gap-2.5 rounded-2xl px-7 py-3.5 text-sm font-bold button-gradient text-slate-950 relative overflow-hidden">
+                                Join Battle ⚔️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="border-t border-white/10 pt-12">
+                <h2 class="font-orbitron text-2xl font-bold mb-6">✨ Design Enhancements</h2>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="rounded-2xl bg-white/5 p-6 border border-white/10 hover:bg-white/8 transition-colors">
+                        <h3 class="font-semibold text-white mb-2">✨ Premium Shadows & Depth</h3>
+                        <p class="text-sm text-white/70">Enhanced shadow effects and multi-layered lighting create a luxurious look with better visual hierarchy.</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-6 border border-white/10 hover:bg-white/8 transition-colors">
+                        <h3 class="font-semibold text-white mb-2">🎨 Luxury Color Palette</h3>
+                        <p class="text-sm text-white/70">Gold accents (#B88A35), deep navy backgrounds, and white gradients for sophisticated appearance.</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-6 border border-white/10 hover:bg-white/8 transition-colors">
+                        <h3 class="font-semibold text-white mb-2">✏️ Enhanced Typography</h3>
+                        <p class="text-sm text-white/70">Better spacing, improved letter tracking, and gradient text effects for the pot amount.</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-6 border border-white/10 hover:bg-white/8 transition-colors">
+                        <h3 class="font-semibold text-white mb-2">🔆 Premium Borders & Glows</h3>
+                        <p class="text-sm text-white/70">Gradient borders, subtle glow effects, and improved backdrop blur for high-end appearance.</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-6 border border-white/10 hover:bg-white/8 transition-colors">
+                        <h3 class="font-semibold text-white mb-2">🎯 Interactive Elements</h3>
+                        <p class="text-sm text-white/70">Smooth hover states, animated indicators, and engaging button effects with gradients.</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/5 p-6 border border-white/10 hover:bg-white/8 transition-colors">
+                        <h3 class="font-semibold text-white mb-2">💫 Visual Polish</h3>
+                        <p class="text-sm text-white/70">Decorative corner accents, improved spacing, and refined component styling throughout.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

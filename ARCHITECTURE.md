@@ -275,11 +275,11 @@ Backend/src/
 
 ### Contract: Roastellar
 
-**Contract ID (Testnet):** `CAM52RLHRWG57CCDSI5BKZAYI3KLMHCOOJRXPCG2PSYNKXZFFPB4S3SV`
+**Contract ID (Testnet):** `CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW`
 
 **Network:** Stellar Testnet
 
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CAM52RLHRWG57CCDSI5BKZAYI3KLMHCOOJRXPCG2PSYNKXZFFPB4S3SV
+**Explorer:** https://stellar.expert/explorer/testnet/contract/CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW
 
 ### Contract Functions
 
@@ -416,7 +416,7 @@ create_match() → join_match() → submit_roast() (both) → vote() (spectators
 ```bash
 # Stellar
 STELLAR_NETWORK=testnet
-STELLAR_CONTRACT_ID=CAM52RLHRWG57CCDSI5BKZAYI3KLMHCOOJRXPCG2PSYNKXZFFPB4S3SV
+STELLAR_CONTRACT_ID=CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW
 STELLAR_BATTLE_SECRET=<deployer_secret>
 STELLAR_BATTLE_PUBLIC=GAYWZSX43WUBRHM3F2QCWBL6ZOYSH7V5EOQOYMG6SMTGMM24RFEFCMHC
 STELLAR_ESCROW_SECRET=<escrow_secret>
@@ -527,7 +527,7 @@ Client                    Backend                     Blockchain
 ### Smart Contract
 - **Network:** Stellar Testnet
 - **Deployed:** Via `stellar contract deploy`
-- **Contract ID:** `CAM52RLHRWG57CCDSI5BKZAYI3KLMHCOOJRXPCG2PSYNKXZFFPB4S3SV`
+- **Contract ID:** `CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW`
 
 ## Future Architecture Considerations
 

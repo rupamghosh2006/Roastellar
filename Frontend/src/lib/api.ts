@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 import { getWalletAuthToken } from '@/lib/walletAuth'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrender.com'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar-9khj.onrender.com'
 
 export const api = axios.create({
   baseURL: API_URL,

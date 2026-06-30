@@ -446,7 +446,7 @@ CLIENT_ORIGINS=https://roastellar.vercel.app
 ### Frontend (.env.local)
 
 ```bash
-NEXT_PUBLIC_API_URL=https://roastellar.onrender.com
+NEXT_PUBLIC_API_URL=https://roastellar-9khj.onrender.com
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<clerk_key>
 ```
 
@@ -519,7 +519,7 @@ Client                    Backend                     Blockchain
 - **Build:** `npm run build`
 
 ### Backend (Render)
-- **URL:** https://roastellar.onrender.com
+- **URL:** https://roastellar-9khj.onrender.com
 - **Runtime:** Node.js 20
 - **Database:** MongoDB Atlas
 - **Features:** Auto-deploy from GitHub

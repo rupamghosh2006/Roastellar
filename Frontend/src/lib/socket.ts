@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client'
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar.onrender.com'
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'https://roastellar-9khj.onrender.com'
 
 let socket: Socket | null = null
 

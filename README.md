@@ -18,6 +18,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
   - Source sheet (30 users): [Google Sheet](https://docs.google.com/spreadsheets/d/1rSuNXtO64Es7leAAnP5zJ5c3lW_7HQTvoOU-yRK8lsc/edit?usp=sharing)
   - Explorer sample: [Stellar Expert Account](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
 - **10+ June 2026 Onboarded Users:** [June 2026 Onboarded Users](#june-2026-onboarded-users)
+- **Sign-In Flow Fix (User Feedback Resolved):** [Sign-In Flow Fix](#sign-in-flow-fix)
 - **Metrics Dashboard (Screenshot):** [Metrics Dashboard](#metrics-dashboard)
   <!-- - API endpoint: [https://roastellar-9khj.onrender.com/api/analytics/metrics](https://roastellar-9khj.onrender.com/api/analytics/metrics) -->
 - **Monitoring Dashboard (Screenshot):** [Monitoring Active](#monitoring-active)
@@ -160,6 +161,13 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 | ABANTIKA KUNDU | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` | Voting issue: match still shows draw after voting. | `532bd9c094b76e9ef50bd06cd54098a2b7e47eb5` |
 | Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | Improve UI/UX, reduce mock/demo parts. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
 | Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | Mobile menu button redundant; add Clerk logout button. | `6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1`, `fa368559be91147008b212585b30a98294be9c7c` |
+
+### Sign-In Flow Fix
+
+Two users reported that signing in as a new user showed a 404 error instead of redirecting to the sign-up page. This was resolved in commit `41188a1` by detecting Clerk's `form_identifier_not_found` error and automatically redirecting to `/sign-up`.
+
+| User Name | User Email | User Wallet Address | User Feedback | Commit ID |
+|-----------|------------|---------------------|---------------|-----------|
 | RIJU DAS | riju.rj84kly@gmail.com | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | Sign-in showed 404 user not found instead of redirecting to sign-up. | `41188a1` |
 | BIBHAS BANIK | bibbybon44@gmail.com | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | Sign-in showed 404 error and didn't redirect to sign-up for new users. | `41188a1` |
 

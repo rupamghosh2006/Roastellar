@@ -1,11 +1,30 @@
 'use client'
 
-import { SignIn } from '@clerk/nextjs'
+import { useEffect, useRef } from 'react'
+import { SignIn, useSignIn } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Wallet } from 'lucide-react'
 import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SignInPage() {
+  const router = useRouter()
+  const { isLoaded, signIn } = useSignIn()
+  const hasRedirected = useRef(false)
+
+  useEffect(() => {
+    if (!isLoaded || !signIn || hasRedirected.current) return
+
+    const isUserNotFound = signIn.errors?.some(
+      (err: any) => err.code === 'form_identifier_not_found'
+    )
+
+    if (isUserNotFound) {
+      hasRedirected.current = true
+      router.push('/sign-up?redirect_url=/onboarding?flow=new')
+    }
+  }, [isLoaded, signIn, router])
+
   return (
     <main className="min-h-screen px-4 pb-10 pt-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">

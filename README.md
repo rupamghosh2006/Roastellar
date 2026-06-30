@@ -17,6 +17,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
   - Table in this README: [Testnet Users (Verified)](#testnet-users-verified)
   - Source sheet (30 users): [Google Sheet](https://docs.google.com/spreadsheets/d/1rSuNXtO64Es7leAAnP5zJ5c3lW_7HQTvoOU-yRK8lsc/edit?usp=sharing)
   - Explorer sample: [Stellar Expert Account](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
+- **10+ June 2026 Onboarded Users:** [June 2026 Onboarded Users](#june-2026-onboarded-users)
 - **Metrics Dashboard (Screenshot):** [Metrics Dashboard](#metrics-dashboard)
   <!-- - API endpoint: [https://roastellar-9khj.onrender.com/api/analytics/metrics](https://roastellar-9khj.onrender.com/api/analytics/metrics) -->
 - **Monitoring Dashboard (Screenshot):** [Monitoring Active](#monitoring-active)
@@ -129,6 +130,23 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
 
+## June 2026 Onboarded Users
+
+10 new testnet users onboarded in June 2026:
+
+| User Name | User Email | User Wallet Address | Onboarding Date |
+|-----------|------------|---------------------|-----------------|
+| Raunak Singh | Raunak537singh@gmail.com | `GDV7W3U4NX7X6Y5A23Z7B6M72VCLQ66PXZ7K6NY6L3I7Y42WW2DTEST3` | 29 Jun 2026 |
+| RIJU DAS | riju.rj84kly@gmail.com | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | 29 Jun 2026 |
+| PRATIK DUBE | pradube897@gmail.com | `GBV4DHWFLJQO6GHJXIN5S747EOXQGEEJA5BVOJHXLKD55XWHRUNWVV6Y` | 29 Jun 2026 |
+| Shrikant Ajay Bhore | shrikantbhore56@gmail.com | `GAGQ4AEPOYTJ2VLWXEWOTLVDMQNYW44CPHTK5LVHYERAL5AIOCDLEODU` | 30 Jun 2026 |
+| DISHA PAL | dishapalld9@gmail.com | `GC6JEOQTXDUZWQE6KTIFV5KKPT67UQR2SNILSZ6UZWZ5YYJRU27VYLRO` | 30 Jun 2026 |
+| BIBHAS BANIK | bibbybon44@gmail.com | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | 30 Jun 2026 |
+| URMI CHATTERJEE | peppaspip1212@gmail.com | `GC35DTKVPAIFHUU7PYOBKDEIM5FRXBSHQIWZBASA2IFRPN7VEQ5YZC24` | 30 Jun 2026 |
+| MANIK LAL | maniklalvivo@gmail.com | `GB5GF6NA6DFHBS6EZLNYTKKI6ODFHM6PD772VWTJMU7IRF5IO4ZFL526` | 30 Jun 2026 |
+| SNEHA DAS | sneeehaaaadas00@gmail.com | `GC4JRFZKUQQHXUE6BFDEQSYYP2YLSBS6MATKZJBJ3X2E56RGYLXWGO4X` | 30 Jun 2026 |
+| Swarnali Rani Lodh | srlmusic8765@gmail.com | `GAH6LDNKDOMJK7FSM2ZH3NVUQZQQYFFPO3LWO27MFQLKF2DZ7K6QMWYN` | 30 Jun 2026 |
+
 ## User Feedback
 
 **Full Feedback Data:** [Google Sheets Export](https://docs.google.com/spreadsheets/d/1bQhjQawRHuge7KuS5utRJ055WBbf2KfnXiU75W_4m1o/edit?usp=sharing)
@@ -142,6 +160,8 @@ View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/accou
 | ABANTIKA KUNDU | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` | Voting issue: match still shows draw after voting. | `532bd9c094b76e9ef50bd06cd54098a2b7e47eb5` |
 | Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | Improve UI/UX, reduce mock/demo parts. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
 | Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | Mobile menu button redundant; add Clerk logout button. | `6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1`, `fa368559be91147008b212585b30a98294be9c7c` |
+| RIJU DAS | riju.rj84kly@gmail.com | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | Sign-in showed 404 user not found instead of redirecting to sign-up. | `41188a1` |
+| BIBHAS BANIK | bibbybon44@gmail.com | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | Sign-in showed 404 error and didn't redirect to sign-up for new users. | `41188a1` |
 
 <!-- ## Next Iteration Improvements
 

@@ -5,9 +5,11 @@ import { motion, useInView } from 'framer-motion'
 import { TrendingUp } from 'lucide-react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ChampionIcon } from '@hugeicons/core-free-icons'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { LeaderboardEntry } from '@/lib/api'
-import ElectricBorder from '@/components/ElectricBorder'
+import dynamic from 'next/dynamic'
+const ElectricBorder = dynamic(() => import('@/components/ElectricBorder'), { ssr: false })
 
 function AnimatedItem({
   children,
@@ -23,7 +25,7 @@ function AnimatedItem({
   onClick: () => void
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
-  const inView = useInView(ref, { amount: 0.5, once: false })
+  const inView = useInView(ref, { amount: 0.5, once: true })
 
   return (
     <motion.div
@@ -270,9 +272,11 @@ export function Podium({ topThree }: { topThree: LeaderboardEntry[] }) {
             >
               <div className="mb-4">
                 {entry.avatar ? (
-                  <img
+                  <Image
                     src={entry.avatar}
                     alt={entry.username}
+                    width={80}
+                    height={80}
                     className="h-20 w-20 rounded-full border-4 border-white object-cover shadow-lg"
                   />
                 ) : (

@@ -20,7 +20,7 @@ export function AnimatedItem({
   className?: string
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
-  const inView = useInView(ref, { amount: 0.5, once: false })
+  const inView = useInView(ref, { amount: 0.5, once: true })
 
   return (
     <motion.div

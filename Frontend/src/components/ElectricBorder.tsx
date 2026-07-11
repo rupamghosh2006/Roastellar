@@ -42,6 +42,7 @@ export default function ElectricBorder({
   const animationRef = useRef<number | null>(null)
   const timeRef = useRef(0)
   const lastFrameTimeRef = useRef(0)
+  const hiddenRef = useRef(false)
 
   const random = useCallback((x: number) => {
     return (Math.sin(x * 12.9898) * 43758.5453) % 1
@@ -175,7 +176,7 @@ export default function ElectricBorder({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const octaves = 10
+    const octaves = 4
     const lacunarity = 1.6
     const gain = 0.7
     const amplitude = chaos
@@ -202,7 +203,13 @@ export default function ElectricBorder({
 
     let { width, height } = updateSize()
 
+    const handleVisibility = () => { hiddenRef.current = document.hidden }
+    document.addEventListener('visibilitychange', handleVisibility)
+
     const drawElectricBorder = (currentTime: number) => {
+      animationRef.current = requestAnimationFrame(drawElectricBorder)
+      if (hiddenRef.current) return
+
       const deltaTime = (currentTime - lastFrameTimeRef.current) / 1000
       timeRef.current += deltaTime * speed
       lastFrameTimeRef.current = currentTime
@@ -264,7 +271,6 @@ export default function ElectricBorder({
 
       ctx.closePath()
       ctx.stroke()
-      animationRef.current = requestAnimationFrame(drawElectricBorder)
     }
 
     const resizeObserver = new ResizeObserver(() => {
@@ -277,6 +283,7 @@ export default function ElectricBorder({
     animationRef.current = requestAnimationFrame(drawElectricBorder)
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
       resizeObserver.disconnect()
     }

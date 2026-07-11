@@ -10,7 +10,8 @@ import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/
 import { isOnboardingComplete, setOnboardingComplete } from '@/lib/utils'
 import { isWalletAuthenticated, getWalletAuthToken } from '@/lib/walletAuth'
 import { BrandLogo } from '@/components/BrandLogo'
-import PrismaticTiltCard from '@/components/PrismaticTiltCard'
+import dynamic from 'next/dynamic'
+const PrismaticTiltCard = dynamic(() => import('@/components/PrismaticTiltCard'), { ssr: false })
 
 const features = [
   { icon: Swords, title: 'Live roast battles', copy: '' },

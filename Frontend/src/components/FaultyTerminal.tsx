@@ -251,6 +251,7 @@ export default function FaultyTerminal({
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 })
   const frozenTimeRef = useRef(0)
   const rafRef = useRef(0)
+  const hiddenRef = useRef(false)
   const loadAnimationStartRef = useRef(0)
   const timeOffsetRef = useRef(Math.random() * 100)
 
@@ -312,8 +313,12 @@ export default function FaultyTerminal({
     resizeObserver.observe(ctn)
     resize()
 
+    const handleVisibility = () => { hiddenRef.current = document.hidden }
+    document.addEventListener('visibilitychange', handleVisibility)
+
     const update = (t: number) => {
       rafRef.current = requestAnimationFrame(update)
+      if (hiddenRef.current) return
 
       if (pageLoadAnimation && loadAnimationStartRef.current === 0) loadAnimationStartRef.current = t
 
@@ -349,6 +354,7 @@ export default function FaultyTerminal({
     if (mouseReact) ctn.addEventListener('mousemove', handleMouseMove)
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
       cancelAnimationFrame(rafRef.current)
       resizeObserver.disconnect()
       if (mouseReact) ctn.removeEventListener('mousemove', handleMouseMove)

@@ -1,8 +1,32 @@
 import type { Metadata, Viewport } from 'next'
+import dynamic from 'next/dynamic'
+import { Jura, Share_Tech_Mono, Syncopate } from 'next/font/google'
 import { ClerkProvider } from '@/components/ClerkProvider'
 import { Navbar } from '@/components/Navbar'
-import { AppBackground } from '@/components/AppBackground'
 import './globals.css'
+
+const jura = Jura({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const syncopate = Syncopate({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-orbitron',
+  display: 'swap',
+})
+
+const shareTechMono = Share_Tech_Mono({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-space',
+  display: 'swap',
+})
+
+const AppBackground = dynamic(() => import('@/components/AppBackground').then(mod => mod.AppBackground), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Roastellar - Roast. Battle. Earn.',
@@ -24,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark" data-scroll-behavior="smooth">
+    <html lang="en" className={`dark ${jura.variable} ${syncopate.variable} ${shareTechMono.variable}`} data-scroll-behavior="smooth">
       <body className="font-inter antialiased">
         <ClerkProvider>
           <AppBackground />

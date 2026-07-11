@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Jura:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -65,11 +64,11 @@
   }
 
   .glass {
-    @apply surface backdrop-blur-[16px];
+    @apply surface backdrop-blur-[6px];
   }
 
   .glass-hover {
-    @apply transition-all duration-300 hover:border-white/15 hover:bg-white/[0.08] hover:shadow-[0_24px_80px_rgba(124,58,237,0.15)];
+    @apply transition-all duration-300 hover:border-white/15 hover:bg-white/[0.08] hover:shadow-[0_24px_80px_rgba(124,58,237,0.15)] will-change-transform;
   }
 
   /* Primary CTA button style */
@@ -136,6 +135,7 @@
     transform: translateY(0);
     transition: transform 0.25s ease, text-shadow 0.25s ease;
     transition-delay: calc(var(--i) * 20ms);
+    will-change: transform, text-shadow;
   }
 
   .hero-glitch-char::before,

@@ -9,7 +9,8 @@ import { Sidebar } from '@/components/Sidebar'
 import { apiRoutes, type User } from '@/lib/api'
 import { formatAddress, formatDate } from '@/lib/utils'
 import { clearWalletAuthSession, getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
-import PrismaticTiltCard from '@/components/PrismaticTiltCard'
+import dynamic from 'next/dynamic'
+const PrismaticTiltCard = dynamic(() => import('@/components/PrismaticTiltCard'), { ssr: false })
 
 export default function ProfilePage() {
   const router = useRouter()

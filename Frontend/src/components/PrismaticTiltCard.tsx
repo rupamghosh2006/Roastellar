@@ -115,8 +115,8 @@ export default function PrismaticTiltCard({
         <div
           className="pointer-events-none absolute inset-0 z-[1]"
           style={{
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
             background: 'rgba(10,14,24,0.34)',
           }}
         />

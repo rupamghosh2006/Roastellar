@@ -13,9 +13,11 @@ import { apiRoutes, type Battle, type LeaderboardEntry, type User, type Wallet }
 import { setOnboardingComplete } from '@/lib/utils'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import { useRouter } from 'next/navigation'
-import ElectricBorder from '@/components/ElectricBorder'
+import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { AnimatedList } from '@/components/AnimatedList'
-import PrismaticTiltCard from '@/components/PrismaticTiltCard'
+const ElectricBorder = dynamic(() => import('@/components/ElectricBorder'), { ssr: false })
+const PrismaticTiltCard = dynamic(() => import('@/components/PrismaticTiltCard'), { ssr: false })
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -253,9 +255,11 @@ export default function DashboardPage() {
                             <div className={`relative rounded-[28px] px-5 pb-7 pt-8 ${cardStyles}`}>
                               <div className="absolute -top-5 left-1/2 -translate-x-1/2">
                                 {entry?.avatar ? (
-                                  <img
+                                  <Image
                                     src={entry.avatar}
                                     alt={entry.username}
+                                    width={40}
+                                    height={40}
                                     className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
                                   />
                                 ) : (

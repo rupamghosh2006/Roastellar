@@ -130,19 +130,32 @@ const TextPressure = ({
 
   useEffect(() => {
     let rafId = 0
+    let frameCount = 0
+    const skipFrames = typeof window !== 'undefined' && window.innerWidth < 768 ? 3 : 1
+    let cachedTitleRect: DOMRect | null = null
+    let cachedMaxDist = 0
+    let cachedCharRects: { center: { x: number; y: number } }[] = []
+
     const animate = () => {
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15
       mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15
 
       if (titleRef.current) {
-        const titleRect = titleRef.current.getBoundingClientRect()
-        const maxDist = titleRect.width / 2
+        if (frameCount % skipFrames === 0) {
+          cachedTitleRect = titleRef.current.getBoundingClientRect()
+          cachedMaxDist = cachedTitleRect.width / 2
+          cachedCharRects = spansRef.current.map((span) => {
+            if (!span) return { center: { x: 0, y: 0 } }
+            const rect = span.getBoundingClientRect()
+            return { center: { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } }
+          })
+        }
 
-        spansRef.current.forEach((span) => {
+        const maxDist = cachedMaxDist
+
+        spansRef.current.forEach((span, i) => {
           if (!span) return
-
-          const rect = span.getBoundingClientRect()
-          const charCenter = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+          const charCenter = cachedCharRects[i]?.center ?? { x: 0, y: 0 }
           const d = dist(mouseRef.current, charCenter)
 
           const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100
@@ -160,6 +173,7 @@ const TextPressure = ({
         })
       }
 
+      frameCount++
       rafId = requestAnimationFrame(animate)
     }
 

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import dynamic from 'next/dynamic'
 import { Jura, Share_Tech_Mono, Syncopate } from 'next/font/google'
 import { ClerkProvider } from '@/components/ClerkProvider'
 import { Navbar } from '@/components/Navbar'
+import AppBackground from '@/components/AppBackgroundWrapper'
 import './globals.css'
 
 const jura = Jura({
@@ -25,8 +25,6 @@ const shareTechMono = Share_Tech_Mono({
   variable: '--font-space',
   display: 'swap',
 })
-
-const AppBackground = dynamic(() => import('@/components/AppBackground').then(mod => mod.AppBackground), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Roastellar - Roast. Battle. Earn.',

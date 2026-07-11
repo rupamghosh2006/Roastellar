@@ -32,3 +32,4 @@ Thumbs.db
 # Stellar CLI
 .config/
 identity/
+# Un-ignore contracts lock file

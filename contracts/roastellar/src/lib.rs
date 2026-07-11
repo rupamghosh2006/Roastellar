@@ -365,57 +365,64 @@ impl Roastellar {
 #[cfg(test)]
 mod tests {
     use soroban_sdk::{Env, Address, String};
-    use soroban_sdk::testutils::Address as _;
     use crate::{Roastellar, RoastellarClient, MatchStatus, Badge};
+
+    fn setup_user(env: &Env, id: u8) -> Address {
+        let user = Address::from_account_id(env, &[id; 32]);
+        env.set_source_account(&[id; 32]);
+        user
+    }
+
+    fn register_user(
+        env: &Env,
+        client: &RoastellarClient<'_>,
+        id: u8,
+        username: &str,
+        profile_cid: &str,
+    ) -> Address {
+        let user = Address::from_account_id(env, &[id; 32]);
+        env.set_source_account(&[id; 32]);
+        let name = String::from_str(env, username);
+        let cid = String::from_str(env, profile_cid);
+        client.register_user(&user, &name, &cid);
+        user
+    }
 
     #[test]
     fn test_register_user() {
         let env = Env::default();
-        let user = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username = String::from_str(&env, "testuser");
-        let profile_cid = String::from_str(&env, "QmProfile");
-        client.register_user(&user, &username, &profile_cid);
+        let user = register_user(&env, &client, 0, "testuser", "QmProfile");
         let user_data = client.get_user(&user).unwrap();
-        assert_eq!(user_data.username, username);
+        assert_eq!(user_data.username, String::from_str(&env, "testuser"));
     }
 
     #[test]
     #[should_panic(expected = "user already registered")]
     fn test_duplicate_registration() {
         let env = Env::default();
-        let user = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username = String::from_str(&env, "testuser");
-        let profile_cid = String::from_str(&env, "QmProfile");
-        client.register_user(&user, &username, &profile_cid);
-        client.register_user(&user, &username, &profile_cid);
+        register_user(&env, &client, 0, "testuser", "QmProfile");
+        register_user(&env, &client, 0, "testuser", "QmProfile");
     }
 
     #[test]
     fn test_create_and_join_match() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
         assert_eq!(match_id, 1);
         let match_data = client.get_match(&match_id).unwrap();
         assert_eq!(match_data.status, MatchStatus::Open);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
         let match_data = client.get_match(&match_id).unwrap();
         assert_eq!(match_data.status, MatchStatus::Active);
@@ -424,24 +431,21 @@ mod tests {
     #[test]
     fn test_submit_roast() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
+        env.set_source_account(&[0; 32]);
         let roast1_cid = String::from_str(&env, "QmRoast1");
-        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast1_cid, &user1);
+        env.set_source_account(&[1; 32]);
+        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast2_cid, &user2);
         let match_data = client.get_match(&match_id).unwrap();
         assert!(match_data.roast1_cid.is_some());
@@ -451,27 +455,24 @@ mod tests {
     #[test]
     fn test_vote() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
+        env.set_source_account(&[0; 32]);
         let roast1_cid = String::from_str(&env, "QmRoast1");
-        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast1_cid, &user1);
+        env.set_source_account(&[1; 32]);
+        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast2_cid, &user2);
-        let voter = Address::generate(&env);
-        client.vote(&match_id, &user1, &voter);
+        env.set_source_account(&[2; 32]);
+        client.vote(&match_id, &user1, &Address::from_account_id(&env, &[2; 32]));
         let match_data = client.get_match(&match_id).unwrap();
         assert_eq!(match_data.votes_player1, 1);
     }
@@ -480,22 +481,18 @@ mod tests {
     #[should_panic(expected = "already voted")]
     fn test_double_vote_prevented() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
-        let voter = Address::generate(&env);
+        let voter = Address::from_account_id(&env, &[2; 32]);
+        env.set_source_account(&[2; 32]);
         client.vote(&match_id, &user1, &voter);
         client.vote(&match_id, &user1, &voter);
     }
@@ -503,22 +500,18 @@ mod tests {
     #[test]
     fn test_prediction() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
-        let predictor = Address::generate(&env);
+        let predictor = Address::from_account_id(&env, &[2; 32]);
+        env.set_source_account(&[2; 32]);
         let amount = 50i128;
         client.predict(&match_id, &user1, &amount, &predictor);
     }
@@ -526,28 +519,28 @@ mod tests {
     #[test]
     fn test_finalize_winner() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
+        env.set_source_account(&[0; 32]);
         let roast1_cid = String::from_str(&env, "QmRoast1");
-        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast1_cid, &user1);
+        env.set_source_account(&[1; 32]);
+        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast2_cid, &user2);
-        let voter = Address::generate(&env);
+        env.set_source_account(&[2; 32]);
+        let voter = Address::from_account_id(&env, &[2; 32]);
         client.vote(&match_id, &user1, &voter);
+        env.set_source_account(&[1; 32]);
         client.vote(&match_id, &user1, &user2);
+        env.set_source_account(&[0; 32]);
         client.finalize_match(&match_id);
         let match_data = client.get_match(&match_id).unwrap();
         assert_eq!(match_data.status, MatchStatus::Ended);
@@ -556,29 +549,29 @@ mod tests {
     #[test]
     fn test_draw_match() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
+        env.set_source_account(&[0; 32]);
         let roast1_cid = String::from_str(&env, "QmRoast1");
-        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast1_cid, &user1);
+        env.set_source_account(&[1; 32]);
+        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast2_cid, &user2);
-        let voter1 = Address::generate(&env);
-        let voter2 = Address::generate(&env);
+        env.set_source_account(&[2; 32]);
+        let voter1 = Address::from_account_id(&env, &[2; 32]);
         client.vote(&match_id, &user1, &voter1);
+        env.set_source_account(&[3; 32]);
+        let voter2 = Address::from_account_id(&env, &[3; 32]);
         client.vote(&match_id, &user2, &voter2);
+        env.set_source_account(&[0; 32]);
         client.finalize_match(&match_id);
         let match_data = client.get_match(&match_id).unwrap();
         assert_eq!(match_data.status, MatchStatus::Draw);
@@ -587,28 +580,28 @@ mod tests {
     #[test]
     fn test_badge_award() {
         let env = Env::default();
-        let user1 = Address::generate(&env);
-        let user2 = Address::generate(&env);
         let contract_id = env.register(Roastellar, ());
         let client = RoastellarClient::new(&env, &contract_id);
-        env.mock_all_auths();
-        let username1 = String::from_str(&env, "user1");
-        let username2 = String::from_str(&env, "user2");
-        let profile_cid1 = String::from_str(&env, "QmProfile1");
-        let profile_cid2 = String::from_str(&env, "QmProfile2");
-        client.register_user(&user1, &username1, &profile_cid1);
-        client.register_user(&user2, &username2, &profile_cid2);
+        let user1 = register_user(&env, &client, 0, "user1", "QmProfile1");
+        let user2 = register_user(&env, &client, 1, "user2", "QmProfile2");
         let entry_fee = 100i128;
         let topic_cid = String::from_str(&env, "QmTopic1");
+        env.set_source_account(&[0; 32]);
         let match_id = client.create_match(&entry_fee, &topic_cid, &user1);
+        env.set_source_account(&[1; 32]);
         client.join_match(&match_id, &user2);
+        env.set_source_account(&[0; 32]);
         let roast1_cid = String::from_str(&env, "QmRoast1");
-        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast1_cid, &user1);
+        env.set_source_account(&[1; 32]);
+        let roast2_cid = String::from_str(&env, "QmRoast2");
         client.submit_roast(&match_id, &roast2_cid, &user2);
-        let voter = Address::generate(&env);
+        env.set_source_account(&[2; 32]);
+        let voter = Address::from_account_id(&env, &[2; 32]);
         client.vote(&match_id, &user1, &voter);
+        env.set_source_account(&[1; 32]);
         client.vote(&match_id, &user1, &user2);
+        env.set_source_account(&[0; 32]);
         client.finalize_match(&match_id);
         assert!(client.has_badge(&user1, &Badge::FirstWin));
     }

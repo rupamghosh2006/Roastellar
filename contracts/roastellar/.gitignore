@@ -2,8 +2,8 @@
 /target/
 **/target/
 
-# Cargo
-Cargo.lock
+# Cargo (locked via CI; uncomment to ignore locally)
+# Cargo.lock
 
 # Rust
 **/*.rs.bk

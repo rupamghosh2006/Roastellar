@@ -4,7 +4,7 @@
 
 # Cargo
 Cargo.lock
- contracts/roastellar/Cargo.lock
+!contracts/roastellar/Cargo.lock
 
 # Rust
 **/*.rs.bk

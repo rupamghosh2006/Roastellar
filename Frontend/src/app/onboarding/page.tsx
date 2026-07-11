@@ -108,6 +108,27 @@ export default function OnboardingPage() {
   }
 
   useEffect(() => {
+    const checkAlreadyOnboarded = async () => {
+      if (!isSignedIn) return
+
+      try {
+        const token = await getToken({ skipCache: true })
+        if (!token) return
+
+        const me = await apiRoutes.users.me(token)
+        if (me.data.onboardingCompleted) {
+          setOnboardingComplete()
+          router.replace('/dashboard')
+        }
+      } catch (error) {
+        console.error('Failed to check onboarding status:', error)
+      }
+    }
+
+    checkAlreadyOnboarded()
+  }, [isSignedIn, getToken, router])
+
+  useEffect(() => {
     const flow = typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('flow')
       : null

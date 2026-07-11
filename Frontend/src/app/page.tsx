@@ -7,8 +7,8 @@ import { useAuth } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { Coins, Flame, ShieldCheck, Swords, Trophy, Wallet } from 'lucide-react'
 import { apiRoutes, type Battle, type LeaderboardEntry, type User } from '@/lib/api'
-import { isOnboardingComplete } from '@/lib/utils'
-import { isWalletAuthenticated } from '@/lib/walletAuth'
+import { isOnboardingComplete, setOnboardingComplete } from '@/lib/utils'
+import { isWalletAuthenticated, getWalletAuthToken } from '@/lib/walletAuth'
 import { BrandLogo } from '@/components/BrandLogo'
 import PrismaticTiltCard from '@/components/PrismaticTiltCard'
 
@@ -48,15 +48,45 @@ function GlitchWord({ text }: { text: string }) {
 }
 
 export default function LandingPage() {
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, getToken } = useAuth()
   const router = useRouter()
   const [openBattles, setOpenBattles] = useState<Battle[]>([])
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
 
   useEffect(() => {
     if (!isSignedIn && !isWalletAuthenticated()) return
-    router.replace(isOnboardingComplete() ? '/dashboard' : '/onboarding')
-  }, [isSignedIn, router])
+
+    const checkAndRedirect = async () => {
+      if (isOnboardingComplete()) {
+        router.replace('/dashboard')
+        return
+      }
+
+      try {
+        let token: string | null = null
+        if (isSignedIn) {
+          token = await getToken({ skipCache: true })
+        } else if (isWalletAuthenticated()) {
+          token = getWalletAuthToken()
+        }
+
+        if (token) {
+          const me = await apiRoutes.users.me(token)
+          if (me.data.onboardingCompleted) {
+            setOnboardingComplete()
+            router.replace('/dashboard')
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Failed to verify onboarding status:', error)
+      }
+
+      router.replace('/onboarding')
+    }
+
+    checkAndRedirect()
+  }, [isSignedIn, getToken, router])
 
   useEffect(() => {
     Promise.allSettled([apiRoutes.battles.open(), apiRoutes.users.leaderboard()]).then(([battlesResult, leaderboardResult]) => {

@@ -2,8 +2,7 @@
 /target/
 **/target/
 
-# Cargo
-Cargo.lock
+# Cargo lock is tracked for reproducible CI builds.
 
 # Rust
 **/*.rs.bk

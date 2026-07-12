@@ -22,6 +22,7 @@ export default function BattlesPage() {
   const [wallet, setWallet] = useState<Wallet | null>(null)
   const [topic, setTopic] = useState('')
   const [entryFee, setEntryFee] = useState('10')
+  const [durationHours, setDurationHours] = useState(24)
   const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
   const [enablingBattleMode, setEnablingBattleMode] = useState(false)
 
@@ -134,6 +135,7 @@ export default function BattlesPage() {
         {
           topic: topic.trim(),
           entryFee: fee,
+          durationHours,
         },
         token
       )
@@ -219,7 +221,7 @@ export default function BattlesPage() {
               <Plus className="h-5 w-5 text-violet-300" />
               <h2 className="font-orbitron text-2xl text-white">Create Contest</h2>
             </div>
-<div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px_auto] lg:items-center">
+<div className="mt-5 grid gap-4 lg:grid-cols-[1fr_160px_160px_auto] lg:items-center">
   <input
     value={topic}
     onChange={(event) => setTopic(event.target.value)}
@@ -238,6 +240,21 @@ export default function BattlesPage() {
     />
     <span className="text-sm text-gray-400">XLM</span>
   </div>
+
+  <select
+    value={durationHours}
+    onChange={(event) => setDurationHours(Number(event.target.value))}
+    className="input-glass w-full"
+  >
+    <option value={1}>1 hour</option>
+    <option value={2}>2 hours</option>
+    <option value={6}>6 hours</option>
+    <option value={12}>12 hours</option>
+    <option value={24}>24 hours</option>
+    <option value={48}>48 hours</option>
+    <option value={72}>3 days</option>
+    <option value={168}>7 days</option>
+  </select>
 
   <button
     onClick={createBattle}

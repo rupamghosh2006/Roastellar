@@ -16,6 +16,7 @@ const writeLimiter = rateLimit({
 const createSchema = z.object({
   topic: z.string().transform((value) => sanitizeText(value, 120)).refine((value) => value.length >= 3, 'Topic must be at least 3 characters'),
   entryFee: z.number().positive(),
+  durationHours: z.number().positive().optional(),
 });
 
 const roastSchema = z.object({

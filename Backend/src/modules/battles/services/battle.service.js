@@ -189,7 +189,7 @@ class BattleService {
     return serialized;
   }
 
-  async createBattle({ user, topic, entryFee }) {
+  async createBattle({ user, topic, entryFee, durationHours }) {
     if (!user?.walletPublicKey || !user?.walletEncryptedSecret) {
       throw new Error('Wallet with signing capability is required to create battle');
     }
@@ -246,6 +246,9 @@ class BattleService {
       throw error;
     }
 
+    const dh = toNumber(durationHours, 24);
+    const expiresAt = new Date(Date.now() + dh * 60 * 60 * 1000);
+
     const battle = await Battle.create({
       matchId,
       creator: user._id,
@@ -254,6 +257,8 @@ class BattleService {
       topic: safeTopic,
       topicCid,
       entryFee: fee,
+      durationHours: dh,
+      expiresAt,
       status: 'open',
       txHash: chainCreate.txHash,
       chain: {
@@ -281,6 +286,8 @@ class BattleService {
     if (io) {
       io.to('lobby').emit('open_battles_updated', await this.getOpenBattles());
     }
+
+    this.startTotalDurationTimer(matchId);
 
     return this.getBattleByMatchId(battle.matchId);
   }
@@ -407,6 +414,7 @@ class BattleService {
         };
         await battle.save();
         timerService.clear(`roast_${matchId}`);
+        timerService.clear(`total_${matchId}`);
         io?.to(`battle_${matchId}`).emit('battle_result', winnerPayload(battle));
       },
     });
@@ -434,8 +442,82 @@ class BattleService {
           battle: battlePayload,
         });
         this.startRoastTimer(matchId);
+
+        this.startTotalDurationTimer(matchId);
       },
     });
+  }
+
+  startTotalDurationTimer(matchId) {
+    const io = getIO();
+    (async () => {
+      try {
+        const battle = await Battle.findOne({ matchId });
+        const durationSec = battle?.expiresAt
+          ? Math.max(0, Math.ceil((new Date(battle.expiresAt) - Date.now()) / 1000))
+          : 0;
+        if (durationSec <= 0) return;
+        timerService.schedule({
+          matchId: `total_${matchId}`,
+          durationSec,
+          onTick: (remaining) => {
+            io?.to(`battle_${matchId}`).emit('countdown_tick', {
+              matchId,
+              phase: 'total_duration',
+              remaining,
+            });
+          },
+          onExpire: async () => this.autoEvaluateBattle(matchId),
+        });
+      } catch (error) {
+        logger.error('Failed to start total duration timer', { matchId, message: error?.message });
+      }
+    })();
+  }
+
+  async autoEvaluateBattle(matchId) {
+    timerService.clear(`roast_${matchId}`);
+    timerService.clear(`voting_${matchId}`);
+    timerService.clear(`total_${matchId}`);
+
+    const battle = await Battle.findOne({ matchId });
+    if (!battle) return;
+    if (['ended', 'draw', 'cancelled'].includes(battle.status)) return;
+
+    if (battle.status === 'open') {
+      battle.status = 'cancelled';
+      battle.endedAt = new Date();
+      const refundTxHashes = await this.refundBattleEscrowOnCancel(battle);
+      battle.finance = {
+        ...(battle.finance || {}),
+        payoutTxHashes: [...((battle.finance || {}).payoutTxHashes || []), ...refundTxHashes],
+      };
+      await battle.save();
+      const io = getIO();
+      io?.to(`battle_${matchId}`).emit('battle_result', winnerPayload(battle));
+      io?.to('lobby').emit('open_battles_updated', await this.getOpenBattles());
+      return;
+    }
+
+    if (battle.status === 'active') {
+      const bothRoastsOnChain = Boolean(battle.chain?.roast1TxHash && battle.chain?.roast2TxHash);
+      if (!bothRoastsOnChain) {
+        battle.status = 'cancelled';
+        battle.endedAt = new Date();
+        const refundTxHashes = await this.refundBattleEscrowOnCancel(battle);
+        battle.finance = {
+          ...(battle.finance || {}),
+          payoutTxHashes: [...((battle.finance || {}).payoutTxHashes || []), ...refundTxHashes],
+        };
+        await battle.save();
+        const io = getIO();
+        io?.to(`battle_${matchId}`).emit('battle_result', winnerPayload(battle));
+        io?.to('lobby').emit('open_battles_updated', await this.getOpenBattles());
+        return;
+      }
+    }
+
+    await this.finalizeBattle({ matchId, actorUserId: null, internalCall: true });
   }
 
   startVotingTimer(matchId) {
@@ -847,6 +929,7 @@ class BattleService {
   async finalizeBattle({ matchId, actorUserId, internalCall = false }) {
     timerService.clear(`roast_${matchId}`);
     timerService.clear(`voting_${matchId}`);
+    timerService.clear(`total_${matchId}`);
 
     const battle = await Battle.findOne({ matchId });
     if (!battle) throw new Error('Battle not found');
@@ -1003,6 +1086,7 @@ class BattleService {
   async cancelBattle({ user, matchId }) {
     timerService.clear(`roast_${matchId}`);
     timerService.clear(`voting_${matchId}`);
+    timerService.clear(`total_${matchId}`);
 
     const battle = await Battle.findOne({ matchId });
     if (!battle) throw new Error('Battle not found');

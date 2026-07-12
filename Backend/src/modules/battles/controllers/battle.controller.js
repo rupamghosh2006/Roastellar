@@ -12,11 +12,12 @@ function parseMatchId(raw) {
 
 exports.create = async (req, res) => {
   try {
-    const { topic, entryFee } = req.body || {};
+    const { topic, entryFee, durationHours } = req.body || {};
     const battle = await battleService.createBattle({
       user: req.auth.user,
       topic,
       entryFee,
+      durationHours,
     });
     return ApiResponse.created(res, battle, 'Battle created');
   } catch (error) {

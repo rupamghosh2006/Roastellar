@@ -83,6 +83,13 @@ const battleSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
+  durationHours: {
+    type: Number,
+    default: 24,
+  },
+  expiresAt: {
+    type: Date,
+  },
   startedAt: {
     type: Date,
   },
@@ -126,6 +133,8 @@ battleSchema.methods.toJSON = function() {
     status: this.status,
     winner: this.winner,
     entryFee: this.entryFee,
+    durationHours: this.durationHours,
+    expiresAt: this.expiresAt,
     startedAt: this.startedAt,
     endedAt: this.endedAt,
     txHash: this.txHash,

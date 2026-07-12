@@ -59,6 +59,7 @@ export interface Battle {
   endedAt?: string
   createdAt: string
   expiresAt: string
+  durationHours?: number
   pot: number
 }
 
@@ -183,6 +184,8 @@ type BackendBattle = {
   startedAt?: string
   endedAt?: string
   createdAt?: string
+  durationHours?: number
+  expiresAt?: string
 }
 
 type BackendWallet = {
@@ -327,7 +330,8 @@ export function normalizeBattle(battle: BackendBattle | null | undefined): Battl
     startedAt: battle?.startedAt,
     endedAt: battle?.endedAt,
     createdAt: battle?.createdAt ?? new Date(0).toISOString(),
-    expiresAt: battle?.endedAt ?? battle?.startedAt ?? battle?.createdAt ?? new Date(0).toISOString(),
+    expiresAt: battle?.expiresAt ?? battle?.endedAt ?? battle?.startedAt ?? battle?.createdAt ?? new Date(0).toISOString(),
+    durationHours: battle?.durationHours,
     pot,
   }
 }
@@ -392,7 +396,7 @@ export const apiRoutes = {
   battles: {
     open: () =>
       getAndNormalize(api.get<BackendBattle[]>('/api/battles/open'), normalizeBattleList),
-    create: (payload: { topic: string; entryFee: number }, token?: string) =>
+    create: (payload: { topic: string; entryFee: number; durationHours?: number }, token?: string) =>
       getAndNormalize(api.post<BackendBattle>('/api/battles/create', payload, authConfig(token)), normalizeBattle),
     join: (matchId: number | string, token?: string) =>
       getAndNormalize(api.post<BackendBattle>(`/api/battles/join/${matchId}`, undefined, authConfig(token)), normalizeBattle),

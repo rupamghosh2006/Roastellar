@@ -1135,6 +1135,27 @@ class BattleService {
       onPlayer2,
     };
   }
+
+  async recoverStuckBattles() {
+    const now = new Date();
+    const stuck = await Battle.find({
+      expiresAt: { $gt: now },
+      status: { $in: ['open', 'active', 'voting'] },
+    });
+    if (stuck.length === 0) return;
+    logger.info(`Recovering ${stuck.length} stuck battles after server restart`);
+    for (const battle of stuck) {
+      const durationSec = Math.max(0, Math.ceil((new Date(battle.expiresAt) - Date.now()) / 1000));
+      if (durationSec <= 0) continue;
+      if (battle.status === 'open') {
+        this.startTotalDurationTimer(battle.matchId);
+      } else if (battle.status === 'active') {
+        this.startRoastTimer(battle.matchId, durationSec);
+      } else if (battle.status === 'voting') {
+        this.startVotingTimer(battle.matchId, durationSec);
+      }
+    }
+  }
 }
 
 module.exports = new BattleService();

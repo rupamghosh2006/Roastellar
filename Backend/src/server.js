@@ -4,6 +4,7 @@ const http = require('http');
 const app = require('./app');
 const connectDB = require('./config/db');
 const { initializeSocket } = require('./config/socket');
+const battleService = require('./modules/battles/services/battle.service');
 const logger = require('./utils/logger');
 
 const PORT = process.env.PORT || 3000;
@@ -14,6 +15,8 @@ const startServer = async () => {
 
     const server = http.createServer(app);
     initializeSocket(server);
+
+    battleService.recoverStuckBattles();
 
     server.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);

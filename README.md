@@ -77,10 +77,10 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 
 ## Smart Contract
 
-**Contract ID (Testnet):** `CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW`
+**Contract ID (Testnet):** `CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`
 
 **Network:** Stellar Testnet
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW
+**Explorer:** https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA
 
 ## Testnet Users (Verified)
 

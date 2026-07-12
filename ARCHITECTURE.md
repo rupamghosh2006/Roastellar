@@ -275,11 +275,11 @@ Backend/src/
 
 ### Contract: Roastellar
 
-**Contract ID (Testnet):** `CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW`
+**Contract ID (Testnet):** `CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`
 
 **Network:** Stellar Testnet
 
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW
+**Explorer:** https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA
 
 ### Contract Functions
 
@@ -527,7 +527,7 @@ Client                    Backend                     Blockchain
 ### Smart Contract
 - **Network:** Stellar Testnet
 - **Deployed:** Via `stellar contract deploy`
-- **Contract ID:** `CB2NV4N7NEZFTNRBVZSZDH64RROI7FDPTIFWNXMQOAA5JB2BUWXG4BHW`
+- **Contract ID:** `CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`
 
 ## Future Architecture Considerations
 

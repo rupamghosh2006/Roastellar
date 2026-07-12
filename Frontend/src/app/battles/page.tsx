@@ -25,6 +25,7 @@ export default function BattlesPage() {
   const [durationHours, setDurationHours] = useState(24)
   const [durationOpen, setDurationOpen] = useState(false)
   const durationRef = useRef<HTMLDivElement | null>(null)
+
   const durationOptions = [
     { label: '1 hour', value: 1 },
     { label: '2 hours', value: 2 },
@@ -35,6 +36,7 @@ export default function BattlesPage() {
     { label: '3 days', value: 72 },
     { label: '7 days', value: 168 },
   ]
+
   const handleDurationSelect = useCallback((item: { label: string; value: number }) => {
     setDurationHours(item.value)
     setDurationOpen(false)
@@ -244,7 +246,7 @@ export default function BattlesPage() {
             </div>
           </section>
 
-          <section className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-violet-500/40">
+          <section className="relative z-10 glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-violet-500/40">
             <div className="flex items-center gap-2">
               <Plus className="h-5 w-5 text-violet-300" />
               <h2 className="font-orbitron text-2xl text-white">Create Contest</h2>
@@ -283,10 +285,7 @@ export default function BattlesPage() {
                 </button>
 
                 {durationOpen && (
-                  <div
-                    className="absolute right-0 top-full z-[100] mt-2 w-48 overflow-hidden rounded-xl
-                               border border-white/10 bg-[#12131c] shadow-2xl shadow-black/60 backdrop-blur-xl"
-                  >
+                  <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[160px] overflow-hidden rounded-xl border border-white/10 bg-[#12131c] shadow-2xl shadow-black/60 backdrop-blur-xl">
                     <div className="max-h-[280px] overflow-y-auto py-1">
                       {durationOptions.map((item) => {
                         const selected = item.value === durationHours

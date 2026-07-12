@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import lottie from 'lottie-web'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Swords } from 'lucide-react'
 
 type LoadingPhase = 'connecting' | 'waiting' | 'countdown'
 
@@ -30,17 +31,24 @@ const phaseConfig = {
 export function BattleLoadingCard({ phase, countdownSeconds, topic }: BattleLoadingCardProps) {
   const animContainer = useRef<HTMLDivElement>(null)
   const animInstance = useRef<ReturnType<typeof lottie.loadAnimation> | null>(null)
+  const [animFailed, setAnimFailed] = useState(false)
   const config = phaseConfig[phase]
 
   useEffect(() => {
     if (!animContainer.current) return
     animInstance.current?.destroy()
-    animInstance.current = lottie.loadAnimation({
-      container: animContainer.current,
-      path: '/animations/swords-attack.json',
-      loop: true,
-      autoplay: true,
-    })
+    try {
+      animInstance.current = lottie.loadAnimation({
+        container: animContainer.current,
+        path: '/animations/swords-attack.json',
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+      })
+      animInstance.current.addEventListener('data_failed', () => setAnimFailed(true))
+    } catch {
+      setAnimFailed(true)
+    }
     return () => {
       animInstance.current?.destroy()
       animInstance.current = null
@@ -62,7 +70,16 @@ export function BattleLoadingCard({ phase, countdownSeconds, topic }: BattleLoad
         className="glass rounded-2xl mx-4 w-full max-w-sm border-l-4 border-l-amber-500/50 p-8 text-center"
       >
         <div className="mx-auto flex h-48 w-48 items-center justify-center">
-          <div ref={animContainer} className="h-full w-full" />
+          {animFailed ? (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            >
+              <Swords className="h-16 w-16 text-amber-400/60" />
+            </motion.div>
+          ) : (
+            <div ref={animContainer} className="h-full w-full" />
+          )}
         </div>
 
         <h2 className="mt-4 font-orbitron text-xl text-white sm:text-2xl">{config.title}</h2>

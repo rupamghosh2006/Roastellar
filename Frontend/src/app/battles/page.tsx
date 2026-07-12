@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { BattleList } from '@/components/BattleCard'
 import { SkeletonCard } from '@/components/LoadingScreen'
-import { AnimatedList } from '@/components/AnimatedList'
 import { apiRoutes, normalizeBattleList, type Battle, type User, type Wallet } from '@/lib/api'
 import { connectSocket, joinLobby, onOpenBattlesUpdated, removeAllSocketListeners } from '@/lib/socket'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
@@ -250,70 +249,75 @@ export default function BattlesPage() {
               <Plus className="h-5 w-5 text-violet-300" />
               <h2 className="font-orbitron text-2xl text-white">Create Contest</h2>
             </div>
-<div className="mt-5 grid gap-4 lg:grid-cols-[1fr_160px_160px_auto] lg:items-center">
-  <input
-    value={topic}
-    onChange={(event) => setTopic(event.target.value)}
-    placeholder="Example: Roast Web3 influencers in one line"
-    className="input-glass"
-  />
+            <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_160px_160px_auto] lg:items-center">
+              <input
+                value={topic}
+                onChange={(event) => setTopic(event.target.value)}
+                placeholder="Example: Roast Web3 influencers in one line"
+                className="input-glass"
+              />
 
-  <div className="flex items-center gap-2">
-    <input
-      value={entryFee}
-      onChange={(event) => setEntryFee(event.target.value)}
-      type="number"
-      min={1}
-      placeholder="Entry fee"
-      className="input-glass w-full"
-    />
-    <span className="text-sm text-gray-400">XLM</span>
-  </div>
+              <div className="flex items-center gap-2">
+                <input
+                  value={entryFee}
+                  onChange={(event) => setEntryFee(event.target.value)}
+                  type="number"
+                  min={1}
+                  placeholder="Entry fee"
+                  className="input-glass w-full"
+                />
+                <span className="text-sm text-gray-400">XLM</span>
+              </div>
 
-  <div className="relative" ref={durationRef}>
-    <button
-      type="button"
-      onClick={() => setDurationOpen((v) => !v)}
-      className="input-glass flex w-full items-center gap-2"
-    >
-      <Clock className="h-4 w-4 text-violet-300" />
-      <span className="flex-1 text-left">
-        {durationOptions.find((d) => d.value === durationHours)?.label ?? '24 hours'}
-      </span>
-      {durationOpen ? <X className="h-3 w-3" /> : <span className="text-xs text-gray-500">v</span>}
-    </button>
-    {durationOpen && (
-      <div className="absolute right-0 z-[60] mt-1 w-48">
-        <div className="glass rounded-xl p-1">
-          <div className="max-h-[300px] overflow-y-auto">
-            <AnimatedList
-              items={durationOptions}
-              renderItem={(item, _index, selected) => (
-                <div className={`rounded-lg px-3 py-2 ${selected ? 'bg-violet-500/20' : ''}`}>
-                  <p className="text-sm text-white">{item.label}</p>
-                </div>
-              )}
-              onItemSelect={handleDurationSelect}
-              showGradients={false}
-              displayScrollbar={false}
-              initialSelectedIndex={durationOptions.findIndex((d) => d.value === durationHours)}
-              containerClassName="!p-0"
-            />
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
+              <div className="relative" ref={durationRef}>
+                <button
+                  type="button"
+                  onClick={() => setDurationOpen((v) => !v)}
+                  className="input-glass flex w-full items-center gap-2"
+                >
+                  <Clock className="h-4 w-4 text-violet-300" />
+                  <span className="flex-1 text-left">
+                    {durationOptions.find((d) => d.value === durationHours)?.label ?? '24 hours'}
+                  </span>
+                  {durationOpen ? <X className="h-3 w-3" /> : <span className="text-xs text-gray-500">v</span>}
+                </button>
 
-  <button
-    onClick={createBattle}
-    disabled={submitting}
-    className="btn-primary disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
-  >
-    <Swords className="h-4 w-4" />
-    {submitting ? 'Creating...' : 'Create Battle'}
-  </button>
-</div>
+                {durationOpen && (
+                  <div
+                    className="absolute right-0 top-full z-[100] mt-2 w-48 overflow-hidden rounded-xl
+                               border border-white/10 bg-[#12131c] shadow-2xl shadow-black/60 backdrop-blur-xl"
+                  >
+                    <div className="max-h-[280px] overflow-y-auto py-1">
+                      {durationOptions.map((item) => {
+                        const selected = item.value === durationHours
+                        return (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => handleDurationSelect(item)}
+                            className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors
+                              ${selected
+                                ? 'bg-violet-500/25 text-white'
+                                : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}
+                          >
+                            {item.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={createBattle}
+                disabled={submitting}
+                className="btn-primary disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+              >
+                <Swords className="h-4 w-4" />
+                {submitting ? 'Creating...' : 'Create Battle'}
+              </button>
+            </div>
             <p className="mt-3 text-xs text-slate-500">
               Signed in as {user?.username ?? 'Player'} | Wallet {(wallet?.publicKey || user?.walletAddress) ? 'ready' : 'missing'}
             </p>

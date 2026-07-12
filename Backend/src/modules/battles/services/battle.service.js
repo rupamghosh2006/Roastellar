@@ -14,7 +14,6 @@ const logger = require('../../../utils/logger');
 const { sanitizeText } = require('../../../utils/inputSanitizer');
 
 const ROAST_PHASE_SECONDS = Number(process.env.BATTLE_ROAST_SECONDS || 60);
-const VOTING_PHASE_SECONDS = Number(process.env.BATTLE_VOTING_SECONDS || 30);
 const VOTE_STAKE_XLM = Number(process.env.BATTLE_VOTE_STAKE_XLM || 0);
 const BATTLE_START_COUNTDOWN_SECONDS = Number(process.env.BATTLE_START_COUNTDOWN_SECONDS || 3);
 const VOTING_FINALIZE_GRACE_SECONDS = Number(process.env.BATTLE_VOTING_FINALIZE_GRACE_SECONDS || 0);
@@ -520,11 +519,13 @@ class BattleService {
     await this.finalizeBattle({ matchId, actorUserId: null, internalCall: true });
   }
 
-  startVotingTimer(matchId) {
+  startVotingTimer(matchId, durationSec) {
     const io = getIO();
+    const remaining = Math.max(0, Number(durationSec || 0));
+    if (remaining <= 0) return;
     timerService.schedule({
       matchId: `voting_${matchId}`,
-      durationSec: VOTING_PHASE_SECONDS,
+      durationSec: remaining,
       onTick: (remaining) => {
         io?.to(`battle_${matchId}`).emit('countdown_tick', {
           matchId,
@@ -612,10 +613,13 @@ class BattleService {
 
     if (bothReady) {
       timerService.clear(`roast_${matchId}`);
-      this.startVotingTimer(matchId);
+      const remainingSec = battle?.expiresAt
+        ? Math.max(0, Math.ceil((new Date(battle.expiresAt) - Date.now()) / 1000))
+        : 0;
+      this.startVotingTimer(matchId, remainingSec);
       io?.to(`battle_${matchId}`).emit('voting_started', {
         matchId,
-        durationSec: VOTING_PHASE_SECONDS,
+        durationSec: remainingSec,
       });
     }
 

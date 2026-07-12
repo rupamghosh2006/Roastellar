@@ -13,7 +13,6 @@ const { getIO } = require('../../../config/socket');
 const logger = require('../../../utils/logger');
 const { sanitizeText } = require('../../../utils/inputSanitizer');
 
-const ROAST_PHASE_SECONDS = Number(process.env.BATTLE_ROAST_SECONDS || 60);
 const VOTE_STAKE_XLM = Number(process.env.BATTLE_VOTE_STAKE_XLM || 0);
 const BATTLE_START_COUNTDOWN_SECONDS = Number(process.env.BATTLE_START_COUNTDOWN_SECONDS || 3);
 const VOTING_FINALIZE_GRACE_SECONDS = Number(process.env.BATTLE_VOTING_FINALIZE_GRACE_SECONDS || 0);
@@ -385,11 +384,13 @@ class BattleService {
     return this.getBattleByMatchId(updated.matchId);
   }
 
-  startRoastTimer(matchId) {
+  startRoastTimer(matchId, durationSec) {
     const io = getIO();
+    const remaining = Math.max(0, Number(durationSec || 0));
+    if (remaining <= 0) return;
     timerService.schedule({
       matchId: `roast_${matchId}`,
-      durationSec: ROAST_PHASE_SECONDS,
+      durationSec: remaining,
       onTick: (remaining) => {
         io?.to(`battle_${matchId}`).emit('countdown_tick', {
           matchId,
@@ -402,8 +403,6 @@ class BattleService {
         if (!battle || battle.status !== 'active') return;
         if (battle.roast1 && battle.roast2) return;
 
-        // Contract finalize requires both roasts mirrored on-chain.
-        // If roast phase ends incomplete, cancel and refund escrowed funds.
         battle.status = 'cancelled';
         battle.endedAt = new Date();
         const refundTxHashes = await this.refundBattleEscrowOnCancel(battle);
@@ -435,14 +434,15 @@ class BattleService {
         const battle = await Battle.findOne({ matchId });
         if (!battle || battle.status !== 'active') return;
         const battlePayload = await this.getBattleByMatchId(matchId);
+        const remainingSec = battle?.expiresAt
+          ? Math.max(0, Math.ceil((new Date(battle.expiresAt) - Date.now()) / 1000))
+          : 0;
         io?.to(`battle_${matchId}`).emit('battle_started', {
           matchId,
-          durationSec: ROAST_PHASE_SECONDS,
+          durationSec: remainingSec,
           battle: battlePayload,
         });
-        this.startRoastTimer(matchId);
-
-        this.startTotalDurationTimer(matchId);
+        this.startRoastTimer(matchId, remainingSec);
       },
     });
   }

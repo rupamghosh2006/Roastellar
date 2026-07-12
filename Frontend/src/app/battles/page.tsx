@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { Flame, Plus, Swords, Users } from 'lucide-react'
+import { Clock, Flame, Plus, Swords, Users, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { BattleList } from '@/components/BattleCard'
 import { SkeletonCard } from '@/components/LoadingScreen'
+import { AnimatedList } from '@/components/AnimatedList'
 import { apiRoutes, normalizeBattleList, type Battle, type User, type Wallet } from '@/lib/api'
 import { connectSocket, joinLobby, onOpenBattlesUpdated, removeAllSocketListeners } from '@/lib/socket'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
@@ -23,6 +24,34 @@ export default function BattlesPage() {
   const [topic, setTopic] = useState('')
   const [entryFee, setEntryFee] = useState('10')
   const [durationHours, setDurationHours] = useState(24)
+  const [durationOpen, setDurationOpen] = useState(false)
+  const durationRef = useRef<HTMLDivElement | null>(null)
+  const durationOptions = [
+    { label: '1 hour', value: 1 },
+    { label: '2 hours', value: 2 },
+    { label: '6 hours', value: 6 },
+    { label: '12 hours', value: 12 },
+    { label: '24 hours', value: 24 },
+    { label: '48 hours', value: 48 },
+    { label: '3 days', value: 72 },
+    { label: '7 days', value: 168 },
+  ]
+  const handleDurationSelect = useCallback((item: { label: string; value: number }) => {
+    setDurationHours(item.value)
+    setDurationOpen(false)
+  }, [])
+
+  useEffect(() => {
+    if (!durationOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (durationRef.current && !durationRef.current.contains(e.target as Node)) {
+        setDurationOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [durationOpen])
+
   const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
   const [enablingBattleMode, setEnablingBattleMode] = useState(false)
 
@@ -241,20 +270,40 @@ export default function BattlesPage() {
     <span className="text-sm text-gray-400">XLM</span>
   </div>
 
-  <select
-    value={durationHours}
-    onChange={(event) => setDurationHours(Number(event.target.value))}
-    className="input-glass w-full"
-  >
-    <option value={1}>1 hour</option>
-    <option value={2}>2 hours</option>
-    <option value={6}>6 hours</option>
-    <option value={12}>12 hours</option>
-    <option value={24}>24 hours</option>
-    <option value={48}>48 hours</option>
-    <option value={72}>3 days</option>
-    <option value={168}>7 days</option>
-  </select>
+  <div className="relative" ref={durationRef}>
+    <button
+      type="button"
+      onClick={() => setDurationOpen((v) => !v)}
+      className="input-glass flex w-full items-center gap-2"
+    >
+      <Clock className="h-4 w-4 text-violet-300" />
+      <span className="flex-1 text-left">
+        {durationOptions.find((d) => d.value === durationHours)?.label ?? '24 hours'}
+      </span>
+      {durationOpen ? <X className="h-3 w-3" /> : <span className="text-xs text-gray-500">v</span>}
+    </button>
+    {durationOpen && (
+      <div className="absolute right-0 z-50 mt-1 w-48">
+        <div className="glass rounded-xl p-1">
+          <div className="max-h-[300px] overflow-y-auto">
+            <AnimatedList
+              items={durationOptions}
+              renderItem={(item, _index, selected) => (
+                <div className={`rounded-lg px-3 py-2 ${selected ? 'bg-violet-500/20' : ''}`}>
+                  <p className="text-sm text-white">{item.label}</p>
+                </div>
+              )}
+              onItemSelect={handleDurationSelect}
+              showGradients={false}
+              displayScrollbar={false}
+              initialSelectedIndex={durationOptions.findIndex((d) => d.value === durationHours)}
+              containerClassName="!p-0"
+            />
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
 
   <button
     onClick={createBattle}

@@ -392,13 +392,6 @@ class BattleService {
     timerService.schedule({
       matchId: `roast_${matchId}`,
       durationSec: remaining,
-      onTick: (remaining) => {
-        io?.to(`battle_${matchId}`).emit('countdown_tick', {
-          matchId,
-          phase: 'active',
-          remaining,
-        });
-      },
       onExpire: async () => {
         const battle = await Battle.findOne({ matchId });
         if (!battle || battle.status !== 'active') return;
@@ -449,7 +442,6 @@ class BattleService {
   }
 
   startTotalDurationTimer(matchId) {
-    const io = getIO();
     (async () => {
       try {
         const battle = await Battle.findOne({ matchId });
@@ -460,13 +452,6 @@ class BattleService {
         timerService.schedule({
           matchId: `total_${matchId}`,
           durationSec,
-          onTick: (remaining) => {
-            io?.to(`battle_${matchId}`).emit('countdown_tick', {
-              matchId,
-              phase: 'total_duration',
-              remaining,
-            });
-          },
           onExpire: async () => this.autoEvaluateBattle(matchId),
         });
       } catch (error) {

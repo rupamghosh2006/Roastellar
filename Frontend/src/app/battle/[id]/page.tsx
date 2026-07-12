@@ -382,10 +382,12 @@ export default function BattleRoomPage() {
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm text-white">
                 <Pill icon={<Sparkles className="h-4 w-4 text-violet-300" />} label={`Status: ${battle.status}`} />
-                <Pill
-                  icon={<Timer className="h-4 w-4 text-amber-300" />}
-                  label={timer.remaining > 0 ? `${timer.phase || 'phase'} ${timer.remaining}s` : 'No timer'}
-                />
+                {timer.phase === 'voting' && timer.remaining > 0 && (
+                  <Pill
+                    icon={<Timer className="h-4 w-4 text-amber-300" />}
+                    label={`Voting ${timer.remaining}s`}
+                  />
+                )}
                 <Pill icon={<Users className="h-4 w-4 text-cyan-300" />} label={`${spectators} spectators`} />
                 <Pill icon={<Coins className="h-4 w-4 text-emerald-300" />} label={`Pot ${battle.pot} XLM`} />
                 {canJoinOpenBattle && (

@@ -283,7 +283,7 @@ export default function BattlesPage() {
       {durationOpen ? <X className="h-3 w-3" /> : <span className="text-xs text-gray-500">v</span>}
     </button>
     {durationOpen && (
-      <div className="absolute right-0 z-50 mt-1 w-48">
+      <div className="absolute right-0 z-[60] mt-1 w-48">
         <div className="glass rounded-xl p-1">
           <div className="max-h-[300px] overflow-y-auto">
             <AnimatedList

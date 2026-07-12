@@ -20,7 +20,7 @@ A fully on-chain roast battle platform built on Stellar Soroban.
 - **10+ June 2026 Onboarded Users:** [June 2026 Onboarded Users](#june-2026-onboarded-users)
 - **June Issue Resolved — Sign-In Flow Fix (User Feedback):** [Sign-In Flow Fix](#sign-in-flow-fix)
 - **Metrics Dashboard (Screenshot):** [Metrics Dashboard](#metrics-dashboard)
-  <!-- - API endpoint: [https://roastellar-9khj.onrender.com/api/analytics/metrics](https://roastellar-9khj.onrender.com/api/analytics/metrics) -->
+  <!-- - API endpoint: [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics) -->
 - **Monitoring Dashboard (Screenshot):** [Monitoring Active](#monitoring-active)
 - **Completed Security Checklist:** [security_checklist.md](./security_checklist.md)
 - **Community Contribution (Twitter/X Post):** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
@@ -270,14 +270,14 @@ This indexing strategy keeps common leaderboard and battle queries efficient whi
 
 ### Endpoint / Dashboard Link
 
-- Public metrics endpoint (indexed analytics-backed): [https://roastellar-9khj.onrender.com/api/analytics/metrics](https://roastellar-9khj.onrender.com/api/analytics/metrics)
+- Public metrics endpoint (indexed analytics-backed): [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
 
 ## Monitoring Active
 
 Roastellar uses active uptime monitoring on the backend health route to continuously verify service availability and response-time behavior.  
 The health endpoint also exposes runtime and dependency readiness signals (MongoDB + Stellar config) for operational visibility.
 
-- Health check endpoint: [https://roastellar-9khj.onrender.com/health](https://roastellar-9khj.onrender.com/health)
+- Health check endpoint: [https://roastellar.onrender.com/health](https://roastellar.onrender.com/health)
 - Screenshot (monitoring dashboard): ![https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png)
 
 ## CI/CD Setup

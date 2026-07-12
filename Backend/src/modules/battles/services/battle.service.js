@@ -170,9 +170,10 @@ class BattleService {
   }
 
   async getOpenBattles(limit = 30) {
-    const battles = await Battle.find({ status: 'open' })
+    const battles = await Battle.find({ status: { $in: ['open', 'active', 'voting'] } })
       .populate('creator', 'username avatar imageUrl')
       .populate('player1', 'username avatar imageUrl')
+      .populate('player2', 'username avatar imageUrl')
       .sort({ createdAt: -1 })
       .limit(limit);
 

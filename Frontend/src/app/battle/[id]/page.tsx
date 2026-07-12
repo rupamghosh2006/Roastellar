@@ -8,6 +8,7 @@ import { Coins, MessageSquareText, Sparkles, Swords, Timer, Trophy, Users } from
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { PredictionPanel } from '@/components/PredictionPanel'
+import { BattleLoadingCard } from '@/components/BattleLoadingCard'
 import { PageLoader } from '@/components/LoadingScreen'
 import { AnimatedList } from '@/components/AnimatedList'
 import { apiRoutes, normalizeBattle, type Battle, type PredictionSummary, type User } from '@/lib/api'
@@ -353,14 +354,15 @@ export default function BattleRoomPage() {
   }
 
   if (loading || !battle) {
-    return (
-      <div className="flex min-h-screen pt-16 md:pt-0">
-        <Sidebar />
-        <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
-          <PageLoader message="Connecting to arena..." />
-        </main>
-      </div>
-    )
+    return <BattleLoadingCard phase="connecting" />
+  }
+
+  if (battle.status === 'open' && (currentUserInBattle.isPlayer1 || currentUserInBattle.isPlayer2)) {
+    return <BattleLoadingCard phase="waiting" topic={battle.topic} />
+  }
+
+  if (timer.phase === 'starting') {
+    return <BattleLoadingCard phase="countdown" countdownSeconds={timer.remaining} topic={battle.topic} />
   }
 
   const isSpectator = !currentUserInBattle.isPlayer1 && !currentUserInBattle.isPlayer2

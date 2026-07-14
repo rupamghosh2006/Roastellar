@@ -1124,21 +1124,41 @@ class BattleService {
 
   async recoverStuckBattles() {
     const now = new Date();
-    const stuck = await Battle.find({
+
+    const future = await Battle.find({
       expiresAt: { $gt: now },
       status: { $in: ['open', 'active', 'voting'] },
     });
-    if (stuck.length === 0) return;
-    logger.info(`Recovering ${stuck.length} stuck battles after server restart`);
-    for (const battle of stuck) {
-      const durationSec = Math.max(0, Math.ceil((new Date(battle.expiresAt) - Date.now()) / 1000));
-      if (durationSec <= 0) continue;
-      if (battle.status === 'open') {
-        this.startTotalDurationTimer(battle.matchId);
-      } else if (battle.status === 'active') {
-        this.startRoastTimer(battle.matchId, durationSec);
-      } else if (battle.status === 'voting') {
-        this.startVotingTimer(battle.matchId, durationSec);
+    if (future.length > 0) {
+      logger.info(`Recovering ${future.length} future-expiring stuck battles after restart`);
+      for (const battle of future) {
+        const durationSec = Math.max(0, Math.ceil((new Date(battle.expiresAt) - Date.now()) / 1000));
+        if (durationSec <= 0) continue;
+        if (battle.status === 'open') {
+          this.startTotalDurationTimer(battle.matchId);
+        } else if (battle.status === 'active') {
+          this.startRoastTimer(battle.matchId, durationSec);
+        } else if (battle.status === 'voting') {
+          this.startVotingTimer(battle.matchId, durationSec);
+        }
+      }
+    }
+
+    const expired = await Battle.find({
+      expiresAt: { $lte: now },
+      status: { $in: ['open', 'active', 'voting'] },
+    });
+    if (expired.length > 0) {
+      logger.info(`Auto-resolving ${expired.length} already-expired stuck battles`);
+      for (const battle of expired) {
+        try {
+          await this.autoEvaluateBattle(battle.matchId);
+        } catch (error) {
+          logger.error('Failed to auto-resolve expired battle', {
+            matchId: battle.matchId,
+            message: error?.message,
+          });
+        }
       }
     }
   }

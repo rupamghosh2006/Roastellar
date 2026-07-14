@@ -2,6 +2,7 @@
 
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl'
 import { useEffect, useRef, type HTMLAttributes } from 'react'
+import { useVisibilityPause } from '@/lib/hooks'
 
 const vertexShader = `
 attribute vec2 uv;
@@ -214,6 +215,8 @@ export default function Galaxy({
   const smoothMousePos = useRef({ x: 0.5, y: 0.5 })
   const targetMouseActive = useRef(0.0)
   const smoothMouseActive = useRef(0.0)
+  const visibleRef = useRef(true)
+  const hiddenRef = useVisibilityPause()
 
   useEffect(() => {
     if (!ctnDom.current) return
@@ -278,11 +281,15 @@ export default function Galaxy({
 
     resize()
 
+    const io = new IntersectionObserver(([entry]) => { visibleRef.current = entry.isIntersecting }, { threshold: 0.01 })
+    io.observe(ctn)
+
     const mesh = new Mesh(gl, { geometry, program: shaderProgram })
     let animateId = 0
 
     function update(t: number) {
       animateId = requestAnimationFrame(update)
+      if (hiddenRef.current || !visibleRef.current) return
       if (!disableAnimation) {
         shaderProgram.uniforms.uTime.value = t * 0.001
         shaderProgram.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0
@@ -329,6 +336,7 @@ export default function Galaxy({
       }
       ctn.removeChild(gl.canvas)
       gl.getExtension('WEBGL_lose_context')?.loseContext()
+      io.disconnect()
     }
   }, [
     focal,

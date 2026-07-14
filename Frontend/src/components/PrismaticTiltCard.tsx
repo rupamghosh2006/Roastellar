@@ -34,6 +34,9 @@ export default function PrismaticTiltCard({
     document.head.appendChild(style)
   }, [])
 
+  const rafRef = useRef(0)
+  const pointerRef = useRef({ x: 0, y: 0, moved: false })
+
   const setVarsFromXY = useCallback((x: number, y: number) => {
     const shell = shellRef.current
     const wrap = wrapRef.current
@@ -51,16 +54,29 @@ export default function PrismaticTiltCard({
     wrap.style.setProperty('--background-y', `${35 + (py / 100) * 30}%`)
     wrap.style.setProperty('--rotate-x', `${-(cx / 6)}deg`)
     wrap.style.setProperty('--rotate-y', `${cy / 5}deg`)
+    shell.style.transform = 'translateZ(0) rotateX(var(--rotate-y)) rotateY(var(--rotate-x))'
   }, [])
+
+  const applyPointer = useCallback(() => {
+    pointerRef.current.moved = false
+    const shell = shellRef.current
+    if (!shell) return
+    const rect = shell.getBoundingClientRect()
+    setVarsFromXY(pointerRef.current.x - rect.left, pointerRef.current.y - rect.top)
+  }, [setVarsFromXY])
 
   useEffect(() => {
     const shell = shellRef.current
     if (!shell) return
 
     const handleMove = (event: PointerEvent) => {
-      const rect = shell.getBoundingClientRect()
-      setVarsFromXY(event.clientX - rect.left, event.clientY - rect.top)
-      shell.style.transform = 'translateZ(0) rotateX(var(--rotate-y)) rotateY(var(--rotate-x))'
+      pointerRef.current.x = event.clientX
+      pointerRef.current.y = event.clientY
+      if (!pointerRef.current.moved) {
+        pointerRef.current.moved = true
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = requestAnimationFrame(applyPointer)
+      }
     }
 
     const handleEnter = () => {
@@ -86,11 +102,12 @@ export default function PrismaticTiltCard({
     shell.addEventListener('pointerleave', handleLeave)
 
     return () => {
+      cancelAnimationFrame(rafRef.current)
       shell.removeEventListener('pointerenter', handleEnter)
       shell.removeEventListener('pointermove', handleMove)
       shell.removeEventListener('pointerleave', handleLeave)
     }
-  }, [setVarsFromXY])
+  }, [setVarsFromXY, applyPointer])
 
   const style = useMemo(
     () =>

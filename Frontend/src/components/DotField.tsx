@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useEffect, useRef } from 'react'
+import { useVisibilityPause } from '@/lib/hooks'
 
 const TWO_PI = Math.PI * 2
 
@@ -52,6 +53,7 @@ const DotField = memo(({
   const glowOpacity = useRef(0)
   const engagement = useRef(0)
   const propsRef = useRef({})
+  const hiddenRef = useVisibilityPause()
   propsRef.current = { dotRadius, dotSpacing, cursorRadius, cursorForce, bulgeOnly, bulgeStrength, sparkle, waveAmplitude, dotColor }
   const rebuildRef = useRef<null | (() => void)>(null)
 
@@ -135,6 +137,7 @@ const DotField = memo(({
     let frameCount = 0
 
     function tick() {
+      if (hiddenRef.current) { rafRef.current = requestAnimationFrame(tick); return }
       frameCount++
       const dots = dotsRef.current
       const m = mouseRef.current

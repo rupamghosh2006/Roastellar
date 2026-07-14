@@ -43,6 +43,7 @@ export default function ElectricBorder({
   const timeRef = useRef(0)
   const lastFrameTimeRef = useRef(0)
   const hiddenRef = useRef(false)
+  const visibleRef = useRef(true)
 
   const random = useCallback((x: number) => {
     return (Math.sin(x * 12.9898) * 43758.5453) % 1
@@ -208,7 +209,7 @@ export default function ElectricBorder({
 
     const drawElectricBorder = (currentTime: number) => {
       animationRef.current = requestAnimationFrame(drawElectricBorder)
-      if (hiddenRef.current) return
+      if (hiddenRef.current || !visibleRef.current) return
 
       const deltaTime = (currentTime - lastFrameTimeRef.current) / 1000
       timeRef.current += deltaTime * speed
@@ -280,12 +281,16 @@ export default function ElectricBorder({
     })
     resizeObserver.observe(container)
 
+    const io = new IntersectionObserver(([entry]) => { visibleRef.current = entry.isIntersecting }, { threshold: 0.01 })
+    io.observe(container)
+
     animationRef.current = requestAnimationFrame(drawElectricBorder)
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
       resizeObserver.disconnect()
+      io.disconnect()
     }
   }, [borderRadius, chaos, color, getRoundedRectPoint, octavedNoise, speed])
 

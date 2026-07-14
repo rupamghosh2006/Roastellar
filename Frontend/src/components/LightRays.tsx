@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
 
 type RaysOrigin = 'top-center' | 'top-left' | 'top-right'
@@ -36,19 +36,23 @@ export default function LightRays({
   fadeDistance = 1.8,
   saturation = 1.1,
 }: LightRaysProps) {
-  const [mouse, setMouse] = useState({ x: 50, y: 0 })
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const mouseRef = useRef({ x: 50, y: 0 })
 
   useEffect(() => {
     if (!followMouse) return
     const onMove = (event: MouseEvent) => {
-      setMouse({
-        x: (event.clientX / window.innerWidth) * 100,
-        y: (event.clientY / window.innerHeight) * 100,
-      })
+      mouseRef.current.x = (event.clientX / window.innerWidth) * 100
+      mouseRef.current.y = (event.clientY / window.innerHeight) * 100
+      const el = rootRef.current
+      if (el) {
+        const xShift = (mouseRef.current.x - 50) * mouseInfluence
+        el.style.setProperty('--lr-x', `${xShift}%`)
+      }
     }
     window.addEventListener('mousemove', onMove)
     return () => window.removeEventListener('mousemove', onMove)
-  }, [followMouse])
+  }, [followMouse, mouseInfluence])
 
   const originPosition = useMemo(() => {
     if (raysOrigin === 'top-left') return '12% 0%'
@@ -56,17 +60,17 @@ export default function LightRays({
     return '50% 0%'
   }, [raysOrigin])
 
-  const xShift = followMouse ? (mouse.x - 50) * mouseInfluence : 0
   const fade = Math.max(0.45, Math.min(1, 1 / Math.max(1, fadeDistance)))
   const solidOpacity = Math.min(fade, Math.min(1, rayLength / 3)) * Math.max(0.4, Math.min(1, lightSpread))
 
   return (
     <div
+      ref={rootRef}
       className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}
       style={
         {
           '--lr-color': raysColor,
-          '--lr-x': `${xShift}%`,
+          '--lr-x': `0%`,
           '--lr-speed': `${Math.max(0.2, raysSpeed) * 8}s`,
           '--lr-sat': saturation,
           '--lr-opacity': fade,
@@ -82,7 +86,7 @@ export default function LightRays({
           pulsating && 'animate-[pulse_5s_ease-in-out_infinite]'
         )}
         style={{
-          transform: `translateX(var(--lr-x))`,
+          transform: 'translateX(var(--lr-x))',
           opacity: solidOpacity,
           filter: 'blur(var(--lr-blur)) saturate(var(--lr-sat))',
           background: 'color-mix(in oklab, var(--lr-color) 12%, transparent)',

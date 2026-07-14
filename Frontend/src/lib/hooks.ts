@@ -1,8 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { api, type Battle, type User, type Wallet } from './api'
+
+export function useVisibilityPause() {
+  const hiddenRef = useRef(document.hidden)
+
+  useEffect(() => {
+    const handler = () => { hiddenRef.current = document.hidden }
+    document.addEventListener('visibilitychange', handler)
+    return () => document.removeEventListener('visibilitychange', handler)
+  }, [])
+
+  return hiddenRef
+}
 
 export function useUserProfile() {
   const { isSignedIn } = useUser()

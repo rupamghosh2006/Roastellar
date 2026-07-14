@@ -3,7 +3,7 @@ const logger = require('../../../utils/logger');
 const { shouldSponsor, buildFeeBumpTx } = require('../../../utils/feeSponsor');
 
 const CONTRACT_ID = process.env.STELLAR_CONTRACT_ID || 'CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA';
-const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.TREASURY_SECRET || '';
+const ESCROW_SECRET = process.env.STELLAR_ESCROW_SECRET || process.env.STELLAR_BATTLE_SECRET || process.env.TREASURY_SECRET || '';
 const ESCROW_PUBLIC = process.env.STELLAR_ESCROW_PUBLIC || '';
 
 function sleep(ms) {
@@ -20,28 +20,28 @@ function resolvePublicKey(secret, fallback = '') {
 }
 
 function parseReturnValue(returnValue) {
-  if (!returnValue) return null;
+  if (!returnValue) return { ok: true, value: null };
   try {
-    if (typeof returnValue === 'string' && StellarSdk?.xdr?.ScVal?.fromXDR) {
-      const scVal = StellarSdk.xdr.ScVal.fromXDR(returnValue, 'base64');
-      if (typeof StellarSdk.scValToNative === 'function') {
-        const native = StellarSdk.scValToNative(scVal);
-        if (native && typeof native === 'object' && 'switch' in native) {
-          if (native.switch === 0 && native.value !== undefined) {
-            return { ok: true, value: native.value };
-          }
-          if (native.switch === 1) {
-            logger.error('Contract returned Err variant', { returnValue: JSON.stringify(native) });
-            return { ok: false, value: native.value };
-          }
-        }
-        return { ok: true, value: native };
+    let scVal = returnValue;
+    if (typeof returnValue === 'string') {
+      try {
+        scVal = StellarSdk.xdr.ScVal.fromXDR(returnValue, 'base64');
+      } catch (e) {
+        logger.warn('parseReturnValue fromXDR failed, trying native', { message: e?.message });
       }
-      return { ok: true, value: scVal };
     }
     if (typeof StellarSdk.scValToNative === 'function') {
-      const native = StellarSdk.scValToNative(returnValue);
-      if (native && typeof native === 'object' && 'switch' in native) {
+      let native;
+      try {
+        native = StellarSdk.scValToNative(scVal);
+      } catch (e) {
+        logger.warn('parseReturnValue scValToNative failed', { message: e?.message });
+        return { ok: true, value: null };
+      }
+      if (native === undefined || native === null) {
+        return { ok: true, value: null };
+      }
+      if (typeof native === 'object' && 'switch' in native) {
         if (native.switch === 0 && native.value !== undefined) {
           return { ok: true, value: native.value };
         }
@@ -52,17 +52,17 @@ function parseReturnValue(returnValue) {
       }
       return { ok: true, value: native };
     }
+    return { ok: true, value: null };
   } catch (e) {
     logger.error('parseReturnValue failed', { message: e?.message, returnValue });
-    throw e;
+    return { ok: true, value: null };
   }
-  return { ok: true, value: null };
 }
 
 class BattleChainService {
   getEscrowSecret() {
     if (!ESCROW_SECRET) {
-      throw new Error('STELLAR_ESCROW_SECRET (or TREASURY_SECRET) is required');
+      throw new Error('STELLAR_ESCROW_SECRET (or STELLAR_BATTLE_SECRET or TREASURY_SECRET) is required');
     }
     return ESCROW_SECRET;
   }
@@ -140,25 +140,22 @@ class BattleChainService {
     const maxAttempts = Number(process.env.STELLAR_TX_POLL_ATTEMPTS || 25);
     const pollIntervalMs = Number(process.env.STELLAR_TX_POLL_INTERVAL_MS || 1200);
 
+    let lastError = null;
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       let txResult = null;
       try {
         txResult = await rpcServer.getTransaction(hash);
+        lastError = null;
       } catch (error) {
-        logger.warn('Soroban getTransaction decode failed, using fallback return value', {
+        lastError = error;
+        logger.warn('Soroban getTransaction decode failed (will retry)', {
           method,
           txHash: hash,
+          attempt: attempt + 1,
           message: error?.message,
         });
-        if (simulatedReturnValue && simulatedReturnValue.ok) {
-          return {
-            txHash: hash,
-            returnValue: simulatedReturnValue.value,
-            raw: null,
-          };
-        } else {
-          throw new Error(`Contract error: ${JSON.stringify(simulatedReturnValue.value)}`);
-        }
+        await sleep(pollIntervalMs);
+        continue;
       }
       if (txResult?.status === 'SUCCESS') {
         logger.info('Soroban tx result', { method, txResult: JSON.stringify(txResult, null, 2) });
@@ -179,11 +176,13 @@ class BattleChainService {
       await sleep(pollIntervalMs);
     }
 
+    if (lastError) {
+      throw lastError;
+    }
     if (simulatedReturnValue && simulatedReturnValue.ok) {
       return { txHash: hash, returnValue: simulatedReturnValue.value, raw: null };
-    } else {
-      throw new Error(`Contract error: ${JSON.stringify(simulatedReturnValue.value)}`);
     }
+    throw new Error(`Soroban tx polling timed out: ${hash}`);
   }
 
   async createMatchOnChain({ entryFee, topicCid, sourceSecret, sourcePublic }) {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { useDeviceCapability } from '@/lib/hooks'
 
 const KEYFRAMES_ID = 'pc-keyframes'
 
@@ -17,6 +18,7 @@ export default function PrismaticTiltCard({
   className?: string
   radius?: number
 }) {
+  const { isTouchDevice } = useDeviceCapability()
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const shellRef = useRef<HTMLDivElement | null>(null)
 
@@ -67,7 +69,7 @@ export default function PrismaticTiltCard({
 
   useEffect(() => {
     const shell = shellRef.current
-    if (!shell) return
+    if (!shell || isTouchDevice) return
 
     const handleMove = (event: PointerEvent) => {
       pointerRef.current.x = event.clientX
@@ -107,7 +109,7 @@ export default function PrismaticTiltCard({
       shell.removeEventListener('pointermove', handleMove)
       shell.removeEventListener('pointerleave', handleLeave)
     }
-  }, [setVarsFromXY, applyPointer])
+  }, [setVarsFromXY, applyPointer, isTouchDevice])
 
   const style = useMemo(
     () =>
@@ -132,8 +134,6 @@ export default function PrismaticTiltCard({
         <div
           className="pointer-events-none absolute inset-0 z-[1]"
           style={{
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
             background: 'rgba(10,14,24,0.34)',
           }}
         />

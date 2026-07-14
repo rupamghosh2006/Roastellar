@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
+import { useDeviceCapability } from '@/lib/hooks'
 
 function hexToRgba(hex: string, alpha = 1) {
   if (!hex) return `rgba(0,0,0,${alpha})`
@@ -37,6 +38,7 @@ export default function ElectricBorder({
   className,
   style,
 }: ElectricBorderProps) {
+  const { shouldReduceQuality } = useDeviceCapability()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const animationRef = useRef<number | null>(null)
@@ -234,7 +236,8 @@ export default function ElectricBorder({
       const radius = Math.min(borderRadius, maxRadius)
 
       const approximatePerimeter = 2 * (borderWidth + borderHeight) + 2 * Math.PI * radius
-      const sampleCount = Math.floor(approximatePerimeter / 2)
+      const sampleCountDiv = shouldReduceQuality ? 4 : 2
+      const sampleCount = Math.floor(approximatePerimeter / sampleCountDiv)
 
       ctx.beginPath()
       for (let i = 0; i <= sampleCount; i++) {

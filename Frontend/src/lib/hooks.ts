@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { api, type Battle, type User, type Wallet } from './api'
 
@@ -14,6 +14,61 @@ export function useVisibilityPause() {
   }, [])
 
   return hiddenRef
+}
+
+export type QualityLevel = 'low' | 'medium' | 'high'
+
+export type DeviceCapability = {
+  isTouchDevice: boolean
+  dprCap: number
+  preferReducedMotion: boolean
+  shouldReduceQuality: boolean
+  qualityLevel: QualityLevel
+}
+
+export function useDeviceCapability(): DeviceCapability {
+  return useMemo(() => {
+    if (typeof window === 'undefined') {
+      return { isTouchDevice: false, dprCap: 2, preferReducedMotion: false, shouldReduceQuality: false, qualityLevel: 'high' }
+    }
+    const dpr = window.devicePixelRatio || 1
+    const isTouch = window.matchMedia('(pointer: coarse)').matches
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion)').matches
+    const cpuCores = navigator.hardwareConcurrency || 8
+    const memory = (navigator as any).deviceMemory || 8
+
+    const isLowEnd = isTouch && (dpr >= 3 || cpuCores <= 4 || memory <= 4)
+    const isMidEnd = isTouch && !isLowEnd
+
+    let qualityLevel: QualityLevel = 'high'
+    let dprCap = 2
+    if (reducedMotion) {
+      qualityLevel = 'low'
+      dprCap = 1
+    } else if (isLowEnd) {
+      qualityLevel = 'low'
+      dprCap = 1
+    } else if (isMidEnd) {
+      qualityLevel = 'medium'
+      dprCap = 1.5
+    }
+
+    return {
+      isTouchDevice: isTouch,
+      dprCap,
+      preferReducedMotion: reducedMotion,
+      shouldReduceQuality: qualityLevel !== 'high',
+      qualityLevel,
+    }
+  }, [])
+}
+
+export function useSkipFrame(shouldReduce: boolean): () => boolean {
+  const frameRef = useRef(0)
+  return () => {
+    frameRef.current++
+    return shouldReduce && frameRef.current % 2 !== 0
+  }
 }
 
 export function useUserProfile() {

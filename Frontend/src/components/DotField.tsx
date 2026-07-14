@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useEffect, useRef } from 'react'
-import { useVisibilityPause } from '@/lib/hooks'
+import { useDeviceCapability, useVisibilityPause } from '@/lib/hooks'
 
 const TWO_PI = Math.PI * 2
 
@@ -54,6 +54,7 @@ const DotField = memo(({
   const engagement = useRef(0)
   const propsRef = useRef({})
   const hiddenRef = useVisibilityPause()
+  const { shouldReduceQuality, isTouchDevice } = useDeviceCapability()
   propsRef.current = { dotRadius, dotSpacing, cursorRadius, cursorForce, bulgeOnly, bulgeStrength, sparkle, waveAmplitude, dotColor }
   const rebuildRef = useRef<null | (() => void)>(null)
 
@@ -97,7 +98,7 @@ const DotField = memo(({
 
     function buildDots(w: number, h: number) {
       const p = propsRef.current as DotFieldProps
-      const step = (p.dotRadius ?? 1.5) + (p.dotSpacing ?? 14)
+      const step = ((p.dotRadius ?? 1.5) + (p.dotSpacing ?? 14)) * (isTouchDevice ? 1.5 : 1)
       const cols = Math.floor(w / step)
       const rows = Math.floor(h / step)
       const padX = (w % step) / 2
@@ -135,9 +136,11 @@ const DotField = memo(({
     const speedInterval = setInterval(updateMouseSpeed, 20)
 
     let frameCount = 0
+    let skipCounter = 0
 
     function tick() {
       if (hiddenRef.current) { rafRef.current = requestAnimationFrame(tick); return }
+      if (shouldReduceQuality) { skipCounter++; if (skipCounter % 2 === 0) { rafRef.current = requestAnimationFrame(tick); return } }
       frameCount++
       const dots = dotsRef.current
       const m = mouseRef.current

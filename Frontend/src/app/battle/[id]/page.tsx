@@ -435,28 +435,30 @@ export default function BattleRoomPage() {
                 />
               </div>
 
-              <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-violet-500/40">
-                <div className="flex items-center gap-2">
-                  <MessageSquareText className="h-5 w-5 text-violet-300" />
-                  <h2 className="font-orbitron text-xl text-white sm:text-2xl">Roast Submission</h2>
+              {(currentUserInBattle.isPlayer1 || currentUserInBattle.isPlayer2) && (
+                <div className="glass rounded-2xl border-l-4 border-l-violet-500/40 p-5 sm:rounded-2xl sm:p-6">
+                  <div className="flex items-center gap-2">
+                    <MessageSquareText className="h-5 w-5 text-violet-300" />
+                    <h2 className="font-orbitron text-xl text-white sm:text-2xl">Roast Submission</h2>
+                  </div>
+                  <textarea
+                    value={roastText}
+                    onChange={(event) => setRoastText(event.target.value)}
+                    placeholder={canRoast ? 'Drop your best roast here...' : 'Roast submissions are closed'}
+                    disabled={!canRoast || actionBusy}
+                    className="mt-4 h-36 w-full input-glass disabled:cursor-not-allowed disabled:opacity-60"
+                  />
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={submitRoast}
+                      disabled={!canRoast || actionBusy || !roastText.trim()}
+                      className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Submit Roast
+                    </button>
+                  </div>
                 </div>
-                <textarea
-                  value={roastText}
-                  onChange={(event) => setRoastText(event.target.value)}
-                  placeholder={canRoast ? 'Drop your best roast here...' : 'Only battle players can submit roasts'}
-                  disabled={!canRoast || actionBusy}
-                  className="mt-4 h-36 w-full input-glass disabled:cursor-not-allowed disabled:opacity-60"
-                />
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={submitRoast}
-                    disabled={!canRoast || actionBusy || !roastText.trim()}
-                    className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Submit Roast
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
 
             <aside className="space-y-6">

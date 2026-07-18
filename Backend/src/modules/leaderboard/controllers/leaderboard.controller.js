@@ -4,11 +4,20 @@ const logger = require('../../../utils/logger');
 
 exports.getLeaderboard = async (req, res) => {
   try {
-    const limit = Math.min(Math.max(Number(req.query.limit || 50), 1), 100);
-    const users = await User.find({ isBanned: false })
+    const requestedLimit = Number(req.query.limit);
+    const limit = Number.isFinite(requestedLimit) && requestedLimit > 0
+      ? Math.min(Math.floor(requestedLimit), 1000)
+      : null;
+
+    let query = User.find({ isBanned: false })
       .sort({ rankPoints: -1, xp: -1, wins: -1 })
-      .limit(limit)
       .select('username imageUrl avatar clerkId xp wins losses rankPoints badges totalBattles createdAt');
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const users = await query;
 
     const leaderboard = users.map((user, index) => {
       const total = Number(user.wins || 0) + Number(user.losses || 0);

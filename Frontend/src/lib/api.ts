@@ -81,6 +81,11 @@ export interface PredictionSummary {
   onPlayer2: number
 }
 
+export interface BattleParticipationStatus {
+  hasVoted: boolean
+  hasPredicted: boolean
+}
+
 export interface Wallet {
   address: string
   publicKey: string
@@ -410,6 +415,11 @@ export const apiRoutes = {
       getAndNormalize(api.post<BackendBattle>(`/api/battles/cancel/${matchId}`, undefined, authConfig(token)), normalizeBattle),
     get: (matchId: number | string) =>
       getAndNormalize(api.get<BackendBattle>(`/api/battles/${matchId}`), normalizeBattle),
+    participation: (matchId: number | string, token?: string) =>
+      getAndNormalize(
+        api.get<BattleParticipationStatus>(`/api/battles/participation/${matchId}`, authConfig(token)),
+        (status) => ({ hasVoted: Boolean(status?.hasVoted), hasPredicted: Boolean(status?.hasPredicted) })
+      ),
   },
   predictions: {
     place: (matchId: number | string, payload: { selectedPlayer: string; amount: number }, token?: string) =>

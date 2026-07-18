@@ -188,6 +188,23 @@ class BattleService {
     return serialized;
   }
 
+  async getParticipationStatus({ user, matchId }) {
+    const battle = await Battle.findOne({ matchId }).select('_id');
+    if (!battle) {
+      throw new Error('Battle not found');
+    }
+
+    const [vote, prediction] = await Promise.all([
+      BattleVote.exists({ battleId: battle._id, voter: user._id }),
+      Prediction.exists({ battleId: battle._id, predictor: user._id }),
+    ]);
+
+    return {
+      hasVoted: Boolean(vote),
+      hasPredicted: Boolean(prediction),
+    };
+  }
+
   async createBattle({ user, topic, entryFee, durationHours }) {
     if (!user?.walletPublicKey || !user?.walletEncryptedSecret) {
       throw new Error('Wallet with signing capability is required to create battle');

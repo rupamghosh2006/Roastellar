@@ -64,6 +64,23 @@ exports.getMatch = async (req, res) => {
   }
 };
 
+exports.getParticipationStatus = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const status = await battleService.getParticipationStatus({
+      user: req.auth.user,
+      matchId,
+    });
+    return ApiResponse.success(res, status);
+  } catch (error) {
+    logger.error('Get battle participation status error', { message: error?.message });
+    if (error.message === 'Battle not found') {
+      return ApiResponse.notFound(res, 'Battle not found');
+    }
+    return ApiResponse.error(res, error.message || 'Failed to get battle participation status');
+  }
+};
+
 exports.submitRoast = async (req, res) => {
   try {
     const matchId = parseMatchId(req.params.matchId);

@@ -52,6 +52,8 @@ export default function BattleRoomPage() {
   const [me, setMe] = useState<User | null>(null)
   const [activity, setActivity] = useState<string[]>([])
   const [predictionBusy, setPredictionBusy] = useState(false)
+  const [hasVoted, setHasVoted] = useState(false)
+  const [hasPredicted, setHasPredicted] = useState(false)
   const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
 
   const pushActivity = useCallback((line: string) => {
@@ -86,10 +88,11 @@ export default function BattleRoomPage() {
         connectSocket(token)
         joinBattle(matchId)
 
-        const [meRes, battleRes, predictionRes] = await Promise.all([
+        const [meRes, battleRes, predictionRes, participationRes] = await Promise.all([
           apiRoutes.users.me(token),
           apiRoutes.battles.get(matchId),
           apiRoutes.predictions.summary(matchId),
+          apiRoutes.battles.participation(matchId, token),
         ])
 
         if (!active) return
@@ -97,6 +100,8 @@ export default function BattleRoomPage() {
         setManagedWalletBlocked(Boolean(!meRes.data.hasManagedWallet))
         setBattle(battleRes.data)
         setPredictionSummary(predictionRes.data.summary)
+        setHasVoted(participationRes.data.hasVoted)
+        setHasPredicted(participationRes.data.hasPredicted)
         setSpectators(battleRes.data.spectators ?? 0)
         pushActivity(`Battle room connected for match #${matchId}`)
 
@@ -302,6 +307,7 @@ export default function BattleRoomPage() {
       }
       const response = await apiRoutes.battles.vote(matchId, { selectedPlayer }, token)
       setBattle(response.data)
+      setHasVoted(true)
       toast.success('Vote cast')
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to cast vote')
@@ -345,6 +351,7 @@ export default function BattleRoomPage() {
       await apiRoutes.predictions.place(matchId, { selectedPlayer, amount }, token)
       const latest = await apiRoutes.predictions.summary(matchId)
       setPredictionSummary(latest.data.summary)
+      setHasPredicted(true)
       toast.success('Prediction placed')
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to place prediction')
@@ -415,14 +422,16 @@ export default function BattleRoomPage() {
                   player={battle.player1}
                   roast={battle.roast1}
                   onVote={canVote && battle.player1?.id ? () => castVote(battle.player1!.id) : undefined}
-                  disabled={actionBusy}
+                  disabled={actionBusy || hasVoted}
+                  voteLocked={hasVoted}
                 />
                 <PlayerCard
                   title="Player 2"
                   player={battle.player2}
                   roast={battle.roast2}
                   onVote={canVote && battle.player2?.id ? () => castVote(battle.player2!.id) : undefined}
-                  disabled={actionBusy}
+                  disabled={actionBusy || hasVoted}
+                  voteLocked={hasVoted}
                 />
               </div>
 
@@ -457,7 +466,8 @@ export default function BattleRoomPage() {
                 player1Name={battle.player1?.username || 'Player 1'}
                 player2Name={battle.player2?.username || 'Player 2'}
                 isSpectator={isSpectator}
-                disabled={predictionBusy}
+                disabled={predictionBusy || hasPredicted}
+                submitted={hasPredicted}
                 onPredict={(selectedPlayer, amount) => placePrediction(selectedPlayer, amount)}
               />
 
@@ -527,12 +537,14 @@ function PlayerCard({
   roast,
   onVote,
   disabled,
+  voteLocked,
 }: {
   title: string
   player?: User
   roast?: string
   onVote?: () => void
   disabled?: boolean
+  voteLocked?: boolean
 }) {
   return (
     <div className="glass rounded-xl border-l-4 border-l-white/20 p-5 sm:rounded-xl sm:p-6">
@@ -554,7 +566,7 @@ function PlayerCard({
           disabled={disabled}
           className="mt-4 w-full rounded-xi bg-[#B88A35] px-4 py-2.5 font-semibold text-slate-950 transition-all hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-55"
         >
-          Vote for {player?.username || 'Player'}
+          {voteLocked ? 'Vote cast' : `Vote for ${player?.username || 'Player'}`}
         </button>
       )}
     </div>

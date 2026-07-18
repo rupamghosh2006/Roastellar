@@ -45,6 +45,7 @@ router.post('/submit-roast/:matchId', writeLimiter, protect, validateBody(roastS
 router.post('/vote/:matchId', writeLimiter, protect, validateBody(voteSchema), battleController.vote);
 router.post('/finalize/:matchId', writeLimiter, protect, battleController.finalize);
 router.post('/cancel/:matchId', writeLimiter, protect, battleController.cancel);
+router.get('/participation/:matchId', protect, battleController.getParticipationStatus);
 router.get('/open', battleController.getOpenMatches);
 router.get('/:matchId', battleController.getMatch);
 

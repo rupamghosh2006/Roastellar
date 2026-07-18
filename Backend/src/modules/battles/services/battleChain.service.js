@@ -176,11 +176,23 @@ class BattleChainService {
       await sleep(pollIntervalMs);
     }
 
+    // A successful simulation gives us the contract return value before the
+    // transaction is sent. If the RPC status endpoint cannot be decoded by a
+    // client, do not report the creation as failed after the transaction has
+    // already been accepted by the network. This is only a fallback; a real
+    // FAILED status above still throws.
+    if (simulatedReturnValue && simulatedReturnValue.ok) {
+      if (lastError) {
+        logger.warn('Soroban tx status unavailable; using simulated return value after submission', {
+          method,
+          txHash: hash,
+          message: lastError?.message,
+        });
+      }
+      return { txHash: hash, returnValue: simulatedReturnValue.value, raw: null };
+    }
     if (lastError) {
       throw lastError;
-    }
-    if (simulatedReturnValue && simulatedReturnValue.ok) {
-      return { txHash: hash, returnValue: simulatedReturnValue.value, raw: null };
     }
     throw new Error(`Soroban tx polling timed out: ${hash}`);
   }

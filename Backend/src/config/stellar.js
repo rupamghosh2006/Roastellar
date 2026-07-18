@@ -1,5 +1,7 @@
 require('dotenv').config();
-const StellarSdk = require('stellar-sdk');
+// Use the maintained SDK package. The legacy `stellar-sdk` package pins an
+// older XDR schema and cannot decode current Soroban RPC responses.
+const StellarSdk = require('@stellar/stellar-sdk');
 
 const NETWORK_PASSPHRASE = process.env.STELLAR_NETWORK === 'mainnet'
   ? 'Public Global Stellar Network ; September 2015'
@@ -15,7 +17,7 @@ const server = new StellarSdk.Horizon.Server(HORIZON_URL, {
   allowHttp: true,
 });
 
-const rpcServer = new StellarSdk.SorobanRpc.Server(RPC_URL, {
+const rpcServer = new StellarSdk.rpc.Server(RPC_URL, {
   allowHttp: true,
 });
 

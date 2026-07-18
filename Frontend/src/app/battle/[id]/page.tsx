@@ -389,6 +389,10 @@ export default function BattleRoomPage() {
                   />
                 )}
                 <Pill icon={<Users className="h-4 w-4 text-cyan-300" />} label={`${spectators} spectators`} />
+                <Pill
+                  icon={<MessageSquareText className="h-4 w-4 text-violet-300" />}
+                  label={`${battle.player1Votes + battle.player2Votes} votes cast`}
+                />
                 <Pill icon={<Coins className="h-4 w-4 text-emerald-300" />} label={`Pot ${battle.pot} XLM`} />
                 {canJoinOpenBattle && (
                   <button

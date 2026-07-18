@@ -410,8 +410,6 @@ export default function BattleRoomPage() {
                   title="Player 1"
                   player={battle.player1}
                   roast={battle.roast1}
-                  votes={battle.player1Votes}
-                  winning={battle.player1Votes > battle.player2Votes}
                   onVote={canVote && battle.player1?.id ? () => castVote(battle.player1!.id) : undefined}
                   disabled={actionBusy}
                 />
@@ -419,8 +417,6 @@ export default function BattleRoomPage() {
                   title="Player 2"
                   player={battle.player2}
                   roast={battle.roast2}
-                  votes={battle.player2Votes}
-                  winning={battle.player2Votes > battle.player1Votes}
                   onVote={canVote && battle.player2?.id ? () => castVote(battle.player2!.id) : undefined}
                   disabled={actionBusy}
                 />
@@ -464,10 +460,7 @@ export default function BattleRoomPage() {
               <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-6 border-l-4 border-l-cyan-500/40">
                 <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Prediction Pot</p>
                 <p className="mt-3 font-orbitron text-3xl text-white">{predictionSummary?.totalAmount ?? 0} XLM</p>
-                <div className="mt-4 space-y-2 text-sm text-slate-400">
-                  <p>Backed on P1: {predictionSummary?.onPlayer1 ?? 0} XLM</p>
-                  <p>Backed on P2: {predictionSummary?.onPlayer2 ?? 0} XLM</p>
-                </div>
+                <p className="mt-4 text-sm text-slate-400">Individual prediction backing is private.</p>
               </div>
             </aside>
           </section>
@@ -528,29 +521,24 @@ function PlayerCard({
   title,
   player,
   roast,
-  votes,
-  winning,
   onVote,
   disabled,
 }: {
   title: string
   player?: User
   roast?: string
-  votes: number
-  winning?: boolean
   onVote?: () => void
   disabled?: boolean
 }) {
   return (
-    <div className={cn('glass rounded-xl p-5 sm:rounded-xl sm:p-6 border-l-4', winning ? 'border-l-emerald-500/50' : 'border-l-white/20')}>
+    <div className="glass rounded-xl border-l-4 border-l-white/20 p-5 sm:rounded-xl sm:p-6">
       <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{title}</p>
       <div className="mt-3 flex items-center gap-3">
-        <div className={cn("flex h-11 w-11 items-center justify-center rounded-full font-semibold text-white", winning ? 'bg-emerald-500/20' : 'bg-white/10')}>
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 font-semibold text-white">
           {player?.username?.[0]?.toUpperCase() ?? '?'}
         </div>
         <div>
           <p className="font-semibold text-white">{player?.username || 'Awaiting challenger'}</p>
-          <p className="text-xs text-slate-400">{votes} votes</p>
         </div>
       </div>
       <div className="mt-4 min-h-[92px] rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm leading-6 text-slate-300">
@@ -603,8 +591,6 @@ function ResultModal({
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <InfoRow label="Votes P1" value={String(battle.player1Votes)} />
-          <InfoRow label="Votes P2" value={String(battle.player2Votes)} />
           <InfoRow label="Prize" value={`${battle.pot} XLM`} />
           <InfoRow label="Tx Hash" value={battle.txHash ? `${battle.txHash.slice(0, 12)}...` : 'Pending'} />
         </div>

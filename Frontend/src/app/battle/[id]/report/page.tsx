@@ -117,16 +117,23 @@ export default function BattleReportPage() {
             <SectionHeading icon={<Vote className="h-5 w-5 text-cyan-300" />} eyebrow="Audience" title="Votes cast" detail={`${report.votes.length} total`} />
             {report.votes.length ? (
               <div className="mt-5 divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-black/10">
+                <div className="hidden grid-cols-[minmax(0,1fr)_80px_minmax(0,1fr)_minmax(132px,auto)] gap-4 border-b border-white/10 bg-white/[0.025] px-4 py-3 sm:grid">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Voter</p>
+                  <p className="text-center text-xs uppercase tracking-[0.16em] text-slate-500">Vote</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Selected player</p>
+                  <p className="text-right text-xs uppercase tracking-[0.16em] text-slate-500">Explorer</p>
+                </div>
                 {report.votes.map((vote) => (
-                  <div key={vote.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div key={vote.id} className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_80px_minmax(0,1fr)_minmax(132px,auto)] sm:items-center sm:gap-4">
                     <Person user={vote.voter} label="Voted" />
-                    <div className="flex items-center gap-2 text-sm text-slate-500 sm:px-4">
-                      <span className="hidden sm:inline">for</span>
-                      <span className="sm:hidden">Voted for</span>
-                      <span className="text-slate-600">→</span>
+                    <div className="flex items-center gap-2 text-sm text-slate-500 sm:justify-center">
+                      <span className="hidden sm:inline">for →</span>
+                      <span className="sm:hidden">Voted for →</span>
                     </div>
-                    <Person user={vote.selectedPlayer} label="Selected player" align="right" />
-                    {vote.chainTxHash && <TransactionLink hash={vote.chainTxHash} href={transactionUrl(vote.chainTxHash)} label="Vote transaction" />}
+                    <Person user={vote.selectedPlayer} label="Selected player" />
+                    <div className="sm:justify-self-end">
+                      {vote.chainTxHash && <TransactionLink hash={vote.chainTxHash} href={transactionUrl(vote.chainTxHash)} label="Vote transaction" />}
+                    </div>
                   </div>
                 ))}
               </div>

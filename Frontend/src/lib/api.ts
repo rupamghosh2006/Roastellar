@@ -94,6 +94,53 @@ export interface ProfileMatch extends Battle {
   }
 }
 
+export interface BattleReportVote {
+  id: string
+  voter: User
+  selectedPlayer: User
+  chainTxHash: string
+  stakeTxHash: string
+  createdAt: string
+}
+
+export interface BattleReportPrediction {
+  id: string
+  predictor: User
+  selectedPlayer: User
+  amount: number
+  payoutAmount: number
+  payoutEstimated: boolean
+  settled: boolean
+  won: boolean
+  escrowTxHash: string
+  chainTxHash: string
+  payoutTxHash: string
+  createdAt: string
+}
+
+export interface BattleReportPayout {
+  recipient: User
+  amount: number
+  reason: string
+  txHash: string
+  source: 'battle' | 'prediction'
+  estimated?: boolean
+}
+
+export interface BattleReportTransaction {
+  label: string
+  hash: string
+}
+
+export interface BattleReport {
+  battle: Battle
+  votes: BattleReportVote[]
+  predictions: BattleReportPrediction[]
+  payouts: BattleReportPayout[]
+  transactions: BattleReportTransaction[]
+  network: string
+}
+
 export interface Wallet {
   address: string
   publicKey: string
@@ -207,6 +254,44 @@ type BackendProfileMatch = BackendBattle & {
     role?: 'player' | 'voter'
     selectedPlayerId?: string
   }
+}
+
+type BackendBattleReport = {
+  battle?: BackendBattle
+  votes?: Array<{
+    id?: string
+    _id?: string
+    voter?: BackendUser
+    selectedPlayer?: BackendUser
+    chainTxHash?: string
+    stakeTxHash?: string
+    createdAt?: string
+  }>
+  predictions?: Array<{
+    id?: string
+    _id?: string
+    predictor?: BackendUser
+    selectedPlayer?: BackendUser
+    amount?: number
+    payoutAmount?: number
+    payoutEstimated?: boolean
+    settled?: boolean
+    won?: boolean
+    escrowTxHash?: string
+    chainTxHash?: string
+    payoutTxHash?: string
+    createdAt?: string
+  }>
+  payouts?: Array<{
+    recipient?: BackendUser
+    amount?: number
+    reason?: string
+    txHash?: string
+    source?: 'battle' | 'prediction'
+    estimated?: boolean
+  }>
+  transactions?: Array<{ label?: string; hash?: string }>
+  network?: string
 }
 
 type BackendWallet = {
@@ -373,6 +458,54 @@ export function normalizeProfileMatch(match: BackendProfileMatch | null | undefi
   }
 }
 
+export function normalizeBattleReport(report: BackendBattleReport | null | undefined): BattleReport {
+  return {
+    battle: normalizeBattle(report?.battle),
+    votes: Array.isArray(report?.votes)
+      ? report.votes.map((vote) => ({
+        id: String(vote?.id ?? vote?._id ?? ''),
+        voter: normalizeUser(vote?.voter),
+        selectedPlayer: normalizeUser(vote?.selectedPlayer),
+        chainTxHash: vote?.chainTxHash ?? '',
+        stakeTxHash: vote?.stakeTxHash ?? '',
+        createdAt: vote?.createdAt ?? new Date(0).toISOString(),
+      }))
+      : [],
+    predictions: Array.isArray(report?.predictions)
+      ? report.predictions.map((prediction) => ({
+        id: String(prediction?.id ?? prediction?._id ?? ''),
+        predictor: normalizeUser(prediction?.predictor),
+        selectedPlayer: normalizeUser(prediction?.selectedPlayer),
+        amount: Number(prediction?.amount ?? 0),
+        payoutAmount: Number(prediction?.payoutAmount ?? 0),
+        payoutEstimated: Boolean(prediction?.payoutEstimated),
+        settled: Boolean(prediction?.settled),
+        won: Boolean(prediction?.won),
+        escrowTxHash: prediction?.escrowTxHash ?? '',
+        chainTxHash: prediction?.chainTxHash ?? '',
+        payoutTxHash: prediction?.payoutTxHash ?? '',
+        createdAt: prediction?.createdAt ?? new Date(0).toISOString(),
+      }))
+      : [],
+    payouts: Array.isArray(report?.payouts)
+      ? report.payouts.map((payout) => ({
+        recipient: normalizeUser(payout?.recipient),
+        amount: Number(payout?.amount ?? 0),
+        reason: payout?.reason ?? 'Payout',
+        txHash: payout?.txHash ?? '',
+        source: payout?.source === 'prediction' ? 'prediction' : 'battle',
+        estimated: Boolean(payout?.estimated),
+      }))
+      : [],
+    transactions: Array.isArray(report?.transactions)
+      ? report.transactions
+        .filter((transaction) => Boolean(transaction?.hash))
+        .map((transaction) => ({ label: transaction?.label ?? 'Transaction', hash: transaction?.hash ?? '' }))
+      : [],
+    network: report?.network ?? 'testnet',
+  }
+}
+
 export function normalizePrediction(prediction: BackendPrediction | null | undefined): Prediction {
   const predictorId = typeof prediction?.predictor === 'string'
     ? prediction.predictor
@@ -454,6 +587,8 @@ export const apiRoutes = {
         api.get<BattleParticipationStatus>(`/api/battles/participation/${matchId}`, authConfig(token)),
         (status) => ({ hasVoted: Boolean(status?.hasVoted), hasPredicted: Boolean(status?.hasPredicted) })
       ),
+    report: (matchId: number | string, token?: string) =>
+      getAndNormalize(api.get<BackendBattleReport>(`/api/battles/${matchId}/report`, authConfig(token)), normalizeBattleReport),
   },
   predictions: {
     place: (matchId: number | string, payload: { selectedPlayer: string; amount: number }, token?: string) =>

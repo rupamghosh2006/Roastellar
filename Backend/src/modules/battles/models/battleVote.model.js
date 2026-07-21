@@ -18,6 +18,14 @@ const battleVoteSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  chainTxHash: {
+    type: String,
+    default: '',
+  },
+  stakeTxHash: {
+    type: String,
+    default: '',
+  },
 }, {
   timestamps: true,
 });

@@ -331,7 +331,7 @@ export default function ProfilePage() {
                   return (
                     <button
                       key={match.id}
-                      onClick={() => router.push(`/battle/${match.matchId}`)}
+                      onClick={() => router.push(`/battle/${match.matchId}/report`)}
                       className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.04] sm:gap-4"
                     >
                       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isPlayer ? 'bg-violet-500/15 text-violet-300' : 'bg-orange-500/15 text-orange-300'}`}>

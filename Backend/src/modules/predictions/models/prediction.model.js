@@ -44,6 +44,11 @@ const predictionSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  payoutAmount: {
+    type: Number,
+    default: null,
+    min: 0,
+  },
 }, {
   timestamps: true,
 });

@@ -81,6 +81,26 @@ exports.getParticipationStatus = async (req, res) => {
   }
 };
 
+exports.getReport = async (req, res) => {
+  try {
+    const matchId = parseMatchId(req.params.matchId);
+    const report = await battleService.getBattleReport({
+      user: req.auth.user,
+      matchId,
+    });
+    return ApiResponse.success(res, report);
+  } catch (error) {
+    logger.error('Get battle report error', { message: error?.message });
+    if (error.message === 'Battle not found') {
+      return ApiResponse.notFound(res, 'Battle not found');
+    }
+    if (error.message === 'Not authorized to view this battle report') {
+      return ApiResponse.forbidden(res, error.message);
+    }
+    return ApiResponse.badRequest(res, error.message || 'Failed to fetch battle report');
+  }
+};
+
 exports.submitRoast = async (req, res) => {
   try {
     const matchId = parseMatchId(req.params.matchId);

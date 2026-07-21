@@ -84,6 +84,8 @@ export default function BattleReportPage() {
   const explorerNetwork = report.network === 'mainnet' ? 'public' : 'testnet'
   const transactionUrl = (hash: string) => `https://stellar.expert/explorer/${explorerNetwork}/tx/${hash}`
   const statusLabel = battle.status === 'ended' ? 'Finished' : battle.status === 'draw' ? 'Draw' : 'Cancelled'
+  const player1Votes = report.votes.filter((vote) => vote.selectedPlayer.id === battle.player1?.id)
+  const player2Votes = report.votes.filter((vote) => vote.selectedPlayer.id === battle.player2?.id)
 
   return (
     <div className="flex min-h-screen pt-16 md:pt-0">
@@ -114,32 +116,21 @@ export default function BattleReportPage() {
           </section>
 
           <section className="glass rounded-2xl border-l-4 border-l-cyan-500/40 p-5 sm:p-6">
-            <SectionHeading icon={<Vote className="h-5 w-5 text-cyan-300" />} eyebrow="Audience" title="Votes cast" detail={`${report.votes.length} total`} />
-            {report.votes.length ? (
-              <div className="mt-5 divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-black/10">
-                <div className="hidden grid-cols-[minmax(0,1fr)_80px_minmax(0,1fr)_minmax(132px,auto)] gap-4 border-b border-white/10 bg-white/[0.025] px-4 py-3 sm:grid">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Voter</p>
-                  <p className="text-center text-xs uppercase tracking-[0.16em] text-slate-500">Vote</p>
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Selected player</p>
-                  <p className="text-right text-xs uppercase tracking-[0.16em] text-slate-500">Explorer</p>
-                </div>
-                {report.votes.map((vote) => (
-                  <div key={vote.id} className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_80px_minmax(0,1fr)_minmax(132px,auto)] sm:items-center sm:gap-4">
-                    <Person user={vote.voter} label="Voted" />
-                    <div className="flex items-center gap-2 text-sm text-slate-500 sm:justify-center">
-                      <span className="hidden sm:inline">for →</span>
-                      <span className="sm:hidden">Voted for →</span>
-                    </div>
-                    <Person user={vote.selectedPlayer} label="Selected player" />
-                    <div className="sm:justify-self-end">
-                      {vote.chainTxHash && <TransactionLink hash={vote.chainTxHash} href={transactionUrl(vote.chainTxHash)} label="Vote transaction" />}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState text="No spectator votes were recorded for this battle." />
-            )}
+            <SectionHeading icon={<Vote className="h-5 w-5 text-cyan-300" />} eyebrow="Audience" title="Vote pools" detail={`${report.votes.length} total`} />
+            <div className="mt-5 grid gap-4 md:grid-cols-2 md:gap-0 md:divide-x md:divide-white/10 md:overflow-hidden md:rounded-xl md:border md:border-white/10">
+              <VotePool
+                player={battle.player1}
+                votes={player1Votes}
+                isWinner={battle.winnerId === battle.player1?.id}
+                transactionUrl={transactionUrl}
+              />
+              <VotePool
+                player={battle.player2}
+                votes={player2Votes}
+                isWinner={battle.winnerId === battle.player2?.id}
+                transactionUrl={transactionUrl}
+              />
+            </div>
           </section>
 
           <section className="glass rounded-2xl border-l-4 border-l-violet-500/40 p-5 sm:p-6">
@@ -255,6 +246,52 @@ function PlayerCard({ player, label, isWinner, votes }: { player?: User; label: 
         </div>
       ) : (
         <p className="mt-5 text-sm text-slate-500">No second player joined this battle.</p>
+      )}
+    </div>
+  )
+}
+
+function VotePool({
+  player,
+  votes,
+  isWinner,
+  transactionUrl,
+}: {
+  player?: User
+  votes: BattleReport['votes']
+  isWinner: boolean
+  transactionUrl: (hash: string) => string
+}) {
+  if (!player) {
+    return <EmptyState text="No player was assigned to this side of the battle." />
+  }
+
+  return (
+    <div className="min-w-0 rounded-xl border border-white/10 bg-black/10 md:rounded-none md:border-0">
+      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/10 bg-white/[0.025] p-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <PersonAvatar user={player} />
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Votes for</p>
+            <p className="truncate font-orbitron text-lg text-white">{player.username}</p>
+          </div>
+        </div>
+        <div className="shrink-0 text-right">
+          {isWinner && <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">Winner</p>}
+          <p className="mt-1 text-sm text-cyan-200">{votes.length} vote{votes.length === 1 ? '' : 's'}</p>
+        </div>
+      </div>
+      {votes.length ? (
+        <div className="divide-y divide-white/10">
+          {votes.map((vote, index) => (
+            <div key={vote.id} className="flex min-w-0 items-center justify-between gap-3 p-4">
+              <Person user={vote.voter} label={`Voter ${index + 1}`} />
+              {vote.chainTxHash && <TransactionLink hash={vote.chainTxHash} href={transactionUrl(vote.chainTxHash)} label="Transaction" />}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="p-6 text-center text-sm text-slate-500">No votes for this player.</p>
       )}
     </div>
   )

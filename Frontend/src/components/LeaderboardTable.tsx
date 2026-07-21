@@ -143,9 +143,19 @@ export function LeaderboardTable({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <RankBadge rank={entry.rank} />
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1D4ED8]/20 font-semibold text-white">
-                    {entry.username?.[0]?.toUpperCase() ?? '?'}
-                  </div>
+                  {entry.avatar ? (
+                    <Image
+                      src={entry.avatar}
+                      alt={`${entry.username}'s profile picture`}
+                      width={44}
+                      height={44}
+                      className="h-11 w-11 rounded-2xl border border-white/20 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1D4ED8]/20 font-semibold text-white">
+                      {entry.username?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                  )}
                   <div>
                     <p className="font-semibold text-white">{entry.username}</p>
                     <p className="text-xs text-white/50">{entry.wins} wins</p>

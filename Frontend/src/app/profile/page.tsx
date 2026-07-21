@@ -316,13 +316,14 @@ export default function ProfilePage() {
                 {matchHistory.map((match) => {
                   const isPlayer = match.participation.role === 'player'
                   const didWin = isPlayer && match.winnerId === user?.id
+                  const isDraw = match.status === 'draw' || (match.status === 'ended' && !match.winnerId)
                   const votedFor = match.player1?.id === match.participation.selectedPlayerId
                     ? match.player1?.username || 'Player 1'
                     : match.player2?.id === match.participation.selectedPlayerId
                       ? match.player2?.username || 'Player 2'
                       : 'a player'
                   const roleLabel = isPlayer
-                    ? didWin ? 'Played · Won' : match.status === 'ended' ? 'Played · Lost' : match.status === 'draw' ? 'Played · Draw' : 'Played · Cancelled'
+                    ? didWin ? 'Played · Won' : isDraw ? 'Played · Draw' : match.status === 'cancelled' ? 'Played · Cancelled' : 'Played · Lost'
                     : `Voted for ${votedFor}`
                   const roleClass = isPlayer
                     ? didWin ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-violet-400/30 bg-violet-400/10 text-violet-200'

@@ -66,6 +66,26 @@ function parseSignedMessageCandidates(value) {
   return candidates;
 }
 
+async function findWalletAccount(walletAddress) {
+  const pseudoClerkId = `wallet:${walletAddress}`;
+  const matches = await User.find({
+    $or: [
+      { clerkId: pseudoClerkId },
+      { walletPublicKey: walletAddress },
+      { identityWalletAddress: walletAddress },
+    ],
+  }).sort({ createdAt: 1 });
+
+  // A legacy wallet-only record can coexist with the account that owns the
+  // managed wallet. Always authenticate the real account in that situation.
+  const nonWalletAccounts = matches.filter((user) => user.clerkId !== pseudoClerkId);
+  if (nonWalletAccounts.length > 1) {
+    throw new Error('Wallet is linked to multiple accounts');
+  }
+
+  return nonWalletAccounts[0] || matches[0] || null;
+}
+
 router.post('/wallet/challenge', async (req, res) => {
   try {
     const walletAddress = sanitizeWalletAddress(req.body?.walletAddress);
@@ -84,7 +104,7 @@ router.post('/wallet/challenge', async (req, res) => {
     const username = usernameInput || fallbackName;
     const fallbackEmail = `${walletAddress.toLowerCase()}@wallet.roastellar.local`;
 
-    let user = await User.findOne({ clerkId: pseudoClerkId });
+    let user = await findWalletAccount(walletAddress);
     if (!user) {
       user = await User.create({
         clerkId: pseudoClerkId,
@@ -144,7 +164,14 @@ router.post('/wallet/verify', async (req, res) => {
     }
 
     const pseudoClerkId = `wallet:${walletAddress}`;
-    const user = await User.findOne({ clerkId: pseudoClerkId });
+    const user = await User.findOne({
+      walletAuthNonce: nonce,
+      $or: [
+        { clerkId: pseudoClerkId },
+        { walletPublicKey: walletAddress },
+        { identityWalletAddress: walletAddress },
+      ],
+    });
     if (!user) {
       return ApiResponse.unauthorized(res, 'Wallet challenge user not found');
     }

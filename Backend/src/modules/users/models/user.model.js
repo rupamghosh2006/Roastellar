@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  avatarCid: {
+    type: String,
+    default: '',
+  },
   name: {
     type: String,
     default: '',
@@ -125,6 +129,7 @@ userSchema.methods.toPublicJSON = function() {
     username: this.username,
     email: this.email,
     avatar: this.avatar || this.imageUrl,
+    avatarCid: this.avatarCid,
     name: this.firstName && this.lastName 
       ? `${this.firstName} ${this.lastName}` 
       : this.name || this.firstName || this.username,

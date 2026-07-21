@@ -17,6 +17,7 @@ export interface User {
   firstName?: string | null
   lastName?: string | null
   avatar?: string | null
+  avatarCid?: string | null
   xp: number
   wins: number
   losses: number
@@ -152,6 +153,7 @@ type BackendUser = {
   lastName?: string
   imageUrl?: string
   avatar?: string
+  avatarCid?: string
   xp?: number
   wins?: number
   losses?: number
@@ -255,6 +257,7 @@ export function normalizeUser(user: BackendUser | null | undefined): User {
     firstName: user?.firstName ?? null,
     lastName: user?.lastName ?? null,
     avatar: user?.avatar ?? user?.imageUrl ?? null,
+    avatarCid: user?.avatarCid ?? null,
     xp: user?.xp ?? 0,
     wins: user?.wins ?? 0,
     losses: user?.losses ?? 0,
@@ -420,6 +423,8 @@ export const apiRoutes = {
       getAndNormalize(api.get<BackendProfileMatch[]>('/api/users/me/matches', authConfig(token)), (matches) =>
         Array.isArray(matches) ? matches.map(normalizeProfileMatch) : []
       ),
+    uploadAvatar: (dataUrl: string, token?: string) =>
+      getAndNormalize(api.post<BackendUser>('/api/users/me/avatar', { dataUrl }, authConfig(token)), normalizeUser),
     leaderboard: () => getAndNormalize(api.get<BackendUser[]>('/api/leaderboard'), normalizeLeaderboard),
     updateProfile: (payload: Partial<User>, token?: string) =>
       getAndNormalize(api.patch<BackendUser>('/api/users/me', payload, authConfig(token)), normalizeUser),

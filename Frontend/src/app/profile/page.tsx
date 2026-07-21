@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SignOutButton, useAuth } from '@clerk/nextjs'
-import { Award, CheckCircle2, ChevronRight, LogOut, PenSquare, ShieldCheck, Swords, Trophy, Vote } from 'lucide-react'
+import { Award, Camera, CheckCircle2, ChevronRight, LogOut, PenSquare, ShieldCheck, Swords, Trophy, Vote } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { apiRoutes, type ProfileMatch, type User } from '@/lib/api'
@@ -19,10 +20,12 @@ export default function ProfilePage() {
   const [matchHistory, setMatchHistory] = useState<ProfileMatch[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
   const [username, setUsername] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [loading, setLoading] = useState(true)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
   const walletMode = isWalletAuthenticated()
 
   useEffect(() => {
@@ -90,6 +93,41 @@ export default function ProfilePage() {
     }
   }
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Choose a PNG, JPEG, or WebP image.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Profile pictures must be 5 MB or smaller.')
+      return
+    }
+
+    try {
+      setAvatarUploading(true)
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result || ''))
+        reader.onerror = () => reject(new Error('Unable to read image file'))
+        reader.readAsDataURL(file)
+      })
+      const token = walletMode ? getWalletAuthToken() : await getToken({ skipCache: true })
+      if (!token) throw new Error('Missing auth token')
+
+      const response = await apiRoutes.users.uploadAvatar(dataUrl, token)
+      setUser(response.data)
+      toast.success('Profile picture uploaded to Pinata')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to upload profile picture')
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen pt-16 md:pt-0">
@@ -122,9 +160,19 @@ export default function ProfilePage() {
           <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-8 border-l-4 border-l-violet-500/40">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-5">
-                <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-[#B88A35]/18 font-orbitron text-4xl font-bold text-white">
-                  {user?.username?.[0]?.toUpperCase() ?? '?'}
-                </div>
+                {user?.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={`${user.username}'s profile picture`}
+                    width={96}
+                    height={96}
+                    className="h-24 w-24 rounded-2xl border-2 border-white/20 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-[#B88A35]/18 font-orbitron text-4xl font-bold text-white">
+                    {user?.username?.[0]?.toUpperCase() ?? '?'}
+                  </div>
+                )}
                 <div>
                   <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Profile</p>
                   <h1 className="mt-2 font-orbitron text-3xl font-bold text-white sm:text-4xl">{user?.username}</h1>
@@ -164,6 +212,28 @@ export default function ProfilePage() {
 
             {isEditing && (
               <div className="mt-6 grid gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/10 p-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Profile picture</p>
+                    <p className="mt-1 text-sm text-slate-400">PNG, JPEG, or WebP · up to 5 MB · stored on Pinata</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={avatarUploading}
+                    className="btn-secondary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <Camera className="h-4 w-4" />
+                    {avatarUploading ? 'Uploading...' : 'Change picture'}
+                  </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                </div>
                 <label className="space-y-2 sm:col-span-2">
                   <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Username (unique)</span>
                   <input

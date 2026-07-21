@@ -6,6 +6,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'img.clerk.com' },
       { protocol: 'https', hostname: '*.googleusercontent.com' },
       { protocol: 'https', hostname: '*.gravatar.com' },
+      { protocol: 'https', hostname: 'gateway.pinata.cloud' },
     ],
   },
   turbopack: {

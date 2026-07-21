@@ -5,7 +5,15 @@ const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 const { EVENT_TYPES } = require('../../../utils/constants');
 const analyticsService = require('../../analytics/services/analytics.service');
+const uploadService = require('../../uploads/services/upload.service');
 const { sanitizeText, sanitizeUsername, sanitizeCid } = require('../../../utils/inputSanitizer');
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+const AVATAR_FORMATS = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
 
 function normalizeUsername(value) {
   return sanitizeUsername(value);
@@ -13,6 +21,34 @@ function normalizeUsername(value) {
 
 function escapeRegex(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function hasExpectedImageSignature(buffer, contentType) {
+  if (contentType === 'image/jpeg') {
+    return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  }
+  if (contentType === 'image/png') {
+    return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  }
+  return buffer.length >= 12
+    && buffer.subarray(0, 4).toString('ascii') === 'RIFF'
+    && buffer.subarray(8, 12).toString('ascii') === 'WEBP';
+}
+
+function parseAvatarDataUrl(dataUrl) {
+  const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/]+={0,2})$/i.exec(String(dataUrl || ''));
+  if (!match) {
+    throw new Error('Upload a PNG, JPEG, or WebP image');
+  }
+
+  const contentType = match[1].toLowerCase();
+  const encoded = match[2];
+  const buffer = Buffer.from(encoded, 'base64');
+  if (!buffer.length || buffer.length > MAX_AVATAR_BYTES || !hasExpectedImageSignature(buffer, contentType)) {
+    throw new Error('Avatar image is invalid or exceeds 5 MB');
+  }
+
+  return { buffer, contentType, extension: AVATAR_FORMATS[contentType] };
 }
 
 exports.getMe = async (req, res) => {
@@ -95,6 +131,32 @@ exports.getMyMatchHistory = async (req, res) => {
   } catch (error) {
     logger.error('Get match history error:', error);
     return ApiResponse.error(res, error.message || 'Failed to fetch match history');
+  }
+};
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    const { buffer, contentType, extension } = parseAvatarDataUrl(req.body?.dataUrl);
+    const user = req.auth.user;
+    const filename = `avatar_${String(user._id)}_${Date.now()}.${extension}`;
+    const upload = await uploadService.uploadFile(buffer, filename, contentType);
+    const avatar = uploadService.getGatewayURL(upload.cid);
+
+    user.avatar = avatar;
+    user.avatarCid = upload.cid;
+    await user.save();
+
+    await analyticsService.trackEvent(EVENT_TYPES.PROFILE_UPDATED, user._id, {
+      fields: ['avatar'],
+      avatarCid: upload.cid,
+    });
+
+    return ApiResponse.success(res, user.toPublicJSON(), 'Profile picture updated');
+  } catch (error) {
+    logger.error('Avatar upload error:', error);
+    const message = error?.message || 'Failed to upload profile picture';
+    const statusCode = /PNG, JPEG, or WebP|invalid or exceeds/.test(message) ? 400 : 500;
+    return ApiResponse.error(res, message, statusCode);
   }
 };
 

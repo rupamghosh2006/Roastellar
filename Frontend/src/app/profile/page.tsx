@@ -157,32 +157,32 @@ export default function ProfilePage() {
       <Sidebar />
       <main className="mobile-nav-offset flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-6xl space-y-8">
-          <div className="glass rounded-2xl p-5 sm:rounded-2xl sm:p-8 border-l-4 border-l-violet-500/40">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-5">
+          <div className="glass min-w-0 rounded-2xl p-4 sm:rounded-2xl sm:p-8 border-l-4 border-l-violet-500/40">
+            <div className="flex flex-col gap-5 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-start gap-4 sm:items-center sm:gap-5">
                 {user?.avatar ? (
                   <Image
                     src={user.avatar}
                     alt={`${user.username}'s profile picture`}
                     width={96}
                     height={96}
-                    className="h-24 w-24 rounded-2xl border-2 border-white/20 object-cover"
+                    className="h-20 w-20 shrink-0 rounded-2xl border-2 border-white/20 object-cover sm:h-24 sm:w-24"
                   />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-[#B88A35]/18 font-orbitron text-4xl font-bold text-white">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#B88A35]/18 font-orbitron text-3xl font-bold text-white sm:h-24 sm:w-24 sm:text-4xl">
                     {user?.username?.[0]?.toUpperCase() ?? '?'}
                   </div>
                 )}
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Profile</p>
-                  <h1 className="mt-2 font-orbitron text-3xl font-bold text-white sm:text-4xl">{user?.username}</h1>
-                  <p className="mt-2 text-slate-400">Member since {formatDate(user?.createdAt ?? new Date())}</p>
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 sm:text-sm">Profile</p>
+                  <h1 className="mt-2 break-all font-orbitron text-2xl font-bold leading-tight text-white sm:text-4xl">{user?.username}</h1>
+                  <p className="mt-2 text-sm text-slate-400 sm:text-base">Member since {formatDate(user?.createdAt ?? new Date())}</p>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
                 <button
                   onClick={() => setIsEditing((value) => !value)}
-                  className="btn-secondary"
+                  className="btn-secondary w-full sm:w-auto"
                 >
                   <PenSquare className="h-4 w-4" />
                   {isEditing ? 'Cancel Edit' : 'Edit Profile'}
@@ -194,14 +194,14 @@ export default function ProfilePage() {
                       toast.success('Wallet session disconnected')
                       router.push('/')
                     }}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-5 py-3 font-medium text-red-200 transition-colors"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 font-medium text-red-200 transition-colors hover:bg-red-500/20 sm:w-auto"
                   >
                     <LogOut className="h-4 w-4" />
                     Disconnect Wallet Session
                   </button>
                 ) : (
                   <SignOutButton>
-                    <button className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-5 py-3 font-medium text-red-200 transition-colors">
+                    <button className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 font-medium text-red-200 transition-colors hover:bg-red-500/20 sm:w-auto">
                       <LogOut className="h-4 w-4" />
                       Logout
                     </button>

@@ -86,6 +86,13 @@ export interface BattleParticipationStatus {
   hasPredicted: boolean
 }
 
+export interface ProfileMatch extends Battle {
+  participation: {
+    role: 'player' | 'voter'
+    selectedPlayerId?: string
+  }
+}
+
 export interface Wallet {
   address: string
   publicKey: string
@@ -191,6 +198,13 @@ type BackendBattle = {
   createdAt?: string
   durationHours?: number
   expiresAt?: string
+}
+
+type BackendProfileMatch = BackendBattle & {
+  participation?: {
+    role?: 'player' | 'voter'
+    selectedPlayerId?: string
+  }
 }
 
 type BackendWallet = {
@@ -345,6 +359,17 @@ export function normalizeBattleList(battles: BackendBattle[] | null | undefined)
   return Array.isArray(battles) ? battles.map(normalizeBattle) : []
 }
 
+export function normalizeProfileMatch(match: BackendProfileMatch | null | undefined): ProfileMatch {
+  const battle = normalizeBattle(match)
+  return {
+    ...battle,
+    participation: {
+      role: match?.participation?.role === 'voter' ? 'voter' : 'player',
+      selectedPlayerId: match?.participation?.selectedPlayerId,
+    },
+  }
+}
+
 export function normalizePrediction(prediction: BackendPrediction | null | undefined): Prediction {
   const predictorId = typeof prediction?.predictor === 'string'
     ? prediction.predictor
@@ -391,6 +416,10 @@ export const apiRoutes = {
   },
   users: {
     me: (token?: string) => getAndNormalize(api.get<BackendUser>('/api/users/me', authConfig(token)), normalizeUser),
+    matchHistory: (token?: string) =>
+      getAndNormalize(api.get<BackendProfileMatch[]>('/api/users/me/matches', authConfig(token)), (matches) =>
+        Array.isArray(matches) ? matches.map(normalizeProfileMatch) : []
+      ),
     leaderboard: () => getAndNormalize(api.get<BackendUser[]>('/api/leaderboard'), normalizeLeaderboard),
     updateProfile: (payload: Partial<User>, token?: string) =>
       getAndNormalize(api.patch<BackendUser>('/api/users/me', payload, authConfig(token)), normalizeUser),

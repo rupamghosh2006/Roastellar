@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { SignOutButton, useAuth } from '@clerk/nextjs'
-import { Award, LogOut, PenSquare, ShieldCheck, Swords, Trophy } from 'lucide-react'
+import { Award, CheckCircle2, ChevronRight, LogOut, PenSquare, ShieldCheck, Swords, Trophy, Vote } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
-import { apiRoutes, type User } from '@/lib/api'
+import { apiRoutes, type ProfileMatch, type User } from '@/lib/api'
 import { formatAddress, formatDate } from '@/lib/utils'
 import { clearWalletAuthSession, getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import dynamic from 'next/dynamic'
@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const [user, setUser] = useState<User | null>(null)
+  const [matchHistory, setMatchHistory] = useState<ProfileMatch[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [username, setUsername] = useState('')
@@ -37,13 +38,14 @@ export default function ProfilePage() {
     Promise.resolve(walletMode ? getWalletAuthToken() : getToken({ skipCache: true }))
       .then((token) => {
         if (!token) throw new Error('Missing auth token')
-        return apiRoutes.users.me(token)
+        return Promise.all([apiRoutes.users.me(token), apiRoutes.users.matchHistory(token)])
       })
-      .then((response) => {
-        setUser(response.data)
-        setUsername(response.data.username ?? '')
-        setFirstName(response.data.firstName ?? '')
-        setLastName(response.data.lastName ?? '')
+      .then(([userResponse, historyResponse]) => {
+        setUser(userResponse.data)
+        setMatchHistory(historyResponse.data)
+        setUsername(userResponse.data.username ?? '')
+        setFirstName(userResponse.data.firstName ?? '')
+        setLastName(userResponse.data.lastName ?? '')
       })
       .catch((error) => console.error('Failed to load profile:', error))
       .finally(() => setLoading(false))
@@ -229,6 +231,65 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          <section className="glass rounded-2xl p-5 sm:p-6 border-l-4 border-l-orange-500/40">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Match history</p>
+                <h2 className="mt-2 font-orbitron text-2xl text-white">Previous matches</h2>
+              </div>
+              <p className="text-sm text-slate-400">As a player or voter</p>
+            </div>
+
+            {matchHistory.length ? (
+              <div className="mt-5 divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
+                {matchHistory.map((match) => {
+                  const isPlayer = match.participation.role === 'player'
+                  const didWin = isPlayer && match.winnerId === user?.id
+                  const votedFor = match.player1?.id === match.participation.selectedPlayerId
+                    ? match.player1?.username || 'Player 1'
+                    : match.player2?.id === match.participation.selectedPlayerId
+                      ? match.player2?.username || 'Player 2'
+                      : 'a player'
+                  const roleLabel = isPlayer
+                    ? didWin ? 'Played · Won' : match.status === 'ended' ? 'Played · Lost' : match.status === 'draw' ? 'Played · Draw' : 'Played · Cancelled'
+                    : `Voted for ${votedFor}`
+                  const roleClass = isPlayer
+                    ? didWin ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-violet-400/30 bg-violet-400/10 text-violet-200'
+                    : 'border-orange-400/30 bg-orange-400/10 text-orange-200'
+
+                  return (
+                    <button
+                      key={match.id}
+                      onClick={() => router.push(`/battle/${match.matchId}`)}
+                      className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.04] sm:gap-4"
+                    >
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isPlayer ? 'bg-violet-500/15 text-violet-300' : 'bg-orange-500/15 text-orange-300'}`}>
+                        {isPlayer ? <Swords className="h-5 w-5" /> : <Vote className="h-5 w-5" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <p className="truncate font-medium text-white">{match.topic}</p>
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${roleClass}`}>{roleLabel}</span>
+                        </div>
+                        <p className="mt-1 text-sm text-slate-400">
+                          Battle #{match.matchId} · {match.player1?.username || 'Player 1'} vs {match.player2?.username || 'Player 2'} · {formatDate(match.endedAt || match.createdAt)}
+                        </p>
+                      </div>
+                      {didWin ? <CheckCircle2 className="hidden h-5 w-5 shrink-0 text-emerald-300 sm:block" /> : null}
+                      <ChevronRight className="h-5 w-5 shrink-0 text-slate-500" />
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="mt-5 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-5 py-10 text-center">
+                <Swords className="mx-auto h-7 w-7 text-slate-500" />
+                <p className="mt-3 text-sm text-slate-300">No previous matches yet.</p>
+                <p className="mt-1 text-sm text-slate-500">Play in a battle or vote on one to build your history.</p>
+              </div>
+            )}
+          </section>
 
         </div>
       </main>

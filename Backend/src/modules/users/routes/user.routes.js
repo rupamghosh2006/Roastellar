@@ -28,6 +28,7 @@ function validateBody(schema) {
 }
 
 router.get('/me', protect, userController.getMe);
+router.get('/me/matches', protect, userController.getMyMatchHistory);
 router.patch('/me', protect, validateBody(updateProfileSchema), userController.updateProfile);
 router.get('/leaderboard', userController.getLeaderboard);
 router.get('/:userId', userController.getUserById);

@@ -1,4 +1,6 @@
 const User = require('../models/user.model');
+const Battle = require('../../battles/models/battle.model');
+const BattleVote = require('../../battles/models/battleVote.model');
 const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 const { EVENT_TYPES } = require('../../../utils/constants');
@@ -39,6 +41,60 @@ exports.getMe = async (req, res) => {
   } catch (error) {
     logger.error('Get me error:', error);
     return ApiResponse.error(res, error.message);
+  }
+};
+
+exports.getMyMatchHistory = async (req, res) => {
+  try {
+    const user = req.auth.user;
+    const parsedLimit = Number.parseInt(req.query.limit, 10);
+    const limit = Math.min(Math.max(Number.isFinite(parsedLimit) ? parsedLimit : 10, 1), 50);
+
+    // A voter cannot also be a player in the same battle, but retaining the
+    // vote record lets the profile label the user's relationship to each match.
+    const votes = await BattleVote.find({ voter: user._id })
+      .select('battleId selectedPlayer')
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+    const voteByBattleId = new Map(
+      votes.map((vote) => [String(vote.battleId), String(vote.selectedPlayer)])
+    );
+
+    const battles = await Battle.find({
+      status: { $in: ['ended', 'draw', 'cancelled'] },
+      $or: [
+        { player1: user._id },
+        { player2: user._id },
+        { _id: { $in: votes.map((vote) => vote.battleId) } },
+      ],
+    })
+      .populate('creator', 'username avatar imageUrl clerkId xp wins losses rankPoints badges walletPublicKey')
+      .populate('player1', 'username avatar imageUrl clerkId xp wins losses rankPoints badges walletPublicKey')
+      .populate('player2', 'username avatar imageUrl clerkId xp wins losses rankPoints badges walletPublicKey')
+      .populate('winner', 'username avatar imageUrl clerkId xp wins losses rankPoints badges walletPublicKey')
+      .sort({ endedAt: -1, createdAt: -1 })
+      .limit(limit);
+
+    const matches = battles.map((battle) => {
+      const battleJson = battle.toJSON();
+      const userId = String(user._id);
+      const isPlayer = String(battle.player1?._id || battle.player1) === userId
+        || String(battle.player2?._id || battle.player2) === userId;
+      const selectedPlayerId = voteByBattleId.get(String(battle._id));
+
+      return {
+        ...battleJson,
+        participation: isPlayer
+          ? { role: 'player' }
+          : { role: 'voter', selectedPlayerId },
+      };
+    });
+
+    return ApiResponse.success(res, matches);
+  } catch (error) {
+    logger.error('Get match history error:', error);
+    return ApiResponse.error(res, error.message || 'Failed to fetch match history');
   }
 };
 

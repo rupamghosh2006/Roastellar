@@ -23,5 +23,6 @@ const battleVoteSchema = new mongoose.Schema({
 });
 
 battleVoteSchema.index({ battleId: 1, voter: 1 }, { unique: true });
+battleVoteSchema.index({ voter: 1, createdAt: -1 });
 
 module.exports = mongoose.model('BattleVote', battleVoteSchema);

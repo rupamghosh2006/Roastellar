@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { SignOutButton, useAuth } from '@clerk/nextjs'
-import { Award, Camera, CheckCircle2, ChevronRight, LogOut, PenSquare, ShieldCheck, Swords, Trophy, Vote } from 'lucide-react'
+import { Award, Camera, CheckCircle2, ChevronRight, LogOut, PenSquare, Share2, ShieldCheck, Swords, Trophy, Vote } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { toast } from 'sonner'
@@ -126,6 +126,33 @@ export default function ProfilePage() {
     } finally {
       setAvatarUploading(false)
     }
+  }
+
+  const shareWinningRoast = (match: ProfileMatch) => {
+    const winningRoast = String(match.player1?.id) === String(match.winnerId)
+      ? match.roast1
+      : String(match.player2?.id) === String(match.winnerId)
+        ? match.roast2
+        : ''
+    if (!winningRoast || typeof window === 'undefined') return
+
+    const shareUrl = new URL(`/battle/${match.matchId}`, window.location.origin)
+    shareUrl.searchParams.set('utm_source', 'x')
+    shareUrl.searchParams.set('utm_medium', 'social')
+    shareUrl.searchParams.set('utm_campaign', 'winning_roast')
+
+    const winnerName = String(match.player1?.id) === String(match.winnerId)
+      ? match.player1?.username || 'A Roaster'
+      : match.player2?.username || 'A Roaster'
+    const roastForPost = winningRoast.length > 180
+      ? `${winningRoast.slice(0, 177).trimEnd()}...`
+      : winningRoast
+    const post = `${winnerName} won a Roastellar battle with this roast:\n\n“${roastForPost}”\n\nThink you can top that? #Roastellar #RoastBattle`
+    const intentUrl = new URL('https://twitter.com/intent/tweet')
+    intentUrl.searchParams.set('text', post)
+    intentUrl.searchParams.set('url', shareUrl.toString())
+
+    window.open(intentUrl.toString(), '_blank', 'noopener,noreferrer')
   }
 
   if (loading) {
@@ -328,12 +355,25 @@ export default function ProfilePage() {
                   const roleClass = isPlayer
                     ? didWin ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-violet-400/30 bg-violet-400/10 text-violet-200'
                     : 'border-orange-400/30 bg-orange-400/10 text-orange-200'
+                  const winningRoast = String(match.player1?.id) === String(match.winnerId)
+                    ? match.roast1
+                    : String(match.player2?.id) === String(match.winnerId)
+                      ? match.roast2
+                      : ''
 
                   return (
-                    <button
+                    <div
                       key={match.id}
                       onClick={() => router.push(`/battle/${match.matchId}/report`)}
-                      className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.04] sm:gap-4"
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          router.push(`/battle/${match.matchId}/report`)
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.04] focus:outline-none focus-visible:bg-white/[0.04] sm:gap-4"
                     >
                       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isPlayer ? 'bg-violet-500/15 text-violet-300' : 'bg-orange-500/15 text-orange-300'}`}>
                         {isPlayer ? <Swords className="h-5 w-5" /> : <Vote className="h-5 w-5" />}
@@ -349,7 +389,21 @@ export default function ProfilePage() {
                       </div>
                       {didWin ? <CheckCircle2 className="hidden h-5 w-5 shrink-0 text-emerald-300 sm:block" /> : null}
                       <ChevronRight className="h-5 w-5 shrink-0 text-slate-500" />
-                    </button>
+                      {didWin && winningRoast && (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            shareWinningRoast(match)
+                          }}
+                          className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-sky-300/35 bg-sky-400/10 px-3 py-2 text-xs font-semibold text-sky-100 transition-colors hover:bg-sky-400/20"
+                        >
+                          <Share2 className="h-4 w-4" />
+                          <span className="hidden sm:inline">Share on X</span>
+                          <span className="sr-only sm:hidden">Share the winning roast on X</span>
+                        </button>
+                      )}
+                    </div>
                   )
                 })}
               </div>

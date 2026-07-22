@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@clerk/nextjs'
-import { Coins, MessageSquareText, Sparkles, Swords, Timer, Trophy, Users } from 'lucide-react'
+import { Coins, MessageSquareText, Share2, Sparkles, Swords, Timer, Trophy, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { PredictionPanel } from '@/components/PredictionPanel'
@@ -585,6 +585,32 @@ function ResultModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const winningRoast = battle.winnerId && String(battle.player1?.id) === String(battle.winnerId)
+    ? battle.roast1
+    : battle.winnerId && String(battle.player2?.id) === String(battle.winnerId)
+      ? battle.roast2
+      : ''
+
+  const shareWinningRoast = () => {
+    if (!winningRoast || typeof window === 'undefined') return
+
+    const shareUrl = new URL(`/battle/${battle.matchId}`, window.location.origin)
+    shareUrl.searchParams.set('utm_source', 'x')
+    shareUrl.searchParams.set('utm_medium', 'social')
+    shareUrl.searchParams.set('utm_campaign', 'winning_roast')
+
+    const winnerName = winner?.username || 'A Roaster'
+    const roastForPost = winningRoast.length > 180
+      ? `${winningRoast.slice(0, 177).trimEnd()}...`
+      : winningRoast
+    const post = `${winnerName} won a Roastellar battle with this roast:\n\n“${roastForPost}”\n\nThink you can top that? #Roastellar #RoastBattle`
+    const intentUrl = new URL('https://twitter.com/intent/tweet')
+    intentUrl.searchParams.set('text', post)
+    intentUrl.searchParams.set('url', shareUrl.toString())
+
+    window.open(intentUrl.toString(), '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -621,6 +647,16 @@ function ResultModal({
           >
             View transaction on Stellar Expert
           </a>
+        )}
+
+        {battle.status !== 'draw' && winningRoast && (
+          <button
+            onClick={shareWinningRoast}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-sky-300/35 bg-sky-400/10 px-4 py-3 text-sm font-semibold text-sky-100 transition-colors hover:bg-sky-400/20"
+          >
+            <Share2 className="h-4 w-4" />
+            Share the winning roast on X
+          </button>
         )}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">

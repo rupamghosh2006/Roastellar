@@ -68,18 +68,18 @@ export default function WalletPage() {
       <div className="flex min-h-screen pt-16 md:pt-0">
         <Sidebar />
         <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8 animate-pulse">
-          <div className="mx-auto max-w-6xl space-y-8">
-            <div className="glass h-32 rounded-[36px]" />
+          <div className="mx-auto max-w-6xl space-y-6">
+            <div className="h-32 rounded-2xl border border-white/10 bg-[#0b0d12]" />
             <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
-              <div className="glass min-h-[600px] rounded-[28px]" />
+              <div className="min-h-[400px] rounded-2xl border border-white/10 bg-[#0e1117]" />
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
-                <div className="glass h-28 rounded-[24px]" />
-                <div className="glass h-28 rounded-[24px]" />
-                <div className="glass h-64 rounded-[28px]" />
-                <div className="glass h-40 rounded-[28px]" />
+                <div className="h-28 rounded-2xl border border-white/10 bg-[#0e1117]" />
+                <div className="h-28 rounded-2xl border border-white/10 bg-[#0e1117]" />
+                <div className="h-64 rounded-2xl border border-white/10 bg-[#0e1117]" />
+                <div className="h-40 rounded-2xl border border-white/10 bg-[#0e1117]" />
               </div>
             </div>
-            <div className="glass rounded-[36px] p-6">
+            <div className="rounded-2xl border border-white/10 bg-[#0b0d12] p-6">
               {[0, 1, 2].map((idx) => (
                 <div key={idx} className="mb-3 h-14 rounded-[20px] bg-white/10 last:mb-0" />
               ))}
@@ -129,18 +129,24 @@ export default function WalletPage() {
     <div className="flex min-h-screen pt-16 md:pt-0">
       <Sidebar />
       <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto max-w-6xl space-y-8">
-          <div className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[36px] md:p-8">
+        <div className="mx-auto max-w-6xl space-y-6">
+          <header className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-[#0b0d12] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
             <div className="flex items-center gap-3">
-              <WalletIcon className="h-7 w-7 text-amber-200 sm:h-8 sm:w-8" />
+              <div className="grid h-11 w-11 place-items-center rounded-xl border border-[#B88A35]/30 bg-[#B88A35]/10">
+                <WalletIcon className="h-5 w-5 text-[#D1A24A]" />
+              </div>
               <div>
-                <p className="text-sm uppercase tracking-[0.24em] text-white/35">Wallet</p>
-                <h1 className="font-orbitron text-3xl font-bold text-white sm:text-4xl">Your Stellar vault</h1>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Wallet account</p>
+                <h1 className="mt-1 font-orbitron text-2xl font-bold tracking-tight text-white sm:text-3xl">Stellar vault</h1>
               </div>
             </div>
-          </div>
+            <div className="inline-flex items-center gap-2 self-start rounded-lg border border-white/10 bg-[#121620] px-3 py-2 text-xs font-medium text-slate-300 sm:self-auto">
+              <span className={`h-1.5 w-1.5 rounded-full ${wallet?.funded ? 'bg-emerald-300' : 'bg-amber-300'}`} />
+              {wallet?.funded ? 'Funded on testnet' : 'Funding in progress'}
+            </div>
+          </header>
 
-          <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
+          <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
             {wallet ? (
               <WalletCard
                 address={wallet.address || wallet.publicKey}
@@ -149,7 +155,7 @@ export default function WalletPage() {
                 variant="full"
               />
             ) : (
-              <div className="glass rounded-[22px] p-5 text-white/70 sm:rounded-[28px] sm:p-6">
+              <div className="rounded-2xl border border-white/10 bg-[#0e1117] p-5 text-slate-400 sm:p-6">
                 Wallet data is unavailable right now. Please refresh after signing in again.
               </div>
             )}
@@ -157,11 +163,11 @@ export default function WalletPage() {
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
               <WalletBalance label="Available" balance={wallet?.balance ?? 0} icon={<WalletIcon className="h-4 w-4 text-amber-200" />} />
               <WalletBalance label="In Battles" balance={0} icon={<ArrowUpDown className="h-4 w-4 text-blue-200" />} />
-              <div className="glass rounded-[22px] p-4 sm:rounded-[28px] sm:p-5">
+              <section className="rounded-2xl border border-white/10 bg-[#0e1117] p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/35">Freighter Import</p>
-                    <p className="mt-2 text-sm text-white/72">
+                  <div className="max-w-xl">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Freighter key export</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">
                       {wallet?.managedWalletAvailable
                         ? 'Export this Roastellar managed wallet secret key and import it in Freighter.'
                         : 'Managed wallet export is unavailable because your Freighter wallet is the primary identity wallet.'}
@@ -173,75 +179,75 @@ export default function WalletPage() {
                   <button
                     onClick={exportForFreighter}
                     disabled={isExporting}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B88A35] px-5 py-3 text-sm font-bold text-slate-950 transition-colors hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <KeyRound className="h-5 w-5" />
-                    {isExporting ? 'Exporting...' : 'Reveal Secret For Freighter'}
+                    {isExporting ? 'Exporting key...' : 'Reveal wallet key'}
                   </button>
                 )}
 
                 {walletSecret && (
                   <div className="mt-4 space-y-3">
-                    <div className="rounded-[20px] border border-amber-300/20 bg-amber-300/10 p-3 text-xs text-amber-100/95">
+                    <div className="border border-amber-300/20 bg-[#231d11] p-3 text-xs leading-5 text-amber-100/95">
                       Never share this secret key. Anyone with this key can control your wallet.
                     </div>
-                    <div className="rounded-[20px] border border-white/8 bg-white/[0.03] p-3">
-                      <p className="text-xs uppercase tracking-[0.24em] text-white/35">Secret Key</p>
-                      <p className="mt-2 break-all font-mono text-xs text-white/85">
+                    <div className="border border-white/10 bg-[#090b10] p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Secret key</p>
+                      <p className="mt-2 break-all font-space text-xs leading-5 text-slate-200">
                         {showSecret ? walletSecret.secretKey : 'S***************************************'}
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button
                         onClick={() => setShowSecret((value) => !value)}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm text-white/90 sm:w-auto"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#171b25] px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:border-white/20 hover:bg-[#1d222e] sm:w-auto"
                       >
                         {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         {showSecret ? 'Hide Secret' : 'Show Secret'}
                       </button>
                       <button
                         onClick={copySecret}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm text-white/90 sm:w-auto"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#171b25] px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:border-white/20 hover:bg-[#1d222e] sm:w-auto"
                       >
                         <Copy className="h-4 w-4" />
                         Copy Secret
                       </button>
                     </div>
-                    <div className="rounded-[20px] border border-white/8 bg-white/[0.03] p-3 text-xs text-white/72">
+                    <div className="border border-white/10 bg-[#090b10] p-3 text-xs leading-5 text-slate-400">
                       Freighter steps: Open Freighter {'->'} Add Wallet {'->'} Import from Secret Key {'->'} paste this key {'->'} switch to TESTNET.
                     </div>
                   </div>
                 )}
                 {!wallet?.managedWalletAvailable && (
-                  <div className="mt-4 rounded-[20px] border border-blue-300/20 bg-blue-500/10 p-3 text-xs text-blue-100/90">
+                  <div className="mt-4 border border-cyan-300/20 bg-[#0e1b22] p-3 text-xs leading-5 text-cyan-100/90">
                     Primary wallet mode: your connected Freighter wallet is used as your identity and primary account.
                   </div>
                 )}
-              </div>
-              <div className="glass rounded-[22px] p-4 sm:rounded-[28px] sm:p-5">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
-                  <ExternalLink className="h-4 w-4 text-violet-200" />
+              </section>
+              <section className="rounded-2xl border border-white/10 bg-[#0e1117] p-4 sm:p-5">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  <ExternalLink className="h-4 w-4 text-cyan-200" />
                   Explorer
                 </div>
                 <a
                   href={wallet ? getExplorerUrl(wallet.address || wallet.publicKey) : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 block text-sm text-blue-200 underline-offset-4 hover:underline"
+                  className="mt-4 inline-flex text-sm font-medium text-cyan-200 underline-offset-4 hover:underline"
                 >
                   Open wallet on Stellar Expert
                 </a>
-                <p className="mt-4 text-sm text-white/50">
+                <p className="mt-4 text-sm text-slate-500">
                   Created {wallet?.createdAt ? formatDate(wallet.createdAt) : 'date unavailable'}
                 </p>
-              </div>
+              </section>
             </div>
           </div>
 
-          <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
+          <section className="rounded-2xl border border-white/10 bg-[#0b0d12] p-5 sm:rounded-[24px] sm:p-6">
             <div className="flex items-center gap-2">
-              <Clock3 className="h-5 w-5 text-blue-200" />
-              <h2 className="font-orbitron text-2xl text-white">Reward history</h2>
+              <Clock3 className="h-5 w-5 text-cyan-200" />
+              <h2 className="font-orbitron text-xl font-bold tracking-tight text-white sm:text-2xl">Reward history</h2>
             </div>
             <div className="mt-6">
               <AnimatedList
@@ -251,13 +257,13 @@ export default function WalletPage() {
                 displayScrollbar={false}
                 containerClassName="max-h-none overflow-visible p-0"
                 renderItem={(item) => (
-                  <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
+                  <div className="border border-white/10 bg-[#10131a] p-4 text-sm text-slate-300">
                     {item}
                   </div>
                 )}
               />
             </div>
-          </div>
+          </section>
         </div>
       </main>
     </div>

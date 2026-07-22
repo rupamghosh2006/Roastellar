@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@clerk/nextjs'
-import { ArrowRight, Sparkles, Wallet as WalletIcon } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { FreighterConnectCard } from '@/components/FreighterConnectCard'
 import dynamic from 'next/dynamic'
@@ -292,8 +292,8 @@ export default function OnboardingPage() {
               className="glass rounded-2xl p-4 sm:rounded-2xl sm:p-6 md:rounded-2xl md:p-8"
             >
               <div className="mb-6 text-center">
-                <h2 className="font-orbitron text-2xl font-bold text-white sm:text-3xl">Tap the Falling Flame</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">Catch 20 flames before time runs out. Demo mode is tuned so you always leave with a win.</p>
+                <h2 className="font-orbitron text-2xl font-bold text-white sm:text-3xl">Ignite the arena</h2>
+                <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">Catch sparks, hunt golden double-point flares, and build a streak. It&apos;s a no-pressure warm-up before your wallet unlocks.</p>
               </div>
               <MiniGame onComplete={handleGameComplete} />
             </motion.section>

@@ -33,3 +33,5 @@ Thumbs.db
 .config/
 identity/
 # Un-ignore contracts lock file
+.vercel
+.env*

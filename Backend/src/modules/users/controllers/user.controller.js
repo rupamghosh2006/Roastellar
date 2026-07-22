@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const Battle = require('../../battles/models/battle.model');
 const BattleVote = require('../../battles/models/battleVote.model');
+const Prediction = require('../../predictions/models/prediction.model');
 const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 const { EVENT_TYPES } = require('../../../utils/constants');
@@ -86,15 +87,28 @@ exports.getMyMatchHistory = async (req, res) => {
     const parsedLimit = Number.parseInt(req.query.limit, 10);
     const limit = Math.min(Math.max(Number.isFinite(parsedLimit) ? parsedLimit : 10, 1), 50);
 
-    // A voter cannot also be a player in the same battle, but retaining the
-    // vote record lets the profile label the user's relationship to each match.
-    const votes = await BattleVote.find({ voter: user._id })
-      .select('battleId selectedPlayer')
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
+    // Retain vote and prediction records so the profile can label each kind
+    // of participation and surface every completed match the user backed.
+    const [votes, predictions] = await Promise.all([
+      BattleVote.find({ voter: user._id })
+        .select('battleId selectedPlayer')
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean(),
+      Prediction.find({ predictor: user._id })
+        .select('battleId selectedPlayer amount')
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean(),
+    ]);
     const voteByBattleId = new Map(
       votes.map((vote) => [String(vote.battleId), String(vote.selectedPlayer)])
+    );
+    const predictionByBattleId = new Map(
+      predictions.map((prediction) => [
+        String(prediction.battleId),
+        { selectedPlayerId: String(prediction.selectedPlayer), amount: Number(prediction.amount || 0) },
+      ])
     );
 
     const battles = await Battle.find({
@@ -103,6 +117,7 @@ exports.getMyMatchHistory = async (req, res) => {
         { player1: user._id },
         { player2: user._id },
         { _id: { $in: votes.map((vote) => vote.battleId) } },
+        { _id: { $in: predictions.map((prediction) => prediction.battleId) } },
       ],
     })
       .populate('creator', 'username avatar imageUrl clerkId xp wins losses rankPoints badges walletPublicKey')
@@ -117,13 +132,26 @@ exports.getMyMatchHistory = async (req, res) => {
       const userId = String(user._id);
       const isPlayer = String(battle.player1?._id || battle.player1) === userId
         || String(battle.player2?._id || battle.player2) === userId;
-      const selectedPlayerId = voteByBattleId.get(String(battle._id));
+      const voteSelectedPlayerId = voteByBattleId.get(String(battle._id));
+      const prediction = predictionByBattleId.get(String(battle._id));
 
       return {
         ...battleJson,
         participation: isPlayer
           ? { role: 'player' }
-          : { role: 'voter', selectedPlayerId },
+          : voteSelectedPlayerId && prediction
+            ? {
+              role: 'voter_predictor',
+              selectedPlayerId: voteSelectedPlayerId,
+              predictionAmount: prediction.amount,
+            }
+            : voteSelectedPlayerId
+              ? { role: 'voter', selectedPlayerId: voteSelectedPlayerId }
+              : {
+                role: 'predictor',
+                selectedPlayerId: prediction?.selectedPlayerId,
+                predictionAmount: prediction?.amount,
+              },
       };
     });
 

@@ -335,13 +335,15 @@ export default function ProfilePage() {
                 <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Match history</p>
                 <h2 className="mt-2 font-orbitron text-2xl text-white">Previous matches</h2>
               </div>
-              <p className="text-sm text-slate-400">As a player or voter</p>
+              <p className="text-sm text-slate-400">As a player, voter, or predictor</p>
             </div>
 
             {matchHistory.length ? (
               <div className="mt-5 divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
                 {matchHistory.map((match) => {
                   const isPlayer = match.participation.role === 'player'
+                  const isPredictor = match.participation.role === 'predictor' || match.participation.role === 'voter_predictor'
+                  const isVoter = match.participation.role === 'voter' || match.participation.role === 'voter_predictor'
                   const didWin = isPlayer && match.winnerId === user?.id
                   const isDraw = match.status === 'draw' || (match.status === 'ended' && !match.winnerId)
                   const votedFor = match.player1?.id === match.participation.selectedPlayerId
@@ -351,10 +353,16 @@ export default function ProfilePage() {
                       : 'a player'
                   const roleLabel = isPlayer
                     ? didWin ? 'Played · Won' : isDraw ? 'Played · Draw' : match.status === 'cancelled' ? 'Played · Cancelled' : 'Played · Lost'
-                    : `Voted for ${votedFor}`
+                    : isVoter && isPredictor
+                      ? `Voted & staked on ${votedFor}`
+                      : isPredictor
+                        ? `Staked ${match.participation.predictionAmount ?? 0} XLM on ${votedFor}`
+                        : `Voted for ${votedFor}`
                   const roleClass = isPlayer
                     ? didWin ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-violet-400/30 bg-violet-400/10 text-violet-200'
-                    : 'border-orange-400/30 bg-orange-400/10 text-orange-200'
+                    : isPredictor
+                      ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
+                      : 'border-orange-400/30 bg-orange-400/10 text-orange-200'
                   const winningRoast = String(match.player1?.id) === String(match.winnerId)
                     ? match.roast1
                     : String(match.player2?.id) === String(match.winnerId)
@@ -375,8 +383,8 @@ export default function ProfilePage() {
                       tabIndex={0}
                       className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.04] focus:outline-none focus-visible:bg-white/[0.04] sm:gap-4"
                     >
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isPlayer ? 'bg-violet-500/15 text-violet-300' : 'bg-orange-500/15 text-orange-300'}`}>
-                        {isPlayer ? <Swords className="h-5 w-5" /> : <Vote className="h-5 w-5" />}
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isPlayer ? 'bg-violet-500/15 text-violet-300' : isPredictor ? 'bg-cyan-500/15 text-cyan-300' : 'bg-orange-500/15 text-orange-300'}`}>
+                        {isPlayer ? <Swords className="h-5 w-5" /> : isPredictor ? <Trophy className="h-5 w-5" /> : <Vote className="h-5 w-5" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -389,7 +397,7 @@ export default function ProfilePage() {
                       </div>
                       {didWin ? <CheckCircle2 className="hidden h-5 w-5 shrink-0 text-emerald-300 sm:block" /> : null}
                       <ChevronRight className="h-5 w-5 shrink-0 text-slate-500" />
-                      {didWin && winningRoast && (
+                      {winningRoast && (
                         <button
                           type="button"
                           onClick={(event) => {

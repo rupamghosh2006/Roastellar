@@ -89,8 +89,9 @@ export interface BattleParticipationStatus {
 
 export interface ProfileMatch extends Battle {
   participation: {
-    role: 'player' | 'voter'
+    role: 'player' | 'voter' | 'predictor' | 'voter_predictor'
     selectedPlayerId?: string
+    predictionAmount?: number
   }
 }
 
@@ -251,8 +252,9 @@ type BackendBattle = {
 
 type BackendProfileMatch = BackendBattle & {
   participation?: {
-    role?: 'player' | 'voter'
+    role?: 'player' | 'voter' | 'predictor' | 'voter_predictor'
     selectedPlayerId?: string
+    predictionAmount?: number
   }
 }
 
@@ -452,8 +454,13 @@ export function normalizeProfileMatch(match: BackendProfileMatch | null | undefi
   return {
     ...battle,
     participation: {
-      role: match?.participation?.role === 'voter' ? 'voter' : 'player',
+      role: match?.participation?.role === 'voter'
+        || match?.participation?.role === 'predictor'
+        || match?.participation?.role === 'voter_predictor'
+        ? match.participation.role
+        : 'player',
       selectedPlayerId: match?.participation?.selectedPlayerId,
+      predictionAmount: Number(match?.participation?.predictionAmount || 0) || undefined,
     },
   }
 }

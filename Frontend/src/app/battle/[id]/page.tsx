@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@clerk/nextjs'
-import { Coins, MessageSquareText, Share2, Sparkles, Swords, Timer, Trophy, Users } from 'lucide-react'
+import { CheckCircle2, Coins, MessageSquareText, Share2, Sparkles, Swords, Timer, Trophy, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sidebar } from '@/components/Sidebar'
 import { PredictionPanel } from '@/components/PredictionPanel'
@@ -53,7 +53,9 @@ export default function BattleRoomPage() {
   const [activity, setActivity] = useState<string[]>([])
   const [predictionBusy, setPredictionBusy] = useState(false)
   const [hasVoted, setHasVoted] = useState(false)
+  const [selectedVotePlayerId, setSelectedVotePlayerId] = useState<string | null>(null)
   const [hasPredicted, setHasPredicted] = useState(false)
+  const [selectedPredictionPlayerId, setSelectedPredictionPlayerId] = useState<string | null>(null)
   const [managedWalletBlocked, setManagedWalletBlocked] = useState(false)
 
   const pushActivity = useCallback((line: string) => {
@@ -101,7 +103,9 @@ export default function BattleRoomPage() {
         setBattle(battleRes.data)
         setPredictionSummary(predictionRes.data.summary)
         setHasVoted(participationRes.data.hasVoted)
+        setSelectedVotePlayerId(participationRes.data.votedForPlayerId ?? null)
         setHasPredicted(participationRes.data.hasPredicted)
+        setSelectedPredictionPlayerId(participationRes.data.predictedForPlayerId ?? null)
         setSpectators(battleRes.data.spectators ?? 0)
         pushActivity(`Battle room connected for match #${matchId}`)
 
@@ -308,6 +312,7 @@ export default function BattleRoomPage() {
       const response = await apiRoutes.battles.vote(matchId, { selectedPlayer }, token)
       setBattle(response.data)
       setHasVoted(true)
+      setSelectedVotePlayerId(selectedPlayer)
       toast.success('Vote cast')
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to cast vote')
@@ -348,10 +353,11 @@ export default function BattleRoomPage() {
       if (!token) {
         throw new Error('Missing token')
       }
-      await apiRoutes.predictions.place(matchId, { selectedPlayer, amount }, token)
+      const prediction = await apiRoutes.predictions.place(matchId, { selectedPlayer, amount }, token)
       const latest = await apiRoutes.predictions.summary(matchId)
       setPredictionSummary(latest.data.summary)
       setHasPredicted(true)
+      setSelectedPredictionPlayerId(prediction.data.selectedPlayer || selectedPlayer)
       toast.success('Prediction placed')
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to place prediction')
@@ -375,6 +381,11 @@ export default function BattleRoomPage() {
   const isSpectator = !currentUserInBattle.isPlayer1 && !currentUserInBattle.isPlayer2
   const canRoast = (currentUserInBattle.isPlayer1 || currentUserInBattle.isPlayer2) && battle.status === 'active'
   const canVote = isSpectator && battle.status === 'voting'
+  const votedForPlayer = selectedVotePlayerId && String(battle.player1?.id) === selectedVotePlayerId
+    ? battle.player1
+    : selectedVotePlayerId && String(battle.player2?.id) === selectedVotePlayerId
+      ? battle.player2
+      : null
 
   return (
     <div className="flex min-h-screen pt-16 md:pt-0">
@@ -400,6 +411,12 @@ export default function BattleRoomPage() {
                   icon={<MessageSquareText className="h-4 w-4 text-violet-300" />}
                   label={`${battle.player1Votes + battle.player2Votes} votes cast`}
                 />
+                {hasVoted && (
+                  <Pill
+                    icon={<CheckCircle2 className="h-4 w-4 text-emerald-300" />}
+                    label={votedForPlayer ? `You voted for ${votedForPlayer.username}` : 'Your vote was recorded'}
+                  />
+                )}
                 <Pill icon={<Coins className="h-4 w-4 text-emerald-300" />} label={`Pot ${battle.pot} XLM`} />
                 {canJoinOpenBattle && (
                   <button
@@ -424,6 +441,7 @@ export default function BattleRoomPage() {
                   onVote={canVote && battle.player1?.id ? () => castVote(battle.player1!.id) : undefined}
                   disabled={actionBusy || hasVoted}
                   voteLocked={hasVoted}
+                  votedFor={Boolean(votedForPlayer && String(votedForPlayer.id) === String(battle.player1?.id))}
                 />
                 <PlayerCard
                   title="Player 2"
@@ -432,6 +450,7 @@ export default function BattleRoomPage() {
                   onVote={canVote && battle.player2?.id ? () => castVote(battle.player2!.id) : undefined}
                   disabled={actionBusy || hasVoted}
                   voteLocked={hasVoted}
+                  votedFor={Boolean(votedForPlayer && String(votedForPlayer.id) === String(battle.player2?.id))}
                 />
               </div>
 
@@ -470,6 +489,7 @@ export default function BattleRoomPage() {
                 isSpectator={isSpectator}
                 disabled={predictionBusy || hasPredicted}
                 submitted={hasPredicted}
+                submittedPlayerId={selectedPredictionPlayerId ?? undefined}
                 onPredict={(selectedPlayer, amount) => placePrediction(selectedPlayer, amount)}
               />
 
@@ -540,6 +560,7 @@ function PlayerCard({
   onVote,
   disabled,
   voteLocked,
+  votedFor,
 }: {
   title: string
   player?: User
@@ -547,10 +568,22 @@ function PlayerCard({
   onVote?: () => void
   disabled?: boolean
   voteLocked?: boolean
+  votedFor?: boolean
 }) {
   return (
-    <div className="glass rounded-xl border-l-4 border-l-white/20 p-5 sm:rounded-xl sm:p-6">
-      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{title}</p>
+    <div className={cn(
+      'glass rounded-xl border-l-4 p-5 sm:rounded-xl sm:p-6',
+      votedFor ? 'border-l-emerald-400 bg-emerald-400/[0.06] ring-1 ring-emerald-300/30' : 'border-l-white/20'
+    )}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{title}</p>
+        {votedFor && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Your vote
+          </span>
+        )}
+      </div>
       <div className="mt-3 flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 font-semibold text-white">
           {player?.username?.[0]?.toUpperCase() ?? '?'}
@@ -568,7 +601,11 @@ function PlayerCard({
           disabled={disabled}
           className="mt-4 w-full rounded-xi bg-[#B88A35] px-4 py-2.5 font-semibold text-slate-950 transition-all hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-55"
         >
-          {voteLocked ? 'Vote cast' : `Vote for ${player?.username || 'Player'}`}
+          {voteLocked
+            ? votedFor
+              ? `You voted for ${player?.username || 'this player'}`
+              : 'Vote already cast'
+            : `Vote for ${player?.username || 'Player'}`}
         </button>
       )}
     </div>

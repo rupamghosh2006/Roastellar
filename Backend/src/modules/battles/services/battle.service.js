@@ -336,13 +336,15 @@ class BattleService {
     }
 
     const [vote, prediction] = await Promise.all([
-      BattleVote.exists({ battleId: battle._id, voter: user._id }),
-      Prediction.exists({ battleId: battle._id, predictor: user._id }),
+      BattleVote.findOne({ battleId: battle._id, voter: user._id }).select('selectedPlayer').lean(),
+      Prediction.findOne({ battleId: battle._id, predictor: user._id }).select('selectedPlayer').lean(),
     ]);
 
     return {
       hasVoted: Boolean(vote),
+      votedForPlayerId: vote?.selectedPlayer ? String(vote.selectedPlayer) : undefined,
       hasPredicted: Boolean(prediction),
+      predictedForPlayerId: prediction?.selectedPlayer ? String(prediction.selectedPlayer) : undefined,
     };
   }
 

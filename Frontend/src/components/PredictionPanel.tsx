@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Coins, Sparkles, Users } from 'lucide-react'
+import { CheckCircle2, Coins, Sparkles, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -15,9 +15,10 @@ interface PredictionPanelProps {
   isSpectator: boolean
   disabled?: boolean
   submitted?: boolean
+  submittedPlayerId?: string
 }
 
-export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name, onPredict, isSpectator, disabled = false, submitted = false }: PredictionPanelProps) {
+export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name, onPredict, isSpectator, disabled = false, submitted = false, submittedPlayerId }: PredictionPanelProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [amount, setAmount] = useState('10')
   const [submitting, setSubmitting] = useState(false)
@@ -60,6 +61,10 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
     { id: player1Id || player1Name, label: player1Name, accent: 'bg-blue-500/12 border-blue-400/18' },
     { id: player2Id || player2Name, label: player2Name, accent: 'bg-violet-500/12 border-violet-400/18' },
   ]
+  const selectedOptionId = submittedPlayerId || selectedPlayer
+  const submittedPlayer = submittedPlayerId
+    ? options.find((option) => String(option.id) === String(submittedPlayerId))
+    : undefined
 
   return (
     <div className="glass rounded-[28px] p-6">
@@ -72,6 +77,13 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
         Stake a small amount of testnet XLM and ride the crowd if your read is right.
       </p>
 
+      {submitted && (
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-300/25 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-100">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />
+          {submittedPlayer ? `You predicted ${submittedPlayer.label} will win` : 'Your prediction was recorded'}
+        </div>
+      )}
+
       <div className="mt-5 space-y-3">
         {options.map((option) => (
           <motion.button
@@ -82,10 +94,20 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
             className={cn(
               'w-full rounded-2xl border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
               option.accent,
-              selectedPlayer === option.id ? 'ring-2 ring-blue-400/45' : 'opacity-80 hover:opacity-100'
+              selectedOptionId === option.id
+                ? 'ring-2 ring-emerald-300/50 opacity-100'
+                : 'opacity-80 hover:opacity-100'
             )}
           >
-            <p className="font-semibold text-white">{option.label}</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-semibold text-white">{option.label}</p>
+              {submittedPlayerId && String(option.id) === String(submittedPlayerId) && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Your prediction
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-xs uppercase tracking-[0.24em] text-white/40">Will win</p>
           </motion.button>
         ))}
@@ -110,7 +132,13 @@ export function PredictionPanel({ player1Id, player2Id, player1Name, player2Name
         disabled={submitting || disabled}
         className="mt-5 w-full rounded-2xl bg-[#B88A35] px-4 py-3 font-semibold text-slate-950 transition-colors hover:bg-[#D1A24A] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {submitting ? 'Placing prediction...' : submitted ? 'Prediction placed' : 'Predict Winner'}
+        {submitting
+          ? 'Placing prediction...'
+          : submitted
+            ? submittedPlayer
+              ? `You predicted ${submittedPlayer.label}`
+              : 'Prediction placed'
+            : 'Predict Winner'}
       </button>
     </div>
   )

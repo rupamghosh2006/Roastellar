@@ -84,7 +84,9 @@ export interface PredictionSummary {
 
 export interface BattleParticipationStatus {
   hasVoted: boolean
+  votedForPlayerId?: string
   hasPredicted: boolean
+  predictedForPlayerId?: string
 }
 
 export interface ProfileMatch extends Battle {
@@ -592,7 +594,12 @@ export const apiRoutes = {
     participation: (matchId: number | string, token?: string) =>
       getAndNormalize(
         api.get<BattleParticipationStatus>(`/api/battles/participation/${matchId}`, authConfig(token)),
-        (status) => ({ hasVoted: Boolean(status?.hasVoted), hasPredicted: Boolean(status?.hasPredicted) })
+        (status) => ({
+          hasVoted: Boolean(status?.hasVoted),
+          votedForPlayerId: status?.votedForPlayerId ? String(status.votedForPlayerId) : undefined,
+          hasPredicted: Boolean(status?.hasPredicted),
+          predictedForPlayerId: status?.predictedForPlayerId ? String(status.predictedForPlayerId) : undefined,
+        })
       ),
     report: (matchId: number | string, token?: string) =>
       getAndNormalize(api.get<BackendBattleReport>(`/api/battles/${matchId}/report`, authConfig(token)), normalizeBattleReport),

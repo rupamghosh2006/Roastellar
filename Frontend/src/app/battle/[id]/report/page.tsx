@@ -115,6 +115,14 @@ export default function BattleReportPage() {
             <PlayerCard player={battle.player2} label="Player 2" isWinner={battle.winnerId === battle.player2?.id} votes={battle.player2Votes} />
           </section>
 
+          <section className="glass rounded-2xl border-l-4 border-l-orange-500/40 p-5 sm:p-6">
+            <SectionHeading icon={<Swords className="h-5 w-5 text-orange-300" />} eyebrow="Roasts" title="What the players said" />
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <RoastCard player={battle.player1} label="Player 1 roast" roast={battle.roast1} />
+              <RoastCard player={battle.player2} label="Player 2 roast" roast={battle.roast2} />
+            </div>
+          </section>
+
           <section className="glass rounded-2xl border-l-4 border-l-cyan-500/40 p-5 sm:p-6">
             <SectionHeading icon={<Vote className="h-5 w-5 text-cyan-300" />} eyebrow="Audience" title="Vote pools" detail={`${report.votes.length} total`} />
             <div className="mt-5 grid gap-4 md:grid-cols-2 md:gap-0 md:divide-x md:divide-white/10 md:overflow-hidden md:rounded-xl md:border md:border-white/10">
@@ -247,6 +255,23 @@ function PlayerCard({ player, label, isWinner, votes }: { player?: User; label: 
       ) : (
         <p className="mt-5 text-sm text-slate-500">No second player joined this battle.</p>
       )}
+    </div>
+  )
+}
+
+function RoastCard({ player, label, roast }: { player?: User; label: string; roast?: string }) {
+  return (
+    <div className="min-w-0 rounded-xl border border-white/10 bg-black/10 p-4">
+      <div className="flex min-w-0 items-center gap-3">
+        {player ? <PersonAvatar user={player} /> : <div className="h-10 w-10 shrink-0 rounded-xl bg-white/5" />}
+        <div className="min-w-0">
+          <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</p>
+          <p className="truncate font-semibold text-white">{player?.username || 'No player'}</p>
+        </div>
+      </div>
+      <blockquote className="mt-4 rounded-lg border border-white/5 bg-white/[0.025] px-4 py-3 text-sm leading-6 text-slate-300">
+        {roast ? `“${roast}”` : 'No roast was submitted for this player.'}
+      </blockquote>
     </div>
   )
 }

@@ -52,7 +52,7 @@ export function MiniGame({ onComplete }: MiniGameProps) {
       id: flameIdRef.current++,
       x: Math.random() * 80 + 8,
       size: Math.round(Math.random() * 16 + (isGolden ? 48 : 42)),
-      duration: Number((Math.random() * 1.35 + (isGolden ? 4.1 : 3.45)).toFixed(2)),
+      duration: Number((Math.random() * 1.8 + (isGolden ? 6.8 : 5.8)).toFixed(2)),
       value: isGolden ? 2 : 1,
       isGolden,
     }
@@ -165,11 +165,8 @@ export function MiniGame({ onComplete }: MiniGameProps) {
   return (
     <section
       aria-label="Flame catcher onboarding game"
-      className="relative isolate h-[min(34rem,calc(100svh-10rem))] min-h-[28rem] w-full overflow-hidden rounded-2xl border border-orange-300/15 bg-[#080a12] shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+      className="relative isolate h-[min(34rem,calc(100svh-10rem))] min-h-[28rem] w-full overflow-hidden rounded-2xl border border-orange-300/15 bg-[#10131c] shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(251,146,60,0.3),transparent_32%),radial-gradient(circle_at_5%_100%,rgba(124,58,237,0.2),transparent_38%),linear-gradient(145deg,#10101d_0%,#070812_58%,#130b0a_100%)]" />
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px)] [background-size:2.5rem_2.5rem] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-orange-500/10 to-transparent" />
 
       <AnimatePresence mode="wait">
         {gameState === 'idle' && (
@@ -244,7 +241,7 @@ export function MiniGame({ onComplete }: MiniGameProps) {
                   <span className="text-orange-100">{score}/{GAME_CONFIG.flameTarget}</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-                  <motion.div animate={{ width: `${progress}%` }} className="h-full rounded-full bg-gradient-to-r from-orange-500 via-amber-300 to-cyan-300" />
+                  <motion.div animate={{ width: `${progress}%` }} className="h-full rounded-full bg-orange-400" />
                 </div>
               </div>
               <div className="rounded-xl border border-white/10 bg-slate-950/65 px-3 py-2.5 text-right backdrop-blur sm:px-4">
@@ -270,7 +267,7 @@ export function MiniGame({ onComplete }: MiniGameProps) {
                 initial={{ y: -90, opacity: 0, scale: 0.7 }}
                 animate={{ y: 650, opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.25 }}
-                transition={{ duration: prefersReducedMotion ? 6.5 : flame.duration, ease: 'linear' }}
+                transition={{ duration: prefersReducedMotion ? 9 : flame.duration, ease: 'linear' }}
                 onAnimationComplete={() => removeFlame(flame.id)}
                 onClick={() => catchFlame(flame)}
                 aria-label={`Catch ${flame.isGolden ? 'golden ' : ''}flame worth ${flame.value} point${flame.value > 1 ? 's' : ''}`}

@@ -41,9 +41,6 @@ jobs:
     env:
       VERCEL_SCOPE: rupamghosh2006s-projects
       VERCEL_PROJECT: roastellar
-    defaults:
-      run:
-        working-directory: Frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { Copy, ExternalLink, ShieldCheck, Wallet as WalletIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatAddress, formatXLM, getExplorerUrl } from '@/lib/utils'
+
+const Galaxy = dynamic(() => import('@/components/Galaxy'), { ssr: false })
 
 interface WalletCardProps {
   address: string
@@ -39,12 +42,29 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'rounded-2xl border border-white/10 border-l-[3px] border-l-[#B88A35] bg-[#0e1117] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.3)] sm:rounded-[24px] sm:p-6',
+        'relative overflow-hidden rounded-2xl border border-white/10 border-l-[3px] border-l-[#B88A35] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.3)] sm:rounded-[24px] sm:p-6',
+        variant === 'full' ? 'bg-[#0e1117]/78' : 'bg-[#0e1117]',
         variant === 'full' && 'min-h-[400px] w-full'
       )}
       aria-label="Stellar wallet"
     >
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+      {variant === 'full' && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Galaxy
+            density={1.2}
+            glowIntensity={0.35}
+            hueShift={145}
+            saturation={0.35}
+            twinkleIntensity={0.45}
+            rotationSpeed={0.08}
+            repulsionStrength={1.8}
+            mouseRepulsion={true}
+            transparent={true}
+          />
+        </div>
+      )}
+
+      <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
             <WalletIcon className="h-4 w-4 text-[#D1A24A]" />
@@ -55,7 +75,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
             <span className="mb-1 text-sm font-medium text-slate-500">XLM</span>
           </div>
         </div>
-        <div className="w-full border border-white/10 bg-[#171d29] px-3 py-2.5 text-left sm:w-auto sm:min-w-28 sm:text-right">
+        <div className={cn('w-full border border-white/10 px-3 py-2.5 text-left sm:w-auto sm:min-w-28 sm:text-right', variant === 'full' ? 'bg-[#171d29]/82' : 'bg-[#171d29]')}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Status</p>
           <p className={cn('mt-1 text-sm font-semibold', funded ? 'text-emerald-300' : 'text-amber-300')}>
             {funded ? 'Funded' : 'Pending'}
@@ -63,7 +83,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
         </div>
       </div>
 
-      <div className="mt-7 border border-white/10 bg-[#090b10] p-4 sm:p-5">
+      <div className={cn('relative z-10 mt-7 border border-white/10 p-4 sm:p-5', variant === 'full' ? 'bg-[#090b10]/76' : 'bg-[#090b10]')}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Public key</p>
         <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <code className={cn('font-space text-sm leading-6 text-slate-200', variant === 'full' ? 'break-all' : 'truncate')}>
@@ -73,7 +93,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
             <button
               onClick={copyAddress}
               aria-label="Copy wallet address"
-              className="inline-flex items-center gap-2 border border-white/10 bg-[#171b25] px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:bg-[#1d222e] hover:text-white"
+              className={cn('inline-flex items-center gap-2 border border-white/10 px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:bg-[#1d222e] hover:text-white', variant === 'full' ? 'bg-[#171b25]/82' : 'bg-[#171b25]')}
             >
               <Copy className="h-4 w-4" />
               Copy
@@ -83,7 +103,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open wallet in Stellar Explorer"
-              className="inline-flex items-center gap-2 border border-white/10 bg-[#171b25] px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:bg-[#1d222e] hover:text-white"
+              className={cn('inline-flex items-center gap-2 border border-white/10 px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:bg-[#1d222e] hover:text-white', variant === 'full' ? 'bg-[#171b25]/82' : 'bg-[#171b25]')}
             >
               <ExternalLink className="h-4 w-4" />
               Explorer
@@ -92,7 +112,7 @@ export function WalletCard({ address, balance, funded = false, isLoading, varian
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-2 border-t border-white/10 pt-5 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative z-10 mt-6 flex flex-col gap-2 border-t border-white/10 pt-5 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-300" />
           Secure testnet custody

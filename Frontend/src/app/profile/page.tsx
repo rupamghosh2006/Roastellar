@@ -136,7 +136,7 @@ export default function ProfilePage() {
         : ''
     if (!winningRoast || typeof window === 'undefined') return
 
-    const shareUrl = new URL(`/battle/${match.matchId}`, window.location.origin)
+    const shareUrl = new URL(`/battle/${match.matchId}/report`, window.location.origin)
     shareUrl.searchParams.set('utm_source', 'x')
     shareUrl.searchParams.set('utm_medium', 'social')
     shareUrl.searchParams.set('utm_campaign', 'winning_roast')
@@ -144,10 +144,13 @@ export default function ProfilePage() {
     const winnerName = String(match.player1?.id) === String(match.winnerId)
       ? match.player1?.username || 'A Roaster'
       : match.player2?.username || 'A Roaster'
-    const roastForPost = winningRoast.length > 180
-      ? `${winningRoast.slice(0, 177).trimEnd()}...`
+    const topicForPost = match.topic.length > 55
+      ? `${match.topic.slice(0, 52).trimEnd()}...`
+      : match.topic
+    const roastForPost = winningRoast.length > 130
+      ? `${winningRoast.slice(0, 127).trimEnd()}...`
       : winningRoast
-    const post = `${winnerName} won a Roastellar battle with this roast:\n\n“${roastForPost}”\n\nThink you can top that? #Roastellar #RoastBattle`
+    const post = `Topic: ${topicForPost}\n\n${winnerName} won on Roastellar:\n“${roastForPost}”\n\nThink you can top that? #Roastellar #RoastBattle`
     const intentUrl = new URL('https://twitter.com/intent/tweet')
     intentUrl.searchParams.set('text', post)
     intentUrl.searchParams.set('url', shareUrl.toString())

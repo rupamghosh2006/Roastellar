@@ -14,10 +14,7 @@ import { setOnboardingComplete } from '@/lib/utils'
 import { getWalletAuthToken, isWalletAuthenticated } from '@/lib/walletAuth'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
 import { AnimatedList } from '@/components/AnimatedList'
-const ElectricBorder = dynamic(() => import('@/components/ElectricBorder'), { ssr: false })
-const PrismaticTiltCard = dynamic(() => import('@/components/PrismaticTiltCard'), { ssr: false })
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -132,71 +129,69 @@ export default function DashboardPage() {
       <Sidebar />
       <main className="mobile-nav-offset min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="glass rounded-[28px] p-5 sm:rounded-[32px] sm:p-6 md:rounded-[36px] md:p-8">
-            <div className="flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
+          <header className="rounded-2xl border border-white/10 bg-[#0b0d12] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.3)] sm:rounded-[24px] sm:p-7">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.28em] text-blue-200/75">Dashboard</p>
-                <h1 className="mt-3 font-orbitron text-3xl font-bold leading-tight text-white sm:text-4xl">Welcome back, {user?.username ?? 'Player'}</h1>
-                {/* <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55 sm:text-base">
-                  Your command center for battles, wallet health, streaks, and everything the arena is doing right now.
-                </p> */}
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200">Arena command</p>
+                <h1 className="mt-2 font-orbitron text-2xl font-bold tracking-tight text-white sm:text-3xl">Welcome back, {user?.username ?? 'Player'}</h1>
+                <p className="mt-2 text-sm text-slate-400">Your live battles, account standing, and wallet overview.</p>
               </div>
-              {/* <div className="rounded-[22px] border border-amber-300/14 bg-amber-300/8 px-4 py-4 sm:rounded-[28px] sm:px-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-amber-100/70">Live edge</p>
-                <p className="mt-2 text-sm text-white/72">Spectator predictions are trending 18% above yesterday.</p>
-              </div> */}
+              <div className="inline-flex items-center gap-2 self-start rounded-lg border border-white/10 bg-[#121620] px-3 py-2 text-xs font-medium text-slate-300 sm:self-auto">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                Arena systems online
+              </div>
             </div>
 
             {hasAuthWarning && (
-              <div className="mt-6 rounded-[24px] border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100/85">
+              <div className="mt-6 border border-amber-300/20 bg-[#231d11] px-4 py-3 text-sm leading-6 text-amber-100/85">
                 Account-only stats are unavailable right now because the backend is not accepting authenticated local requests yet. Public battle and leaderboard data can still load.
               </div>
             )}
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-7 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <StatCard label="Rank" value={`#${user?.rank ?? '-'}`} icon={<Trophy className="h-5 w-5 text-amber-200" />} />
               <StatCard label="XP" value={(user?.xp ?? 0).toLocaleString()} icon={<Sparkles className="h-5 w-5 text-blue-200" />} />
               <StatCard label="Wins" value={String(user?.wins ?? 0)} icon={<Swords className="h-5 w-5 text-violet-200" />} />
               <StatCard label="Wallet Balance" value={`${(wallet?.balance ?? user?.walletBalance ?? 0).toFixed(2)} XLM`} icon={<WalletIcon className="h-5 w-5 text-emerald-200" />} />
             </div>
-          </div>
+          </header>
 
-          <div className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-            <section className="space-y-8">
-              <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <section className="space-y-6">
+              <section className="rounded-2xl border border-white/10 bg-[#0b0d12] p-5 sm:rounded-[24px] sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/35">Quick actions</p>
-                    <h2 className="mt-2 font-orbitron text-2xl text-white">Next moves</h2>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Quick actions</p>
+                    <h2 className="mt-2 font-orbitron text-xl font-bold tracking-tight text-white sm:text-2xl">Next moves</h2>
                   </div>
                 </div>
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
                   <QuickAction href="/battles" title="Quick Match" copy="Jump into the freshest open battle." />
                   <QuickAction href="/battles" title="Create Contest" copy="Launch a new battle and set the tone." />
                   <QuickAction href="/battles" title="Join Open Battle" copy="Pick a live opportunity from the queue." />
                   <QuickAction href="/leaderboard" title="Leaderboard" copy="Track rivals and rising stars." />
                 </div>
-              </div>
+              </section>
 
-              <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
+              <section className="rounded-2xl border border-white/10 bg-[#0b0d12] p-5 sm:rounded-[24px] sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/35">Open battles</p>
-                    <h2 className="mt-2 font-orbitron text-2xl text-white">Join the arena</h2>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Open battles</p>
+                    <h2 className="mt-2 font-orbitron text-xl font-bold tracking-tight text-white sm:text-2xl">Join the arena</h2>
                   </div>
-                  <Link href="/battles" className="text-sm font-semibold text-blue-200">
+                  <Link href="/battles" className="text-sm font-semibold text-cyan-200 hover:text-cyan-100">
                     Browse all
                   </Link>
                 </div>
                 <div className="mt-6">
                   <BattleList battles={battles} emptyMessage="No open battles available yet." />
                 </div>
-              </div>
+              </section>
             </section>
 
-            <section className="space-y-8">
-              <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-white/35">Live activity feed</p>
+            <section className="space-y-6">
+              <section className="rounded-2xl border border-white/10 bg-[#0b0d12] p-5 sm:rounded-[24px] sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Live activity feed</p>
                 <div className="mt-5">
                   <AnimatedList
                     items={liveActivity}
@@ -205,21 +200,21 @@ export default function DashboardPage() {
                     displayScrollbar={false}
                     containerClassName="max-h-none overflow-visible p-0"
                     renderItem={(item) => (
-                      <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4 text-sm text-white/68">
+                      <div className="border border-white/10 bg-[#10131a] p-4 text-sm leading-6 text-slate-300">
                         {item}
                       </div>
                     )}
                   />
                 </div>
-              </div>
+              </section>
 
-              <div className="glass rounded-[28px] p-5 sm:rounded-[36px] sm:p-6">
+              <section className="rounded-2xl border border-white/10 bg-[#0b0d12] p-5 sm:rounded-[24px] sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/35">Top players</p>
-                    <h2 className="mt-2 font-orbitron text-2xl text-white">Leaderboard pulse</h2>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Top players</p>
+                    <h2 className="mt-2 font-orbitron text-xl font-bold tracking-tight text-white sm:text-2xl">Leaderboard pulse</h2>
                   </div>
-                  <Coins className="h-5 w-5 text-amber-200" />
+                  <Coins className="h-5 w-5 text-[#D1A24A]" />
                 </div>
                 <div className="mt-6">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
@@ -229,19 +224,18 @@ export default function DashboardPage() {
                       leaderboard[2] ?? null,
                     ].map((entry, idx) => {
                       const slot = idx === 0 ? 2 : idx === 1 ? 1 : 3
-                      const borderColor = slot === 1 ? '#f1d039' : slot === 2 ? '#abd8da' : '#a54b0f'
                       const cardStyles =
                         slot === 1
-                          ? 'bg-white/20 backdrop-blur-xl border border-white/30 text-white min-h-[220px]'
+                          ? 'border-[#B88A35]/45 bg-[#19170f] text-white min-h-[200px]'
                           : slot === 2
-                          ? 'bg-white/15 backdrop-blur-xl border border-white/25 text-white min-h-[185px]'
-                          : 'bg-white/10 backdrop-blur-xl border border-white/20 text-white min-h-[185px]'
+                          ? 'border-cyan-200/25 bg-[#101923] text-white min-h-[175px]'
+                          : 'border-orange-300/25 bg-[#1a120f] text-white min-h-[175px]'
                       const chipStyles =
                         slot === 1
-                          ? 'bg-black/80 text-white'
+                          ? 'border-[#B88A35]/30 bg-[#0b0d12] text-[#e8c36b]'
                           : slot === 2
-                          ? 'bg-black/75 text-white'
-                          : 'bg-black/70 text-white'
+                          ? 'border-cyan-200/25 bg-[#0b0d12] text-cyan-100'
+                          : 'border-orange-300/25 bg-[#0b0d12] text-orange-100'
 
                       return (
                         <motion.div
@@ -249,10 +243,9 @@ export default function DashboardPage() {
                           initial={{ opacity: 0, y: 18 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.08 }}
-                          className="relative rounded-[28px]"
+                          className="relative"
                         >
-                          <ElectricBorder color={borderColor} speed={1} chaos={0.12} borderRadius={28} className="rounded-[28px]">
-                            <div className={`relative rounded-[28px] px-5 pb-7 pt-8 ${cardStyles}`}>
+                          <div className={`relative border px-5 pb-6 pt-8 ${cardStyles}`}>
                               <div className="absolute -top-5 left-1/2 -translate-x-1/2">
                                 {entry?.avatar ? (
                                   <Image
@@ -260,31 +253,30 @@ export default function DashboardPage() {
                                     alt={entry.username}
                                     width={40}
                                     height={40}
-                                    className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
+                                    className="h-10 w-10 rounded-full border-2 border-[#0b0d12] object-cover"
                                   />
                                 ) : (
-                                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/70 bg-[#1B1449] text-xs font-bold text-white">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#0b0d12] bg-[#171d29] text-xs font-bold text-white">
                                     {entry?.username?.slice(0, 2).toUpperCase() ?? `#${slot}`}
                                   </div>
                                 )}
                               </div>
-                              <div className={`mx-auto inline-flex rounded-full px-4 py-2 text-2xs font-bold uppercase tracking-[0.08em] ${chipStyles}`}>
+                              <div className={`mx-auto inline-flex border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] ${chipStyles}`}>
                                 {slot === 1 ? '1st place' : slot === 2 ? '2nd place' : '3rd place'}
                               </div>
-                              <p className="mt-10 text-center font-orbitron text-[2rem] font-black leading-none">
+                              <p className="mt-9 text-center font-orbitron text-2xl font-black leading-none">
                                 {entry ? entry.xp.toLocaleString() : '0'}
                               </p>
                               <p className="mt-2 text-center text-sm font-semibold">
                                 {entry?.username ?? 'Waiting'}
                               </p>
-                            </div>
-                          </ElectricBorder>
+                          </div>
                         </motion.div>
                       )
                     })}
                   </div>
 
-                  <div className="mt-5">
+                  <div className="mt-4">
                     <AnimatedList
                       items={leaderboard.slice(3, 6)}
                       showGradients={false}
@@ -292,14 +284,14 @@ export default function DashboardPage() {
                       displayScrollbar={false}
                       containerClassName="max-h-none overflow-visible p-0"
                       renderItem={(entry) => (
-                        <div className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                        <div className="flex items-center justify-between border border-white/10 bg-[#10131a] px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/8 font-orbitron text-white">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#171d29] font-orbitron text-white">
                               {entry.rank}
                             </div>
                             <div>
-                              <p className="font-semibold text-white">{entry.username}</p>
-                              <p className="text-xs text-white/45">{entry.wins} wins</p>
+                              <p className="font-semibold text-slate-100">{entry.username}</p>
+                              <p className="text-xs text-slate-500">{entry.wins} wins</p>
                             </div>
                           </div>
                           <p className="font-orbitron text-white">{entry.xp.toLocaleString()} XP</p>
@@ -308,11 +300,11 @@ export default function DashboardPage() {
                     />
                   </div>
                 </div>
-                <Link href="/leaderboard" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-200">
+                <Link href="/leaderboard" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-200 hover:text-cyan-100">
                   View leaderboard
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-              </div>
+              </section>
             </section>
           </div>
         </div>
@@ -323,25 +315,26 @@ export default function DashboardPage() {
 
 function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <PrismaticTiltCard radius={28}>
-      <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[28px] sm:p-5">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/35">
-          {icon}
-          {label}
-        </div>
-        <p className="mt-4 font-orbitron text-2xl text-white sm:text-3xl">{value}</p>
+    <section className="border border-white/10 bg-[#121620] p-4 sm:p-5">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+        {icon}
+        {label}
       </div>
-    </PrismaticTiltCard>
+      <p className="mt-4 font-orbitron text-2xl font-bold tracking-tight text-white sm:text-3xl">{value}</p>
+    </section>
   )
 }
 
 function QuickAction({ href, title, copy }: { href: string; title: string; copy: string }) {
   return (
-    <PrismaticTiltCard radius={28}>
-      <Link href={href} className="block rounded-[22px] border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06] sm:rounded-[28px] sm:p-5">
-        <p className="font-orbitron text-lg text-white sm:text-xl">{title}</p>
-        <p className="mt-3 text-sm leading-6 text-white/50">{copy}</p>
-      </Link>
-    </PrismaticTiltCard>
+    <Link href={href} className="group block border border-white/10 bg-[#10131a] p-4 transition-colors hover:border-cyan-200/30 hover:bg-[#141923] sm:p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-orbitron text-base font-bold tracking-tight text-white sm:text-lg">{title}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">{copy}</p>
+        </div>
+        <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-1 group-hover:text-cyan-200" />
+      </div>
+    </Link>
   )
 }

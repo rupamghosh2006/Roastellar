@@ -19,6 +19,7 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 - **Architecture:** [Read the production architecture](./ARCHITECTURE.md)
 - **Security:** [Read the security checklist](./security_checklist.md)
 - **Quick setup:** [Read the getting-started guide](./GettingStarted.md)
+- **Community contribution:** [View Roastellar's community post on X](https://x.com/roastellar/status/2075922564699103709)
 
 ## Quick navigation
 
@@ -26,6 +27,7 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 - [June Level 4 evidence](#june--level-4-evidence)
 - [July 50+ user proof](#july-users-onboarded)
 - [July feedback iteration summary](#feedback-matched-to-july-improvements)
+- [Community contribution](#community-contribution)
 - [Submission checklist](#submission-checklist)
 
 ## Demo video
@@ -33,6 +35,13 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 [![Watch the Roastellar demo](https://img.youtube.com/vi/YNFZHxYcHtc/maxresdefault.jpg)](https://youtu.be/YNFZHxYcHtc)
 
 > Click the preview to watch the full demo on YouTube.
+
+## Community contribution
+
+<blockquote>
+  <p><strong>Roastellar community contribution on X</strong></p>
+  <a href="https://x.com/roastellar/status/2075922564699103709">View the community post</a>
+</blockquote>
 
 ## Product and architecture
 
@@ -244,4 +253,4 @@ The [July feedback export (main submission sheet)](https://docs.google.com/sprea
 
 ## License
 
-MIT
+[MIT License](./LICENSE)

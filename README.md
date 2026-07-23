@@ -27,7 +27,6 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 - [June Level 4 evidence](#june--level-4-evidence)
 - [July 50+ user proof](#july-users-onboarded)
 - [July feedback iteration summary](#feedback-matched-to-july-improvements)
-- [Community contribution](#community-contribution)
 - [Submission checklist](#submission-checklist)
 
 ## Demo video
@@ -35,20 +34,6 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 [![Watch the Roastellar demo](https://img.youtube.com/vi/YNFZHxYcHtc/maxresdefault.jpg)](https://youtu.be/YNFZHxYcHtc)
 
 > Click the preview to watch the full demo on YouTube.
-
-## Community contribution
-
-<blockquote>
-  <p><strong>Roastellar community contribution on X</strong></p>
-  <a href="https://x.com/roastellar/status/2075922564699103709">View the community post</a>
-</blockquote>
-
-## Product and architecture
-
-- **Frontend:** Next.js + TypeScript, responsive UI, loading/error states, wallet onboarding, battle rooms, profile history, and reporting.
-- **Backend:** Node.js API with authenticated wallet identity, battle services, analytics, monitoring, and MongoDB-backed indexes.
-- **Smart contract:** Rust/Soroban contract deployed to Stellar testnet for battle lifecycle and on-chain interactions.
-- **Operations:** production frontend deployment, backend health monitoring, metrics dashboard, and analytics-backed usage tracking.
 
 ## Evidence screenshots
 

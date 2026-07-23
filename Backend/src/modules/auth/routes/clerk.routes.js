@@ -1,11 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const User = require('../../users/models/user.model');
 const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
 
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+const clerkWebhookLimiter = rateLimit({
+  windowMs: Number(process.env.CLERK_WEBHOOK_RATE_LIMIT_WINDOW_MS) || 60 * 1000,
+  max: Number(process.env.CLERK_WEBHOOK_RATE_LIMIT_MAX_REQUESTS) || 120,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many webhook requests, please try again later' },
+});
+
+router.post('/webhook', clerkWebhookLimiter, express.raw({ type: 'application/json' }), async (req, res) => {
   try {
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
     
@@ -114,8 +123,21 @@ function safeCompareBase64(a, b) {
   return crypto.timingSafeEqual(left, right);
 }
 
+function normalizeClerkUserId(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const clerkId = value.trim();
+  return /^user_[a-zA-Z0-9]{1,120}$/.test(clerkId) ? clerkId : '';
+}
+
 async function handleUserCreated(data) {
-  const clerkId = data.id;
+  const clerkId = normalizeClerkUserId(data?.id);
+  if (!clerkId) {
+    logger.warn('Skipping Clerk user.created event with an invalid user ID');
+    return;
+  }
   const email = data.email_addresses?.[0]?.email_address || '';
   const firstName = data.first_name || '';
   const lastName = data.last_name || '';
@@ -140,7 +162,11 @@ async function handleUserCreated(data) {
 }
 
 async function handleUserUpdated(data) {
-  const clerkId = data.id;
+  const clerkId = normalizeClerkUserId(data?.id);
+  if (!clerkId) {
+    logger.warn('Skipping Clerk user.updated event with an invalid user ID');
+    return;
+  }
   const email = data.email_addresses?.[0]?.email_address || '';
   const firstName = data.first_name || '';
   const lastName = data.last_name || '';
@@ -162,7 +188,11 @@ async function handleUserUpdated(data) {
 }
 
 async function handleUserDeleted(data) {
-  const clerkId = data.id;
+  const clerkId = normalizeClerkUserId(data?.id);
+  if (!clerkId) {
+    logger.warn('Skipping Clerk user.deleted event with an invalid user ID');
+    return;
+  }
   
   const user = await User.findOne({ clerkId });
   
@@ -179,7 +209,11 @@ async function handleEmailCreated(data) {
 }
 
 async function handleEmailDeleted(data) {
-  const clerkId = data.owner_id;
+  const clerkId = normalizeClerkUserId(data?.owner_id);
+  if (!clerkId) {
+    logger.warn('Skipping Clerk email_address.deleted event with an invalid user ID');
+    return;
+  }
   const email = data.email_address;
   
   const user = await User.findOne({ clerkId });

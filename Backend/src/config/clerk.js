@@ -9,6 +9,22 @@ function canUseDevAuthFallback() {
   return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH_FALLBACK === 'true';
 }
 
+function isTrustedDevClerkIssuer(issuer) {
+  if (typeof issuer !== 'string') {
+    return false;
+  }
+
+  try {
+    const url = new URL(issuer);
+    return (
+      url.protocol === 'https:' &&
+      (url.hostname === 'clerk.accounts.dev' || url.hostname.endsWith('.clerk.accounts.dev'))
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
 function normalizeEnvValue(value) {
   if (typeof value !== 'string') {
     return value;
@@ -51,7 +67,11 @@ function normalizeOrigin(value) {
     const url = new URL(trimmed);
     return `${url.protocol}//${url.host}`;
   } catch (error) {
-    return trimmed.replace(/\/+$/, '');
+    let end = trimmed.length;
+    while (end > 0 && trimmed.charCodeAt(end - 1) === 47) {
+      end -= 1;
+    }
+    return trimmed.slice(0, end);
   }
 }
 
@@ -151,8 +171,7 @@ const clerk = {
         const payload = decoded?.payload || {};
         const looksLikeClerkSession =
           typeof payload.sub === 'string' &&
-          typeof payload.iss === 'string' &&
-          (payload.iss.includes('clerk.accounts.dev') || payload.iss.includes('clerk.com'));
+          isTrustedDevClerkIssuer(payload.iss);
 
         if (looksLikeClerkSession) {
           console.warn('Clerk dev auth fallback: trusting decoded JWT claims');

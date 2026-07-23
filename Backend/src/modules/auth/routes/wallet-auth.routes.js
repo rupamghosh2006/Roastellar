@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const User = require('../../users/models/user.model');
 const ApiResponse = require('../../../utils/apiResponse');
 const logger = require('../../../utils/logger');
@@ -10,6 +11,13 @@ const { sanitizeText, sanitizeUsername, sanitizeWalletAddress } = require('../..
 const router = express.Router();
 const NONCE_TTL_MS = Number(process.env.WALLET_AUTH_NONCE_TTL_MS || 5 * 60 * 1000);
 const SIGN_MESSAGE_PREFIX = 'Stellar Signed Message:\n';
+const walletAuthLimiter = rateLimit({
+  windowMs: Number(process.env.WALLET_AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  max: Number(process.env.WALLET_AUTH_RATE_LIMIT_MAX_REQUESTS) || 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many wallet authentication attempts, please try again later' },
+});
 
 function buildChallenge({ walletAddress, nonce }) {
   return [
@@ -86,7 +94,7 @@ async function findWalletAccount(walletAddress) {
   return nonWalletAccounts[0] || matches[0] || null;
 }
 
-router.post('/wallet/challenge', async (req, res) => {
+router.post('/wallet/challenge', walletAuthLimiter, async (req, res) => {
   try {
     const walletAddress = sanitizeWalletAddress(req.body?.walletAddress);
     const usernameInput = sanitizeUsername(req.body?.username);
@@ -146,7 +154,7 @@ router.post('/wallet/challenge', async (req, res) => {
   }
 });
 
-router.post('/wallet/verify', async (req, res) => {
+router.post('/wallet/verify', walletAuthLimiter, async (req, res) => {
   try {
     const walletAddress = sanitizeWalletAddress(req.body?.walletAddress);
     const signedMessageRaw = req.body?.signedMessage;

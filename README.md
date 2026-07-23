@@ -4,370 +4,230 @@
 
 # Roastellar
 
+
 [![Contracts CI](https://github.com/rupamghosh2006/Roastellar/actions/workflows/contracts-ci.yml/badge.svg)](https://github.com/rupamghosh2006/Roastellar/actions/workflows/contracts-ci.yml)
 [![Backend CI/CD](https://github.com/rupamghosh2006/Roastellar/actions/workflows/backend-ci-cd.yml/badge.svg)](https://github.com/rupamghosh2006/Roastellar/actions/workflows/backend-ci-cd.yml)
 [![Frontend CI/CD](https://github.com/rupamghosh2006/Roastellar/actions/workflows/frontend-ci-cd.yml/badge.svg)](https://github.com/rupamghosh2006/Roastellar/actions/workflows/frontend-ci-cd.yml)
 
-A fully on-chain roast battle platform built on Stellar Soroban.
+Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet. Players create and join battles, submit roasts, vote, make predictions, and receive transparent XLM outcomes.
 
-## Quick Navigation
+- **Live application:** [roastellar.vercel.app](https://roastellar.vercel.app)
+- **Public repository:** [github.com/rupamghosh2006/Roastellar](https://github.com/rupamghosh2006/Roastellar)
+- **Stellar testnet contract:** [`CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`](https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA)
+- **Pitch deck:** [View the Level 5 pitch deck](https://drive.google.com/file/d/11yevUYddMpD204HwPB4WqI1QxjTe9YIT/view?usp=sharing)
+- **Demo video:** [Watch the complete product walkthrough](https://youtu.be/YNFZHxYcHtc)
 
-- **Live Demo (Vercel):** [https://roastellar.vercel.app](https://roastellar.vercel.app)
-- **30+ User Wallet Addresses (Stellar-verifiable):**
-  - Table in this README: [Testnet Users (Verified)](#testnet-users-verified)
-  - Source sheet (30 users): [Google Sheet](https://docs.google.com/spreadsheets/d/1rSuNXtO64Es7leAAnP5zJ5c3lW_7HQTvoOU-yRK8lsc/edit?usp=sharing)
-  - Explorer sample: [Stellar Expert Account](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
-- **10+ June 2026 Onboarded Users:** [June 2026 Onboarded Users](#june-2026-onboarded-users)
-- **June Issue Resolved — Sign-In Flow Fix (User Feedback):** [Sign-In Flow Fix](#sign-in-flow-fix)
-- **Metrics Dashboard (Screenshot):** [Metrics Dashboard](#metrics-dashboard)
-  <!-- - API endpoint: [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics) -->
-- **Monitoring Dashboard (Screenshot):** [Monitoring Active](#monitoring-active)
-- **Completed Security Checklist:** [security_checklist.md](./security_checklist.md)
-- **Community Contribution (Twitter/X Post):** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
-- **Advanced Feature (Description + Proof):** [Advanced Feature: Fee Sponsorship](#advanced-feature-fee-sponsorship-gasless-transactions-via-fee-bump)
-- **Data Indexing (Approach + Endpoint):** [Data Indexing](#data-indexing)
+## Demo video
 
-## Live Demo
+[![Watch the Roastellar demo](https://img.youtube.com/vi/YNFZHxYcHtc/maxresdefault.jpg)](https://youtu.be/YNFZHxYcHtc)
 
-**URL:** https://roastellar.vercel.app
+> Click the preview to watch the full demo on YouTube.
 
-**Demo Video:** https://youtu.be/iDdfbYiBElk
+## Product and architecture
 
-## Metrics Dashboard
+- **Frontend:** Next.js + TypeScript, responsive UI, loading/error states, wallet onboarding, battle rooms, profile history, and reporting.
+- **Backend:** Node.js API with authenticated wallet identity, battle services, analytics, monitoring, and MongoDB-backed indexes.
+- **Smart contract:** Rust/Soroban contract deployed to Stellar testnet for battle lifecycle and on-chain interactions.
+- **Operations:** production frontend deployment, backend health monitoring, metrics dashboard, and analytics-backed usage tracking.
 
-![Metrics Dashboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777580625/Screenshot_2026-05-01_014932_ebwpai.png)
+## Evidence screenshots
 
-
-<!-- **Tracking Started On:** April 29, 2026 -->
-
-### Screenshots - Laptop View
-
-![Home Page](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777580848/Screenshot_2026-05-01_015629_h0q3jf.png)
-
-![sign-in](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777580979/Screenshot_2026-05-01_015858_hmybsr.png)
-
-![wallet](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581085/Screenshot_2026-05-01_014217_jowynb.png)
-
-![Battles](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581315/Screenshot_2026-05-01_014242_irpvgg.png)
-
-![Battle Room](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581282/Screenshot_2026-05-01_015201_u8fk8o.png)
-
-![Leaderboard](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581166/Screenshot_2026-05-01_013604_cxtlce.png)
-
-![Profile](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581354/Screenshot_2026-05-01_014118_ed9fot.png)
-
-![wallet-auth](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777581495/Screenshot_2026-05-01_020757_woz7tt.png)
-
-### Screenshots - Mobile View
+### Product UI
 
 <p align="center">
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114435_anapof.jpg" width="180" />
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114448_aljk9x.jpg" width="180" />
+  <img src="Frontend/Screenshots/product_UI/auth_page.png" alt="Authentication page" width="32%" />
+  <img src="Frontend/Screenshots/product_UI/dashboard_before_onbdoading.png" alt="Dashboard before onboarding" width="32%" />
+  <img src="Frontend/Screenshots/product_UI/dashboard.png" alt="Dashboard" width="32%" />
 </p>
 
 <p align="center">
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114937_cnordq.jpg" width="180" />
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114945_vbnleu.jpg" width="180" />
+  <img src="Frontend/Screenshots/product_UI/wallet.png" alt="Wallet" width="32%" />
+  <img src="Frontend/Screenshots/product_UI/battle_page.png" alt="Battle page" width="32%" />
+  <img src="Frontend/Screenshots/product_UI/battle_votingphase.png" alt="Battle voting phase" width="32%" />
 </p>
 
 <p align="center">
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114835_l9jhao.jpg" width="180" />
-  <img src="https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777616658/Screenshot_20260501_114723_bc3z93.jpg" width="180" />
+  <img src="Frontend/Screenshots/product_UI/battle_report.png" alt="Battle report" width="32%" />
+  <img src="Frontend/Screenshots/product_UI/leaderboard.png" alt="Leaderboard" width="32%" />
+  <img src="Frontend/Screenshots/product_UI/profile.png" alt="Profile" width="32%" />
 </p>
 
-## Smart Contract
-
-**Contract ID (Testnet):** `CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`
-
-**Network:** Stellar Testnet
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA
-
-## Testnet Users (Verified)
-
-| User Name | User Email | User Wallet Address |
-|------|-------|---------------------|
-| Dipika Ghosh | dipikaghosh791@gmail.com | `GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER` |
-| Bodhisatwa Dutta | bodhisatwadutta025@gmail.com | `GA6LENTHFAG3UY2HK7V24RBGYKIQTPLPG42G5QT26VILKB7KXLUR2ACI` |
-| ABANTIKA KUNDU | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` |
-| Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` |
-| Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` |
-
-### For Level 6
-
-**Source Sheet (30 users):** https://docs.google.com/spreadsheets/d/1rSuNXtO64Es7leAAnP5zJ5c3lW_7HQTvoOU-yRK8lsc/edit?usp=sharing
-
-| User Name | User Email | User Wallet Address |
-|------|-------|---------------------|
-| Saurav Mahato | mahatosaurav2006@gmail.com | `GBD3DLLDF2ZQYXEN77BR3CZYES6JAXJD3AN2LB5FTBT7Z5XWQGCZDW5U` |
-| Subhajit Dasgupta | subhajit80@gmail.com | `GBFBON2CFNHUYNRBADN6NOSAUDGI6ZQ7ZIUWGP3K4IJ56ZUBHT2EAVXB` |
-| Sayagnika Mollick | sayagnikamollick@gmail.com | `GBJNVAIT3OGVJNBYBTIIVTJFFEFPOOOQADKCR5D2LFG4KN2U5W6YWDL7` |
-| Ankush Datta | ankushdatta712@gmail.com | `GAP2OOAJM3P5DBDICSK4AUWL4YTP6BMIYQAX6UHFY53HIA5C6C6E5SPG` |
-| Arghya Paul | ap3163328@gmail.com | `GDU42AEUUG7BBLNKKLOKE35AKBZFQGT5SWKOOEZCPJHWM7MUN3IOHPDF` |
-| Tamalika Ghosh | ghoshtamalika91@gmail.com | `GDE44HBLIANEIMYZDPPSSN7KMYHRKH4HVQJLHKIRODZZQZBVKQMOQU72` |
-| Anika Haque | anikahaque0597@gmail.com | `GCSALHSW25CKS4BMJG75Q57E6GCFUZXDHLS47FEYSVSRFDD5TVBAZNXI` |
-| Nilesh Halder | rh6262070@gmail.com | `GA26JSQLSVF6YLGCBNCE6MJIP4UBU36CE4BQZO65WF3STDJB7FHGXQPF` |
-| Arghya | apaul19071001@gmail.com | `GDA2ZH52GBGP34SHW6WU45B55HGNCSVUICL4SN2CMOYIXHJ52JGP7ZOH` |
-| Abantika Kundu | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` |
-| Ambika Nandy | Abantikakundu512@gmail.com | `GB67TYT4LQ2GSXALGZHZ5C26Z6RIEAE5IROLPKSOVUFMI6ZE7C5ENPHL` |
-| Rani Kundu | ranikundu.kt@gmail.com | `GCIRDZXUXIDEC22HK3T6AX5RRQCW7ILOK77B7RJ52W5BXFDJ3AL2BWVL` |
-| Ankana Lahiri | ankanalahi.bts@gmail.com | `GBFSD3VATX4KHMPMW6RG6DKNV5JXW5O373CLR2H7O3YHMYTJSMI4KITQ` |
-| Ayantika Kundu | ayantikak484@gmail.com | `GB2LEZTGWAT777PGNTFOC4J2QRDRBYKTG5OSFUGG7QISTQEZZDUUNUGF` |
-| Rupesh Raj | rajrupesh2485@gmail.com | `GD4GWP2RBZCR7P3ZQCEVCPBVZ3UXW5NVO4LFNK5H5KKGLLNY3CKMPBDT` |
-| Sushobhan Mitra | sushobhanp59@gmail.com | `GCIIHXIXJW4VLXMSOAX2QJDTGIROJM7UIZLSFIFULV3C2MDQTFY3NN7C` |
-| Sharmistha | johnsendi727@gmail.com | `GC7A2KEL45O53ERVCSKEOU5G5PXIJEM67UW6QBSOTVOLLKE2GLYPLP2O` |
-| Sudip Saha | sudipshit668@gmail.com | `GBWFOOJI6YE32C3T6BBHHFK3ZZ2USEAFTWBKZA7UFD3OH6IMCNHGAR65` |
-| TANCHAN | tanchangarai51@gmail.com | `GAUTYPM6KM7MIOH45COSKESN7WPK5ZGRSLULDSCVIXFJXCTHTB7MIDIA` |
-| Raghu Prasad Sannigrahi | raghuprasadsannigrahi@gmail.com | `GDMMLMGYGSWQOGRC2OSUDZYCHQY7JO6TJV2KQSSMLWOWXSG6LNKIKJY6` |
-| Abhinandan Kumar | sumankumarrajpati567@gmail.com | `GBWCFMRZRWDLKKSQCTWM3F623TETNUFNCJERPS5LH6SAVN5JYZODLXBG` |
-| Subhajit Ghosh | jitsubha7980@gmail.com | `GCQJ7YCL5H3XGQK775XI6R62HSV6JSDDE7JMHTJVD4ENWV2US6KL3CB7` |
-| Adi Sah | sahaaditya639@gmail.com | `GAGOUDLC4AXFDXPA4BTIR2KZ53BDZTUGLVVNV4J55RSDAG6ULXB3V7S2` |
-| Srijan bhowmik | 2029ece02srijan@buie.ac.in | `GAVQE6CKQUIJOPID3I74SOJN2ISC6XLEZ7WXX5E4K2UM5S54AQ5V7C6Q` |
-| Somsubhra Mitra | somsubhramitra2@gmail.com | `GC7XMPOXBDBJMPNQ5SQE2DTGACVSX4RHOUXE2XFF2SLHPDJNFGADTIHW` |
-| Sreeja Samaddar | sreejasamaddar10@gmail.com | `GCWUUJPXH3FZLY2TCI67QODEXQOAHJN6G5CLGJVO55VBRKGJBB72NBJE` |
-| Ishan Ray | ishanray1.02@gmail.com | `GD6Y2S3CK5JEDXT7XTA63BP43B6EO7API7MIZM6GYEYFZBIYMMWMNTQX` |
-| Sourav | sv.sourav23@gmail.com | `GAJDI3UZB2JGUCDDHBUQKLXYI5336YSAUIP3SKIM5MZXXHIC3IS2NK46` |
-| Subrata M | subratamajhi1207@gmail.com | `GAR7NJQ6QJJTXDABDQSPCFC6MC6A3XP6VD2Y6CTK4WRCIMDKIZX77QLF` |
-| Dipika Ghosh | dipikaghosh791@gmail.com | `GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER` |
-
-View all users on [Stellar Expert](https://stellar.expert/explorer/testnet/account/GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER)
-
-## June 2026 Onboarded Users
-
-10 new testnet users onboarded in June 2026:
-
-| User Name | User Email | User Wallet Address | Onboarding Date |
-|-----------|------------|---------------------|-----------------|
-| Raunak Singh | Raunak537singh@gmail.com | `GDV7W3U4NX7X6Y5A23Z7B6M72VCLQ66PXZ7K6NY6L3I7Y42WW2DTEST3` | 29 Jun 2026 |
-| RIJU DAS | riju.rj84kly@gmail.com | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | 29 Jun 2026 |
-| PRATIK DUBE | pradube897@gmail.com | `GBV4DHWFLJQO6GHJXIN5S747EOXQGEEJA5BVOJHXLKD55XWHRUNWVV6Y` | 29 Jun 2026 |
-| Shrikant Ajay Bhore | shrikantbhore56@gmail.com | `GAGQ4AEPOYTJ2VLWXEWOTLVDMQNYW44CPHTK5LVHYERAL5AIOCDLEODU` | 30 Jun 2026 |
-| DISHA PAL | dishapalld9@gmail.com | `GC6JEOQTXDUZWQE6KTIFV5KKPT67UQR2SNILSZ6UZWZ5YYJRU27VYLRO` | 30 Jun 2026 |
-| BIBHAS BANIK | bibbybon44@gmail.com | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | 30 Jun 2026 |
-| URMI CHATTERJEE | peppaspip1212@gmail.com | `GC35DTKVPAIFHUU7PYOBKDEIM5FRXBSHQIWZBASA2IFRPN7VEQ5YZC24` | 30 Jun 2026 |
-| MANIK LAL | maniklalvivo@gmail.com | `GB5GF6NA6DFHBS6EZLNYTKKI6ODFHM6PD772VWTJMU7IRF5IO4ZFL526` | 30 Jun 2026 |
-| SNEHA DAS | sneeehaaaadas00@gmail.com | `GC4JRFZKUQQHXUE6BFDEQSYYP2YLSBS6MATKZJBJ3X2E56RGYLXWGO4X` | 30 Jun 2026 |
-| Swarnali Rani Lodh | srlmusic8765@gmail.com | `GAH6LDNKDOMJK7FSM2ZH3NVUQZQQYFFPO3LWO27MFQLKF2DZ7K6QMWYN` | 30 Jun 2026 |
-
-## User Feedback
-
-**Full Feedback Data:** [Google Sheets Export](https://docs.google.com/spreadsheets/d/1bQhjQawRHuge7KuS5utRJ055WBbf2KfnXiU75W_4m1o/edit?usp=sharing)
-
-### User Feedback Implementation
-
-| User Name | User Email | User Wallet Address | User Feedback | Commit ID (Where changes made according to the user feedback) |
-|----------|------------|---------------------|---------------|------------------------------|
-| Dipika Ghosh | dipikaghosh791@gmail.com | `GBBWKRWNDY6HN3HD3BVAOPK3DYVFBPDR7ZQZ5BIMIZSGGP4BBB3BW5ER` | Overall positive experience, no specific issue reported. | N/A |
-| Bodhisatwa Dutta | bodhisatwadutta025@gmail.com | `GA6LENTHFAG3UY2HK7V24RBGYKIQTPLPG42G5QT26VILKB7KXLUR2ACI` | UI looks hard coded, wallet reveal part needs improvement. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
-| ABANTIKA KUNDU | kunduabantika.123@gmail.com | `GC7WKLWFRYAOZTDXYXA3GB77HY4AQ5I2GAVEEHKE6IANJOEFZ524TYJO` | Voting issue: match still shows draw after voting. | `532bd9c094b76e9ef50bd06cd54098a2b7e47eb5` |
-| Anubhab Rakshit | anubhabrakshit.06@gmail.com | `GBYXMIJU2W2NZTLI3WTT4H342KV7TOUVJOO5LYGXBA6MHDUKDRZ2GUSN` | Improve UI/UX, reduce mock/demo parts. | `dd66d9ea318a214ea4c3f4b9595261e636f78cf3` |
-| Debasmit Bose | debasmitbos22@gmail.com | `GC53LJZ4V2CLF7NTWFKVSFWSPMKSVT7TABLDVZLT7A63HFHAY4DF4MKC` | Mobile menu button redundant; add Clerk logout button. | `6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1`, `fa368559be91147008b212585b30a98294be9c7c` |
-
-### Sign-In Flow Fix (June 2026 Issue Resolved)
-
-Two users reported in late June 2026 that signing in as a new user showed a 404 error instead of redirecting to the sign-up page. This was resolved in commit `41188a1` by detecting Clerk's `form_identifier_not_found` error and automatically redirecting to `/sign-up`.
-
-| User Name | User Email | User Wallet Address | User Feedback | Feedback Date | Commit ID |
-|-----------|------------|---------------------|---------------|---------------|-----------|
-| RIJU DAS | riju.rj84kly@gmail.com | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | Sign-in showed 404 user not found instead of redirecting to sign-up. | 29 Jun 2026 | `41188a1` |
-| BIBHAS BANIK | bibbybon44@gmail.com | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | Sign-in showed 404 error and didn't redirect to sign-up for new users. | 30 Jun 2026 | `41188a1` |
-
-<!-- ## Next Iteration Improvements
-
-Based on user feedback, the following improvements are planned:
-
-### 1. Fix Voting Race Condition
-- **Issue:** Voting not properly recorded, matches show draw
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/532bd9c094b76e9ef50bd06cd54098a2b7e47eb5
-
-
-### 2. Replace Hardcoded Demo Parts
-- **Issue:** Users reported too many mock/static parts in UI
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/dd66d9ea318a214ea4c3f4b9595261e636f78cf3
-
-### 3. Mobile Responsive Improvements
-- **Issue:** Top right menu button redundant (footer nav already exists)
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/6d3fdb6a95fbf77fc207a9e2cd065e1b07084bf1
-
-### 4. Logout button
-- **Issue:** User needed a dedicated logout button
-- **Commit:** https://github.com/rupamghosh2006/Roastellar/commit/fa368559be91147008b212585b30a98294be9c7c -->
-
-## Architecture
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system architecture documentation.
-
-## Security
-
-Link: [completed security checklist](./security_checklist.md)
-
-## Advanced Feature: Fee Sponsorship (Gasless Transactions via Fee Bump)
-
-### Description
-
-Roastellar implements **Fee Sponsorship** so end-user actions can run in a gasless UX mode where a sponsor account pays network fees using Stellar **fee-bump transactions**.
-
-In this model:
-- The user still authorizes/signs the inner transaction.
-- The backend wraps that signed transaction in a fee-bump envelope.
-- A dedicated sponsor account signs the fee-bump and pays the transaction fee.
-
-### Proof of Implementation
-
-Implementation evidence in code:
-- Fee sponsorship utility:
-  - `Backend/src/utils/feeSponsor.js`
-  - Uses `TransactionBuilder.buildFeeBumpTransaction(...)`
-  - Controls sponsorship with env flags and sponsor key handling
-- Horizon payment flow sponsorship:
-  - `Backend/src/modules/battles/services/battleEscrow.service.js`
-  - Wraps payment tx before `server.submitTransaction(...)`
-- Soroban contract flow sponsorship:
-  - `Backend/src/modules/battles/services/battleChain.service.js`
-  - Wraps prepared/signed contract tx before `rpcServer.sendTransaction(...)`
-
-Configuration proof:
-- `Backend/.env.example` includes:
-  - `STELLAR_ENABLE_FEE_SPONSORSHIP=true`
-  - `STELLAR_FEE_SPONSOR_SECRET=`
-  - `STELLAR_FEE_BUMP_BASE_FEE=100`
-
-### Enable in Deployment
-
-Set the following backend environment variables:
-
-```bash
-STELLAR_ENABLE_FEE_SPONSORSHIP=true
-STELLAR_FEE_SPONSOR_SECRET=<funded sponsor secret key>
-STELLAR_FEE_BUMP_BASE_FEE=100
-```
-
-When enabled, Roastellar submits fee-bumped transactions for eligible Stellar payment and Soroban contract actions.
-
-## Data Indexing
-
-### Approach Description
-
-Roastellar uses MongoDB indexes focused on read-heavy paths (leaderboard, battle discovery, match lookups, analytics timelines) and integrity-critical paths (duplicate vote/prediction prevention, unique identities).
-
-Key indexes implemented:
-
-- User identity and leaderboard:
-  - `clerkId` unique index (auth identity lookup)
-  - `email` unique index
-  - leaderboard indexes on `xp`, `wins`, `rankPoints`
-- Battle performance:
-  - `matchId` unique index (fast battle lookup by public match id)
-  - `status + createdAt` compound index (open/active battle listing)
-  - `player1 + createdAt`, `player2 + createdAt`, `winner + createdAt` compound indexes
-- Prediction and vote integrity:
-  - `battleId + predictor` unique compound index (one prediction per user per battle)
-  - `battleId + voter` unique compound index (one vote per user per battle)
-- Analytics timelines:
-  - `eventType + timestamp` compound index
-  - `userId + timestamp` compound index
-
-This indexing strategy keeps common leaderboard and battle queries efficient while enforcing key anti-duplication rules at the database layer.
-
-### Endpoint / Dashboard Link
-
-- Public metrics endpoint (indexed analytics-backed): [https://roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
-
-## Monitoring Active
-
-Roastellar uses active uptime monitoring on the backend health route to continuously verify service availability and response-time behavior.  
-The health endpoint also exposes runtime and dependency readiness signals (MongoDB + Stellar config) for operational visibility.
-
-- Health check endpoint: [https://roastellar.onrender.com/health](https://roastellar.onrender.com/health)
-- Screenshot (monitoring dashboard): ![https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777548032/Screenshot_2026-04-30_165012_ziodyh.png)
-
-## CI/CD Setup
-
-This repo now includes GitHub Actions for:
-- `contracts` CI: `/.github/workflows/contracts-ci.yml`
-- `Backend` CI/CD with Render deploy hook: `/.github/workflows/backend-ci-cd.yml`
-- `Frontend` CI/CD with Vercel CLI deploy: `/.github/workflows/frontend-ci-cd.yml`
-
-### Required GitHub Secrets
-
-Add these in your GitHub repo settings:
-- `RENDER_DEPLOY_HOOK_URL`: Render Web Service deploy hook URL for backend.
-- `VERCEL_TOKEN`: Vercel personal/team token with deploy access.
-
-### Render Connection (Backend)
-
-- `render.yaml` is added at repo root for Blueprint-based setup.
-- Service is configured with `rootDir: Backend`, `buildCommand: npm ci`, `startCommand: npm start`.
-
-### Vercel Connection (Frontend)
-
-- `Frontend/vercel.json` is added for reproducible Next.js build/install commands.
-- Link the `Frontend` folder to your Vercel project (`Root Directory = Frontend`).
-
-## Quick Start
-
-### Backend Env For Real Soroban Tx
-
-Set these in Render backend env:
-
-```bash
-STELLAR_CONTRACT_ID=CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA
-STELLAR_BATTLE_SECRET=<deployer secret key>
-STELLAR_BATTLE_PUBLIC=GAYWZSX43WUBRHM3F2QCWBL6ZOYSH7V5EOQOYMG6SMTGMM24RFEFCMHC
-STELLAR_ESCROW_SECRET=<escrow secret key>
-STELLAR_ESCROW_PUBLIC=<escrow public key>
-STELLAR_CREATE_MATCH_FN=create_match
-STELLAR_JOIN_MATCH_FN=join_match
-STELLAR_SUBMIT_ROAST_FN=submit_roast
-STELLAR_VOTE_FN=vote
-STELLAR_PREDICT_FN=predict
-STELLAR_FINALIZE_MATCH_FN=finalize_match
-STELLAR_REFUND_DRAW_FN=finalize_match
-BATTLE_VOTE_STAKE_XLM=0
-```
-
-Without these keys, backend cannot execute full mirrored on-chain lifecycle + XLM escrow transfers.
-
-### Build Contract
-
-```bash
-cd contracts/roastellar
-rustup target add wasm32v1-none
-cargo build --target wasm32v1-none --release
-```
-
-### Test
-
-```bash
-cargo test
-```
-
-### Deploy
-
-```bash
-stellar contract deploy \
-  --wasm target/wasm32v1-none/release/roastellar.wasm \
-  --source <your-key> \
-  --network testnet
-```
-
-## Features
-
-- User registration with username and XP system
-- Roast battle matches with entry fees
-- Spectator voting and predictions
-- IPFS storage for roast content
-- Automatic prize distribution (1% platform fee)
-- Draw refunds
-- Badge rewards (FirstWin, FiveWins, TenMatches)
-
-## Community Contribution
-
-**Tweet Link:** [https://x.com/RupamGhosh2006/status/2049507507253768670](https://x.com/RupamGhosh2006/status/2049507507253768670)
-
-**Screenshot:**
-
-![Community Contribution Screenshot](https://res.cloudinary.com/ddp0nf4uv/image/upload/v1777480736/communityContribution_hkhrcz.jpg)
-
+<p align="center">
+  <img src="Frontend/Screenshots/product_UI/txn_hash_links.png" alt="Transaction hash links" width="32%" />
+</p>
+
+### Mobile-responsive design
+
+<p align="center">
+  <img src="Frontend/Screenshots/mobile_view/web3_onboarding.jpg" alt="Mobile Web3 onboarding" width="180" />
+  <img src="Frontend/Screenshots/mobile_view/dashboard_onboarding.jpg" alt="Mobile dashboard onboarding" width="180" />
+  <img src="Frontend/Screenshots/mobile_view/wallet.jpg" alt="Mobile wallet" width="180" />
+  <img src="Frontend/Screenshots/mobile_view/battle_page.jpg" alt="Mobile battle page" width="180" />
+</p>
+
+<p align="center">
+  <img src="Frontend/Screenshots/mobile_view/txn_records.jpg" alt="Mobile transaction records" width="180" />
+  <img src="Frontend/Screenshots/mobile_view/battle_report.jpg" alt="Mobile battle report" width="180" />
+  <img src="Frontend/Screenshots/mobile_view/leaderboard.jpg" alt="Mobile leaderboard" width="180" />
+  <img src="Frontend/Screenshots/mobile_view/profile.jpg" alt="Mobile profile" width="180" />
+</p>
+
+### Monitoring and analytics
+
+<p align="center">
+  <img src="Frontend/Screenshots/monitoring_dashboard.png" alt="Monitoring dashboard" width="49%" />
+  <img src="Frontend/Screenshots/metric_dashboard.png" alt="Metrics dashboard" width="49%" />
+</p>
+
+- **Health endpoint:** [roastellar.onrender.com/health](https://roastellar.onrender.com/health)
+- **Metrics endpoint:** [roastellar.onrender.com/api/analytics/metrics](https://roastellar.onrender.com/api/analytics/metrics)
+
+### Stellar transaction activity
+
+<p align="center">
+  <img src="Frontend/Screenshots/transaction_activity/ccontract_creation.png" alt="Contract creation" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/battle_creation.png" alt="Battle creation" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/player2_joins_onchain.png" alt="Second player joins on-chain" width="32%" />
+</p>
+
+<p align="center">
+  <img src="Frontend/Screenshots/transaction_activity/player_pays_entryfee.png" alt="Player pays entry fee" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/player_submit_roast.png" alt="Player submits roast" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/spectator_votes.png" alt="Spectator votes" width="32%" />
+</p>
+
+<p align="center">
+  <img src="Frontend/Screenshots/transaction_activity/spectator_predict_winner.png" alt="Spectator predicts winner" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/spectator_stakes_on_player.png" alt="Spectator stakes on player" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/battle_finalization1.png" alt="Battle finalization" width="32%" />
+</p>
+
+<p align="center">
+  <img src="Frontend/Screenshots/transaction_activity/battle_finalization2.png" alt="Battle finalization outcome" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/winner_get_pot.png" alt="Winner receives pot" width="32%" />
+  <img src="Frontend/Screenshots/transaction_activity/winning_prediction_payout.png" alt="Winning prediction payout" width="32%" />
+</p>
+
+## June — Level 4 evidence
+
+The [June onboarding and feedback export](https://docs.google.com/spreadsheets/d/1rSuNXtO64Es7leAAnP5zJ5c3lW_7HQTvoOU-yRK8lsc/edit?usp=sharing) records the June-only cohort. Ten new users completed onboarding and supplied their Stellar wallet address; the transaction screenshots above provide the on-chain activity evidence.
+
+| Name | Stellar wallet address | Onboarding date | Overall rating |
+|---|---|---|---|
+| Raunak Singh | `GDV7W3U4NX7X6Y5A23Z7B6M72VCLQ66PXZ7K6NY6L3I7Y42WW2DTEST3` | 29 Jun 2026 | 4/5 |
+| RIJU DAS | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | 29 Jun 2026 | 5/5 |
+| PRATIK DUBE | `GBV4DHWFLJQO6GHJXIN5S747EOXQGEEJA5BVOJHXLKD55XWHRUNWVV6Y` | 29 Jun 2026 | 5/5 |
+| Shrikant Ajay Bhore | `GAGQ4AEPOYTJ2VLWXEWOTLVDMQNYW44CPHTK5LVHYERAL5AIOCDLEODU` | 30 Jun 2026 | 4/5 |
+| DISHA PAL | `GC6JEOQTXDUZWQE6KTIFV5KKPT67UQR2SNILSZ6UZWZ5YYJRU27VYLRO` | 30 Jun 2026 | 3/5 |
+| BIBHAS BANIK | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | 30 Jun 2026 | 5/5 |
+| URMI CHATTERJEE | `GC35DTKVPAIFHUU7PYOBKDEIM5FRXBSHQIWZBASA2IFRPN7VEQ5YZC24` | 30 Jun 2026 | 5/5 |
+| MANIK LAL | `GB5GF6NA6DFHBS6EZLNYTKKI6ODFHM6PD772VWTJMU7IRF5IO4ZFL526` | 30 Jun 2026 | 4/5 |
+| SNEHA DAS | `GC4JRFZKUQQHXUE6BFDEQSYYP2YLSBS6MATKZJBJ3X2E56RGYLXWGO4X` | 30 Jun 2026 | 5/5 |
+| Swarnali Rani Lodh | `GAH6LDNKDOMJK7FSM2ZH3NVUQZQQYFFPO3LWO27MFQLKF2DZ7K6QMWYN` | 30 Jun 2026 | 4/5 |
+
+### June feedback summary and action taken
+
+| Name | Stellar address | Feedback | Action taken | Commit |
+|---|---|---|---|---|
+| RIJU DAS | `GD3KITJCXYGTNIQOH2O7TPZOG6HE2NRHKXZXSPMPWVLVQ6JI72HXMDZB` | First sign-in showed a 404 instead of opening sign-up. | Detect the unknown-user error and route new users to sign-up. | [`41188a1`](https://github.com/rupamghosh2006/Roastellar/commit/41188a17ca6b2d663f0aaeca4d80c80b66865093) |
+| BIBHAS BANIK | `GCDTCISXKC2JPBNGHPAYFK3MFQBX5YHO4OV3F2MJHR3HI2NFEIQNFF2E` | New user sign-in did not offer a sign-up option. | Same sign-in redirect fix. | [`41188a1`](https://github.com/rupamghosh2006/Roastellar/commit/41188a17ca6b2d663f0aaeca4d80c80b66865093) |
+| Shrikant Ajay Bhore | `GAGQ4AEPOYTJ2VLWXEWOTLVDMQNYW44CPHTK5LVHYERAL5AIOCDLEODU` | Requested improved graphics. | Refreshed dashboard layout and visual styling. | [`0718c8a`](https://github.com/rupamghosh2006/Roastellar/commit/0718c8a9f2d01fec902225e22d1734828a51e997) |
+
+## July — Level 5 user growth and feedback iteration
+
+The [July feedback export (main submission sheet)](https://docs.google.com/spreadsheets/d/1atRXev5fF9Dq-ODOT9FWAxqzmgkQwYzoQnKAkh2ywaQ/edit?gid=869760851#gid=869760851) contains **51 responses** with an average product rating of **4.63/5**. The full form captures name, email, Stellar address, location, rating, and feedback; this README lists only the minimum public evidence needed for review.
+
+### July users onboarded
+
+| Name | Stellar wallet address | Rating |
+|---|---|---|
+| Souvik Mandal | `GA4SXARZZ4RPF6N7VOAH3B5OKMFAP3FGY6M6TO3DZJL4TMU2KOVBHCIY` | 5 |
+| Milan Sen | `GDMO333LQVJ47MLF2IWDKBSL5FK3QMRSP67TVJYUB5DVNLQGHQS27V3P` | 5 |
+| Samriddha Chaudhury | `GDZ33XIUXYBPLPQSFZZXNWVZ5XVFKAH47XOTN3IQZMCTRVLYEN3WAE23` | 4 |
+| Ayan Jana | `GB4Y2KU5D5GCVSQSUDNGWQWVBEVU5L7H7V3TTVHKKLGAFZNNYFN74FRJ` | 5 |
+| Lohit Mishra | `GDYWYDOBPPM2XFQS2N7OA2XYO66C24OSBDGASSYAU7V3V4UHFIQYWCRL` | 4 |
+| Sadiya Mulani | `GCCQQTDVHNIB6INPIUS2F2VASHVH4NPWMIVX2LKFGAQY7LEU6EFISVNK` | 5 |
+| dilah777 | `GDFFR6V53O4MASRZ7WS5MSKLBDDU3AMKBCJLTB52V5JR4FZKDWVBZZB7` | 5 |
+| Somjit Dey | `GBFLQSKT3CKVIT5E4I5Y3RMTAKBOOWSXKNYIY5XJOWDTR74VZFQYOCQW` | 5 |
+| Akash De | `GAEVFEJQNKN4233GVTXH4BNNP4FVTBEKK7ZQKMWTOEE6KVO6SNNVIBYI` | 5 |
+| Bodhisatwa Dutta | `GCG34N562IX57PLLVKVC6LYQEK7VNX3HBR5KIECNT22MR5P7MOHN7ECW` | 5 |
+| Meghmallar Hazra | `GA7NBKRRW2XRPZNW7QFFCVLKUFF3WM57LMFN5J5MDATRE2GYY6BPML56` | 5 |
+| Snehasish Ghosh | `GAMZOSNLAMQ3VZLX2ZTULPSNVGXCANKSVREILMJBN4774RE7RRMZI6PM` | 5 |
+| Anubrata Sarkar | `GDWW7FUYR7MAHDX2XICVXQPX6ELFDS74TWLQ7FGMKUFYT3CDUJFYOHFI` | 5 |
+| Abhrajit Dey | `GBJCHUKZMTFSLOMNC7P4TS4VJJBTCYL3XKSOLXAUJSD56C4LHND5TWUC` | 5 |
+| Argha Ghosh | `GBX5RI2SQPFNBXQLKA4TBUUUL2AZIA4QNEYK2C7WOXHJKOPOTQ24BWLS` | 5 |
+| Aritra Banerjee | `GCY3OEI35PIKCJFUS7NNSLUN44NHYTKSY2CIWD4MHDO55JLOV3DMHB4Z` | 5 |
+| Soumyajit Nandi | `GBHP74A56PRZAPTOFYUCNSARSLCVKWO3NY2LNBT6JSWCYQBD7DSSCYD5` | 5 |
+| Soumyadeep Das | `GAPS4C574MHXGEFVOI5U7MV56IVL2SBTTR5OHRE4L3VTYSQXL32ZMQA6` | 5 |
+| Bekir Erdem | `GBGHSPQEIZGJOJJDJYG5VVIPU7THJQU2Z4B6V5VF5IHUQ2SOLIRITDQS` | 4 |
+| Debayan Adhikari | `GA7OKPRV5YHVFUWOV5FH2QPCLRAO42OCNEL3GVPQCISDNFDMJOGRIC32` | 4 |
+| Payel Roy | `GDSXQOWYYUDEIIWAL5S5LJJV4XOHJIMXBJQJCJUYIVITO3GLXRP57A2T` | 5 |
+| Sarnick Patra | `GCF4PIXE6HQRXYHN4O4BJHYKKKOADXTLTWYDP3CAKY5ZZHFWUVZUJBZW` | 5 |
+| Debpriyo Ghosal | `GDU4D7BPCGXXELMXN32IFVXDPW5F5V3RBUVZQCCK3A5Y5QXMN3OL5ODR` | 5 |
+| Rimon Kundu Chowdhury | `GDU3OPDKZ4UCL6MXKNWYPGHVGUR27G5XXEQSVKO2KT4LCCKB6BMHQZAA` | 5 |
+| Abheek Samaddar | `GBBOQTHPXWVOMRNZUEDUKCNJDU4H6FFMTHLLUX4LSYV2ZYOKKXHZQE4E` | 5 |
+| Nishant Singh | `GCX4DDJRY4BL4DV46NOOBBPNN5MTRI7J374G5JUR7YZJWAGTJRPTJ36C` | 4 |
+| Debarpan Datta | `GA5KJBEWU5AUDW5T46M42FJFYVV4J4SU6MPTFIDH7Q4NQG63RV72RR7K` | 5 |
+| Debansh Tiwari | `GBF6HZCMQE4DEDG2AR5OA6KGYFKTG4KINKPDNLLFU2KSBYJRUAIGKJC2` | 5 |
+| Anish Mitra | `GBCTUOPFS5LHGBZ5QGYRVPOB2GRL4ASFJ4WB3W5TAQLQOLKM4GSBIEB3` | 4 |
+| Sabuj Paul | `GAX74JTOIBQN5CLCWPMKKAFUJ7E2PNH3YSRILYX6J2KORKR2OCZ3F6TU` | 3 |
+| Shivam Kumar | `GBA5ZVHMY7RHUFGPXDCDXEHVR654WBTDNRU3QRK5LZYDDW4JJECJIKUQ` | 4 |
+| Ritabrata Sen | `GBZJC35OSNMPPHVP55HXGH4FUVTZR6SHXMKKQIECJUTPWLREO723IFIB` | 4 |
+| Priyanshu Dey | `GCN7BQFYZHIUIJN6ZGPN5UBJS6LPOOIEGCYYNQW7LIESACTQNBROP4U2` | 5 |
+| Anirban Chatterjee | `GBMEKOU6EA7ZQLZW6EH6725TULC4XAKVR4OURSEL45RKC6G2FQ7TGG7Y` | 4 |
+| Sagnik Mukherjee | `GA5WBTNC4HAD2XADPLKLROPT3I6KXU2JODL2LXARJ2UH63I3Y4YSSBGW` | 5 |
+| Rishav Ghoshal | `GA6YMO5EFILMMNXTGUJBAEJGP5NTYBQD3V37TPX7T46ZGG3RSOI5HTXI` | 5 |
+| Debarghya Sinha | `GBCR5Z54YS4AFKT4ETUPY7I7T6B7ANS3XL5KZEIEYCUMN5FYJINDUPM2` | 5 |
+| Arindam Majumdar | `GAJUZWH7ZF56LELGFYVJDVQIZQBI54ZNW7URCSYHIMDCP3CWGQH7TUL6` | 3 |
+| Soham Chakraborty | `GA6X6C4GXEZSQZ2U234R2NMYOI5VWJTQDUU65GDXAY5KXSE6RVWO3NKA` | 4 |
+| Koushik Bhattacharya | `GBW42XNFYJ462ECHUFS2YG66YQ3J2G62IFU332WSZIK3M4UIKTW3KQZE` | 5 |
+| Aniket Roychowdhury | `GCTOLLNNEG7W5CEXXS7X5ZYLMUPDOR3S24XJYAAUAKMLFY6ABSOFW4JL` | 5 |
+| Trisha Mukherjee | `GANWL5FLYBCGA5JMHYDDDUYAG7CKFPL34DOB2WCK5SSGBRNO6OTHI2NL` | 4 |
+| Srijita Banerjee | `GDPEKKXTZXPCUH6LQHFXYL5GWARLZTJS7IL63UQNBERMOK24ZFM2GW4T` | 4 |
+| Poulami Sen | `GBPFRD2QJORG3NA3DY3TDMVVL4BHDFI6KCV4RCXMA27OPGVRCDQNWNXS` | 5 |
+| Ishita Majumdar | `GCVI3YYVKOAXZQKVKFMFJ5IMKZ5O3LTTGEYNZDPERDR7L2HULK5P3ZIQ` | 5 |
+| Madhurima Dey | `GDQUNIFPDE6KNLKTG3S4TP4FV46MISPG2OIHXOWNVYHMNH5XI5G6VQ73` | 5 |
+| Anwesha Sinha | `GDBYORG2Z2NXAZZDUUAQLXHBZR6MSU24RPGRQKGDM5V4XGAKAPR4TZYT` | 4 |
+| Roshni Chakraborty | `GCHSF6S6C73SEBTFFLSZOPPAK6T3WXNAX6XI2NC6KTE5KAE4OYQMXAQS` | 5 |
+| Tiyasha Ghoshal | `GAVCVHZGCEBZOLS2EIVQBCR75KZID2A3JZY7JOVLSCA4UEWVQ22TKT5L` | 4 |
+| Oindrila Bhattacharya | `GDVSQMVYZX4JG65ESFNKZQXOBMDKNHYNNXTGTU5TF6TQXEM57IXNT3X2` | 4 |
+| Pritha Roychowdhury | `GCDWVWQPWQRKM4GJA3ALM3CLT4DDN6QM7H3B62BJFSTMJLSIPVOV7M5H` | 5 |
+
+### July improvements accordi Feedback matched to July improvements
+
+| Name | Stellar address | Feedback | Solution delivered | Commit |
+|---|---|---|---|---|
+| Samriddha Chaudhury | `GDZ33XIUXYBPLPQSFZZXNWVZ5XVFKAH47XOTN3IQZMCTRVLYEN3WAE23` | “The UI could be a bit better.” | Refreshed the dashboard layout and styling. | [`0718c8a`](https://github.com/rupamghosh2006/Roastellar/commit/0718c8a9f2d01fec902225e22d1734828a51e997) |
+| Lohit Mishra | `GDYWYDOBPPM2XFQS2N7OA2XYO66C24OSBDGASSYAU7V3V4UHFIQYWCRL` | Battle-room text was camouflaged by the background. | Applied battle/dashboard UI styling and readability refinements. | [`0718c8a`](https://github.com/rupamghosh2006/Roastellar/commit/0718c8a9f2d01fec902225e22d1734828a51e997) |
+| Soumyadeep Das | `GAPS4C574MHXGEFVOI5U7MV56IVL2SBTTR5OHRE4L3VTYSQXL32ZMQA6` | Requested a smoother, more optimised mobile UI. | Refreshed responsive dashboard presentation and UX styling. | [`0718c8a`](https://github.com/rupamghosh2006/Roastellar/commit/0718c8a9f2d01fec902225e22d1734828a51e997) |
+| Abheek Samaddar | `GBBOQTHPXWVOMRNZUEDUKCNJDU4H6FFMTHLLUX4LSYV2ZYOKKXHZQE4E` | “A bit more responsiveness would be great.” | Responsive UI and dashboard visual improvements. | [`0718c8a`](https://github.com/rupamghosh2006/Roastellar/commit/0718c8a9f2d01fec902225e22d1734828a51e997) |
+| Anwesha Sinha | `GDBYORG2Z2NXAZZDUUAQLXHBZR6MSU24RPGRQKGDM5V4XGAKAPR4TZYT` | Mobile UI felt “a bit laggy.” | Optimised UI presentation and refreshed mobile-facing experience. | [`0718c8a`](https://github.com/rupamghosh2006/Roastellar/commit/0718c8a9f2d01fec902225e22d1734828a51e997) |
+| Bekir Erdem | `GBGHSPQEIZGJOJJDJYG5VVIPU7THJQU2Z4B6V5VF5IHUQ2SOLIRITDQS` | Same-wallet Freighter login created a separate account; requested sharing the winning roast on X. | Resolve the managed wallet to the existing Google account; add share actions in battle results and profile history. | [`446bc78`](https://github.com/rupamghosh2006/Roastellar/commit/446bc78b535f2d5591826cfdcdc64a37a71f8897), [`9756000`](https://github.com/rupamghosh2006/Roastellar/commit/975600047bfbc54515c63f215366924f66de7378), [`b5155b5`](https://github.com/rupamghosh2006/Roastellar/commit/b5155b5afedc0073f86d2017c777637f517d2a63) |
+| Anish Mitra | `GBCTUOPFS5LHGBZ5QGYRVPOB2GRL4ASFJ4WB3W5TAQLQOLKM4GSBIEB3` | Requested previous matches on the profile. | Added protected match-history API and profile history for played/voted battles. | [`5205cf7`](https://github.com/rupamghosh2006/Roastellar/commit/5205cf7e3ac90fdd71f802109a0ead3aef646e36) |
+| Sabuj Paul | `GAX74JTOIBQN5CLCWPMKKAFUJ7E2PNH3YSRILYX6J2KORKR2OCZ3F6TU` | Google-created wallet then Freighter sign-in created a duplicate account. | Freighter lookup now resolves the existing Google account before any wallet-only account is used. | [`446bc78`](https://github.com/rupamghosh2006/Roastellar/commit/446bc78b535f2d5591826cfdcdc64a37a71f8897) |
+| Shivam Kumar | `GBA5ZVHMY7RHUFGPXDCDXEHVR654WBTDNRU3QRK5LZYDDW4JJECJIKUQ` | Requested a profile-picture option. | Added custom PNG/JPEG/WebP profile pictures with Pinata storage, validation, and rate limiting. | [`567d174`](https://github.com/rupamghosh2006/Roastellar/commit/567d174a9b0aa7f8e27d83d3488cce3e0fb23f7f) |
+| Ritabrata Sen | `GBZJC35OSNMPPHVP55HXGH4FUVTZR6SHXMKKQIECJUTPWLREO723IFIB` | After voting or staking, controls froze without clear participation state. | Lock completed vote/prediction actions, show completion state, and persist participation status after refresh. | [`7ab7331`](https://github.com/rupamghosh2006/Roastellar/commit/7ab73313e5ca326f0d7274aad02daf33d8dbc7b4), [`7a6b0bf`](https://github.com/rupamghosh2006/Roastellar/commit/7a6b0bf55368e8a4f59700b744cf2445e61f90c8) |
+
+### July product improvements without a matching feedback response
+
+| Product improvement | Outcome | Commit |
+|---|---|---|
+| Re-onboarding flow | Prevent a completed user from being mistakenly sent through onboarding again. | [`a8ea9c0`](https://github.com/rupamghosh2006/Roastellar/commit/a8ea9c0d35f9f6d064509ccac638302dcfdb71c5) |
+| Custom battle duration | Added extended voting time and creator-selected battle duration. | [`e0afa88`](https://github.com/rupamghosh2006/Roastellar/commit/e0afa88bf7ec7344412bce8f631905f7b1acf352) |
+| Anonymous live voting | Removed per-player totals, leader highlighting, and prediction backing during live voting; retain only aggregate activity. | [`2d0fd76`](https://github.com/rupamghosh2006/Roastellar/commit/2d0fd76ce2b5e91a80673078aec1ed8737bf46fa) |
+| Spectator-safe submission UI | Restrict the Roast Submission panel to the two battle players. | [`7c6eaf3`](https://github.com/rupamghosh2006/Roastellar/commit/7c6eaf37573058519f004c9cd3002a86347a2ab5) |
+| Full leaderboard | Return every non-banned user when no limit is supplied. | [`212660c`](https://github.com/rupamghosh2006/Roastellar/commit/212660c129fda7c4e67b3e9eefa4112c034a1329) |
+| Battle reports | Add a protected historical report with players, voters, predictions, payouts, Stellar Expert links, and transaction ledger. | [`c3349bc`](https://github.com/rupamghosh2006/Roastellar/commit/c3349bcfc0b98d7ffcfcd5a4504377f9a913d8af) |
+
+## Submission checklist
+
+- [x] Public GitHub repository and production deployment
+- [x] Stellar testnet contract deployment address
+- [x] Product UI, mobile-responsive, monitoring, analytics, and transaction screenshots embedded above
+- [x] Live demo video and pitch deck links
+- [x] June proof of 10+ onboarded wallet users and feedback summary
+- [x] July proof of 50+ users, source feedback export, and feedback-to-commit iteration summary
+- [x] 20+ meaningful commits in public Git history
 
 ## License
 

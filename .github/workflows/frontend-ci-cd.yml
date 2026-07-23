@@ -11,6 +11,9 @@ on:
       - 'Frontend/**'
       - '.github/workflows/frontend-ci-cd.yml'
 
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest

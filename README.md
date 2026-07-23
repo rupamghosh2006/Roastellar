@@ -193,7 +193,7 @@ The [July feedback export (main submission sheet)](https://docs.google.com/sprea
 | Oindrila Bhattacharya | `GDVSQMVYZX4JG65ESFNKZQXOBMDKNHYNNXTGTU5TF6TQXEM57IXNT3X2` | 4 |
 | Pritha Roychowdhury | `GCDWVWQPWQRKM4GJA3ALM3CLT4DDN6QM7H3B62BJFSTMJLSIPVOV7M5H` | 5 |
 
-### July improvements accordi Feedback matched to July improvements
+### July improvements according to user feedback
 
 | Name | Stellar address | Feedback | Solution delivered | Commit |
 |---|---|---|---|---|
@@ -208,7 +208,7 @@ The [July feedback export (main submission sheet)](https://docs.google.com/sprea
 | Shivam Kumar | `GBA5ZVHMY7RHUFGPXDCDXEHVR654WBTDNRU3QRK5LZYDDW4JJECJIKUQ` | Requested a profile-picture option. | Added custom PNG/JPEG/WebP profile pictures with Pinata storage, validation, and rate limiting. | [`567d174`](https://github.com/rupamghosh2006/Roastellar/commit/567d174a9b0aa7f8e27d83d3488cce3e0fb23f7f) |
 | Ritabrata Sen | `GBZJC35OSNMPPHVP55HXGH4FUVTZR6SHXMKKQIECJUTPWLREO723IFIB` | After voting or staking, controls froze without clear participation state. | Lock completed vote/prediction actions, show completion state, and persist participation status after refresh. | [`7ab7331`](https://github.com/rupamghosh2006/Roastellar/commit/7ab73313e5ca326f0d7274aad02daf33d8dbc7b4), [`7a6b0bf`](https://github.com/rupamghosh2006/Roastellar/commit/7a6b0bf55368e8a4f59700b744cf2445e61f90c8) |
 
-### July product improvements without a matching feedback response
+### Some add-on July product improvements
 
 | Product improvement | Outcome | Commit |
 |---|---|---|

@@ -54,5 +54,12 @@
     "postcss": "^8.5.12",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "js-cookie": "3.0.7",
+    "node-fetch": "2.6.7",
+    "postcss": "$postcss",
+    "sharp": "0.35.0",
+    "ws": "8.21.1"
   }
 }

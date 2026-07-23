@@ -16,6 +16,20 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 - **Stellar testnet contract:** [`CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`](https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA)
 - **Pitch deck:** [View the Level 5 pitch deck](https://drive.google.com/file/d/11yevUYddMpD204HwPB4WqI1QxjTe9YIT/view?usp=sharing)
 - **Demo video:** [Watch the complete product walkthrough](https://youtu.be/YNFZHxYcHtc)
+- **Architecture:** [Read the production architecture](./ARCHITECTURE.md)
+- **Security:** [Read the security checklist](./security_checklist.md)
+- **Quick setup:** [Read the getting-started guide](./GettingStarted.md)
+
+## Quick navigation
+
+- [Quick setup, CI/CD, and contract deployment](./GettingStarted.md)
+- [Production architecture](./ARCHITECTURE.md)
+- [Security checklist](./security_checklist.md)
+- [Product, mobile, monitoring, and transaction screenshots](#evidence-screenshots)
+- [June Level 4 evidence](#june--level-4-evidence)
+- [July 50+ user proof](#july-users-onboarded)
+- [July feedback iteration summary](#feedback-matched-to-july-improvements)
+- [Submission checklist](#submission-checklist)
 
 ## Demo video
 
@@ -221,13 +235,15 @@ The [July feedback export (main submission sheet)](https://docs.google.com/sprea
 
 ## Submission checklist
 
-- [x] Public GitHub repository and production deployment
-- [x] Stellar testnet contract deployment address
-- [x] Product UI, mobile-responsive, monitoring, analytics, and transaction screenshots embedded above
-- [x] Live demo video and pitch deck links
-- [x] June proof of 10+ onboarded wallet users and feedback summary
-- [x] July proof of 50+ users, source feedback export, and feedback-to-commit iteration summary
-- [x] 20+ meaningful commits in public Git history
+- [x] Public GitHub repository
+- [x] Minimum 20+ meaningful commits
+- [x] Live deployed application
+- [x] PPT/Pitch deck link
+- [x] Demo video link
+- [x] Proof of 50+ users
+- [x] Screenshots of analytics or transaction activity
+- [x] Updated README and documentation
+- [x] User feedback iteration summary
 
 ## License
 

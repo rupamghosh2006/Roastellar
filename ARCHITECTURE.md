@@ -1,540 +1,154 @@
-# Roastellar Architecture
+# Roastellar architecture
 
-## Overview
+Roastellar is a production MVP for two-player roast battles on Stellar testnet. The web application combines a responsive Next.js client, an authenticated Node.js API with real-time battle updates, MongoDB application data, Pinata/IPFS content storage, and a Soroban contract for signed battle lifecycle actions.
 
-Roastellar is a fully on-chain roast battle platform built on Stellar Soroban. Players create battles, submit roasts, and spectators vote to determine winners. The platform features real-time updates, wallet integration, and prediction markets.
+## System context
 
-## System Architecture
+```mermaid
+flowchart TB
+    U["Player or spectator"] --> F["Next.js frontend\nVercel"]
+    F -->|"HTTPS REST API"| B["Express API\nRender"]
+    F <-->|"Authenticated Socket.IO"| B
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                              CLIENT LAYER                                │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │  Next.js 16 (App Router)                                         │   │
-│  │  ├── Clerk Authentication (OAuth, JWT sessions)                   │   │
-│  │  ├── Freighter Wallet Integration (Stellar)                      │   │
-│  │  ├── Socket.IO Client (Real-time updates)                        │   │
-│  │  └── TailwindCSS + Framer Motion (UI)                             │   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                             BACKEND LAYER                                │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │  Node.js + Express Server                                         │   │
-│  │  ├── REST API Routes                                              │   │
-│  │  ├── Socket.IO Server (Real-time battle events)                   │   │
-│  │  ├── MongoDB (Persistent data storage)                            │   │
-│  │  └── Clerk Webhook Handler (User sync)                            │   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-│                                    │                                    │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │  Services Layer                                                  │   │
-│  │  ├── BattleService (Match lifecycle)                             │   │
-│  │  ├── BattleChainService (Soroban contract calls)                  │   │
-│  │  ├── BattleEscrowService (XLM transfers)                         │   │
-│  │  ├── PredictionService (Prediction markets)                      │   │
-│  │  ├── WalletService (Stellar wallet management)                    │   │
-│  │  └── IPFSService (Content storage)                               │   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    ▼                               ▼
-┌─────────────────────────────────┐   ┌─────────────────────────────────┐
-│      BLOCKCHAIN LAYER           │   │        STORAGE LAYER            │
-│  ┌───────────────────────────┐ │   │  ┌───────────────────────────┐ │
-│  │  Stellar Soroban          │ │   │  │  MongoDB Atlas             │ │
-│  │  ├── Contract: roastellar │ │   │  │  ├── Users collection      │ │
-│  │  ├── Network: Testnet     │ │   │  │  ├── Battles collection    │ │
-│  │  └── RPC: soroban-testnet │ │   │  │  ├── Predictions collection │ │
-│  └───────────────────────────┘ │   │  │  └── Analytics collection │ │
-│  ┌───────────────────────────┐ │   │  └───────────────────────────┘ │
-│  │  Stellar Horizon          │ │   │  ┌───────────────────────────┐ │
-│  │  ├── XLM Transfers        │ │   │  │  IPFS (Pinata/Local)      │ │
-│  │  └── Account Queries       │ │   │  │  ├── Roast content CID    │ │
-│  └───────────────────────────┘ │   │  │  └── Topic CID storage    │ │
-└─────────────────────────────────┘   │  └───────────────────────────┘ │
-                                      └─────────────────────────────────┘
+    B --> A["Clerk\nidentity and session verification"]
+    B --> M["MongoDB\nusers, battles, votes, predictions, analytics"]
+    B --> P["Pinata / IPFS\nroasts and profile images"]
+    B --> H["Stellar Horizon\nXLM account and payment operations"]
+    B --> R["Soroban RPC\nStellar testnet"]
+    R --> C["Roastellar contract\nmatch state and signed actions"]
 ```
 
-## Frontend Architecture
+## Component responsibilities
 
-### Tech Stack
-- **Framework:** Next.js 16.2.4 (App Router)
-- **Auth:** Clerk 7.2.5 (OAuth + JWT sessions)
-- **Wallet:** @stellar/freighter-api 6.0.1
-- **Real-time:** Socket.IO Client 4.7.2
-- **Styling:** TailwindCSS 3.4.1 + Framer Motion 11.0.3
-- **State:** Zustand 4.5.0
+| Component | Responsibility |
+|---|---|
+| **Frontend** | Provides onboarding, wallet, dashboard, battle, leaderboard, profile, metrics, and report pages. It renders loading/error states and calls the API through a typed/normalised client. |
+| **Express API** | Applies authentication, input validation, rate limits, battle orchestration, payment/contract integrations, report generation, and public metrics. |
+| **Socket.IO** | Authenticates connections and pushes lobby and battle-room updates without relying on client-side polling alone. |
+| **MongoDB** | Stores the application read model: users, battles, vote and prediction records, analytics events, and transaction/report metadata. |
+| **Pinata/IPFS** | Stores CID-addressed roast/topic content and approved profile image uploads. |
+| **Stellar testnet** | Provides account/payment operations through Horizon and signed Soroban contract interactions through RPC. |
+| **Soroban contract** | Enforces contract-level match creation, joining, roast submission, voting, predictions, finalisation, and badge state. |
 
-### Pages
+## Frontend
 
-| Route | Description |
-|-------|-------------|
-| `/` | Landing page with Hero, Features, HowItWorks |
-| `/sign-in` | Clerk authentication |
-| `/sign-up` | Clerk registration |
-| `/onboarding` | Mini-game + wallet creation flow |
-| `/dashboard` | Main hub with stats and quick actions |
-| `/battles` | List of open battles |
-| `/battle/[id]` | Live battle room with real-time updates |
-| `/leaderboard` | Rankings by XP and wins |
-| `/wallet` | Wallet management and XLM display |
-| `/profile` | User profile, badges, battle history |
+The frontend is a Next.js 16 App Router application written in TypeScript. Clerk protects application routes; Freighter support is available for Stellar wallet sign-in and use.
 
-### Component Structure
+### Main routes
 
-```
-Frontend/src/
-├── components/
-│   ├── Sidebar.tsx           # Navigation sidebar (desktop) + bottom nav (mobile)
-│   ├── Navbar.tsx             # Top navigation bar
-│   ├── BattleCard.tsx         # Battle preview card
-│   ├── LeaderboardTable.tsx   # Ranking display table
-│   ├── MiniGame.tsx           # Onboarding keyboard game
-│   ├── WalletCard.tsx         # Wallet info display
-│   ├── WalletReveal.tsx       # First-time wallet reveal modal
-│   ├── FreighterConnectCard.tsx # Wallet connection prompt
-│   ├── PredictionPanel.tsx    # Prediction market UI
-│   ├── StatCard.tsx           # Stats display card
-│   ├── Hero.tsx               # Landing page hero section
-│   ├── Features.tsx           # Landing page features
-│   ├── HowItWorks.tsx         # Landing page how-to
-│   ├── LoadingScreen.tsx      # Loading states
-│   └── ClerkProvider.tsx      # Clerk integration wrapper
-├── lib/
-│   ├── api.ts                 # REST API client with normalizers
-│   ├── socket.ts              # Socket.IO event handlers
-│   ├── freighter.ts           # Freighter wallet SDK wrapper
-│   ├── hooks.ts               # Custom React hooks
-│   ├── types.ts               # TypeScript interfaces
-│   └── utils.ts               # Utility functions
-└── app/
-    └── [routes]               # Next.js App Router pages
-```
+| Route | Purpose |
+|---|---|
+| `/` | Entry point that directs authenticated users to their next required step. |
+| `/sign-in`, `/sign-up` | Clerk authentication. New-user errors are redirected to sign-up. |
+| `/onboarding` | Creates or connects a wallet and completes the onboarding flow. |
+| `/dashboard`, `/battles`, `/battle/[id]` | Battle discovery, creation/joining, live battle participation, voting, and predictions. |
+| `/battle/[id]/report` | Protected historical battle report: players, votes, predictions, payouts, and transaction ledger. |
+| `/profile` | Profile editing, Pinata-backed avatar upload, previous matches, and sharing. |
+| `/wallet`, `/leaderboard`, `/metrics` | Wallet information, rankings, and public usage metrics. |
 
-### API Client Pattern
+### Client integration pattern
 
-The frontend uses a normalized API pattern (`api.ts`) that:
-1. Makes Axios requests to backend
-2. Receives backend response formats
-3. Normalizes data structures for frontend use
-4. Returns typed data to components
+- `Frontend/src/lib/api.ts` centralises API routes, authentication headers, response normalisation, battle-report types, and analytics metrics requests.
+- `Frontend/src/lib/socket.ts` manages authenticated Socket.IO updates for live battles.
+- The battle page requests the authenticated participation status after load, so vote and prediction locks persist after refresh.
+- The responsive layout uses a desktop sidebar and mobile-oriented navigation/components.
 
-## Backend Architecture
+## Backend
 
-### Tech Stack
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB (Mongoose ODM)
-- **Real-time:** Socket.IO 4.x
-- **Auth:** Clerk (webhooks + JWT verification)
-- **Blockchain:** Stellar SDK + Soroban RPC
+The backend runs Node.js with Express, Socket.IO, Mongoose, Zod, and the Stellar SDK.
 
-### Module Structure
+### API modules
 
-```
-Backend/src/
-├── app.js                     # Express app configuration
-├── server.js                  # HTTP server entry point
-├── config/
-│   ├── clerk.js              # Clerk configuration
-│   ├── stellar.js             # Stellar SDK setup
-│   ├── socket.js              # Socket.IO configuration
-│   ├── db.js                  # MongoDB connection
-│   └── firebase.js           # Firebase (unused currently)
-├── modules/
-│   ├── users/
-│   │   ├── models/user.model.js
-│   │   ├── routes/user.routes.js
-│   │   ├── controllers/user.controller.js
-│   │   └── services/user.service.js
-│   ├── battles/
-│   │   ├── models/
-│   │   │   ├── battle.model.js
-│   │   │   ├── battleVote.model.js
-│   │   │   └── battleCounter.model.js
-│   │   ├── routes/battle.routes.js
-│   │   ├── controllers/battle.controller.js
-│   │   └── services/
-│   │       ├── battle.service.js       # Core battle logic
-│   │       ├── battleChain.service.js  # Soroban contract calls
-│   │       ├── battleEscrow.service.js # XLM transfer logic
-│   │       ├── battleTimer.service.js  # Timer management
-│   │       └── stellar.service.js       # Stellar helpers
-│   ├── predictions/
-│   │   ├── models/prediction.model.js
-│   │   ├── routes/prediction.routes.js
-│   │   ├── controllers/prediction.controller.js
-│   │   └── services/prediction.service.js
-│   ├── leaderboard/
-│   │   ├── routes/leaderboard.routes.js
-│   │   └── controllers/leaderboard.controller.js
-│   ├── wallet/
-│   │   ├── wallet.routes.js
-│   │   ├── wallet.controller.js
-│   │   └── wallet.service.js
-│   ├── auth/
-│   │   ├── routes/clerk.routes.js
-│   │   ├── routes/auth.routes.js
-│   │   ├── controllers/auth.controller.js
-│   ��   └── services/auth.service.js
-│   ├── admin/
-│   │   ├── routes/admin.routes.js
-│   │   └── controllers/admin.controller.js
-│   ├── uploads/
-│   │   ├── routes/upload.routes.js
-│   │   └── services/upload.service.js
-│   └── analytics/
-│       └── models/analytics.model.js
-├── sockets/
-│   └── battle.socket.js       # Socket.IO battle event handlers
-├── middlewares/
-│   ├── clerk.middleware.js     # Clerk JWT verification
-│   ├── auth.middleware.js      # Auth checks
-│   ├── validate.middleware.js  # Request validation
-│   └── error.middleware.js     # Error handling
-└── utils/
-    ├── constants.js            # App constants
-    ├── logger.js               # Logging utility
-    └── apiResponse.js          # Response helpers
+| Prefix | Responsibility |
+|---|---|
+| `/api/auth` | Wallet challenge/verification and wallet-session issuance. A Freighter login resolves an existing linked Google account before creating a wallet-only identity. |
+| `/api/clerk` | Clerk webhook ingestion; mounted before JSON parsing so signature verification can use the raw body. |
+| `/api/users` | Current user, profile updates, Pinata avatar upload, match history, and leaderboard data. |
+| `/api/wallet` | Managed wallet creation, balance retrieval, testnet funding, and controlled secret export. |
+| `/api/battles` | Create, join, submit roast, vote, finalise/cancel, participation status, open battles, and protected reports. |
+| `/api/predictions` | One prediction per eligible user and prediction retrieval. |
+| `/api/leaderboard` | Rankings; an omitted limit returns all non-banned users. |
+| `/api/analytics/metrics` | Public aggregate adoption, wallet, battle, vote, prediction, and recent-activity counts. |
+| `/health` | Health/readiness view for the API, MongoDB, and Stellar configuration. |
+
+### Real-time layer
+
+Socket.IO accepts either a verified Clerk token or a verified wallet session token. After authentication, a socket can join the lobby or a battle-specific room. Battle events update the database/chain services and publish the new state to the appropriate room.
+
+### Data model and indexing
+
+MongoDB holds the application-facing data needed for discovery, permissions, reporting, and analytics. Key collections include `users`, `battles`, `battlevotes`, `predictions`, and `analytics`.
+
+The implementation indexes high-traffic query paths, including:
+
+- user identity and leaderboard fields;
+- match identifiers, lifecycle status, and player/winner history;
+- unique battle-plus-voter and battle-plus-predictor records to prevent duplicate actions; and
+- analytics event/time and user/time queries.
+
+## Battle lifecycle
+
+1. An authenticated player creates a battle with a topic, entry fee, and optional custom duration.
+2. The API records the application state, coordinates the Stellar/Soroban operation, and publishes the update.
+3. A second player joins and both players submit CID-addressed roasts.
+4. Eligible users vote once and may place one prediction. The frontend persists completed-action state through the participation-status API.
+5. During live voting, the interface shows aggregate activity only—no per-player vote total, leading-player highlight, or per-player backing amount.
+6. On finalisation, the backend determines and records the result, writes payout/refund transaction details where available, and creates the data needed for the protected report page.
+
+The database is the application's read/reporting layer; the Soroban contract holds the corresponding signed on-chain match actions and state.
+
+## Soroban contract
+
+Source: `contracts/roastellar/src/lib.rs`
+
+The contract is built with Rust 2021 and `soroban-sdk` 27. It maintains contract types for users, matches, predictions, badges, and per-match participation markers.
+
+| Contract action | Purpose |
+|---|---|
+| `register_user`, `update_profile` | Register a user and update its profile CID. |
+| `create_match`, `join_match` | Create an open match and add the second player. |
+| `submit_roast` | Store each player's roast CID once the match is active. |
+| `vote`, `predict` | Record one vote/prediction with contract-level authorization. |
+| `finalize_match` | Resolve the match, update player outcomes, and manage relevant badge state. |
+
+- **Network:** Stellar testnet
+- **Contract ID:** [`CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`](https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA)
+
+## Security and reliability controls
+
+- Clerk and wallet-token verification protect API and Socket.IO access.
+- Battle writes are rate-limited; profile-image uploads use a separate limiter.
+- Zod schemas and text/CID sanitisation validate request bodies before service execution.
+- Helmet, configured CORS origins, JSON body limits, and central error handling protect the HTTP edge.
+- Profile image uploads accept only PNG, JPEG, and WebP up to 5 MB before Pinata storage.
+- The health endpoint exposes MongoDB readiness and Stellar configuration status for uptime monitoring.
+- Analytics writes are non-blocking; metrics are calculated from indexed MongoDB collections.
+- At startup the backend recovers eligible stuck battles before accepting traffic.
+
+## Deployment and observability
+
+| Service | Production role |
+|---|---|
+| **Vercel** | Hosts the Next.js frontend. |
+| **Render** | Hosts the Express/Socket.IO backend. |
+| **MongoDB** | Persistent application data and analytics. |
+| **Stellar testnet** | Contract and payment verification environment. |
+| **Monitoring** | Calls `/health`; the public `/api/analytics/metrics` endpoint feeds the metrics dashboard. |
+
+Useful project paths:
+
+```text
+Frontend/src/app/                         Next.js routes and pages
+Frontend/src/lib/api.ts                   Typed API client and normalisers
+Backend/src/app.js                        HTTP middleware, routes, and health check
+Backend/src/config/socket.js              Socket.IO authentication and CORS
+Backend/src/modules/battles/services/     Battle, chain, escrow, timer, and IPFS services
+Backend/src/modules/analytics/            Event tracking and aggregate metrics
+contracts/roastellar/src/lib.rs           Soroban contract
+render.yaml                               Backend deployment configuration
+Frontend/vercel.json                      Frontend deployment configuration
 ```
 
-### REST API Routes
+## Related documentation
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/users/me` | GET | Get current user profile |
-| `/api/users/me` | PATCH | Update user profile |
-| `/api/leaderboard` | GET | Get leaderboard rankings |
-| `/api/battles/open` | GET | List open battles |
-| `/api/battles/:id` | GET | Get battle details |
-| `/api/battles/create` | POST | Create new battle |
-| `/api/battles/join/:id` | POST | Join a battle |
-| `/api/battles/submit-roast/:id` | POST | Submit roast text |
-| `/api/battles/vote/:id` | POST | Cast vote |
-| `/api/battles/finalize/:id` | POST | Finalize battle |
-| `/api/predictions/:id` | GET | Get prediction summary |
-| `/api/predictions/place/:id` | POST | Place prediction |
-| `/api/wallet/create` | POST | Create wallet |
-| `/api/wallet/me` | GET | Get wallet info |
-| `/api/wallet/export-secret` | POST | Export secret key |
-| `/api/clerk/webhook` | POST | Clerk webhook |
-
-### Socket.IO Events
-
-**Client → Server:**
-- `join_lobby` - Join lobby room
-- `join_battle` - Join battle room
-- `leave_battle` - Leave battle room
-- `start_match` - Start battle after P2 joins
-- `submit_roast` - Submit roast text
-- `cast_vote` - Cast spectator vote
-- `place_prediction` - Place prediction bet
-
-**Server → Client:**
-- `open_battles_updated` - Lobby battles changed
-- `player_joined` - Player joined battle
-- `countdown_tick` - Pre-battle countdown
-- `battle_started` - Battle正式��始
-- `roast_submitted` - Roast submitted
-- `voting_started` - Voting phase started
-- `vote_update` - Vote count updated
-- `spectator_count` - Spectator count updated
-- `battle_result` - Battle concluded
-- `leaderboard_updated` - Rankings changed
-- `error_message` - Error notification
-
-### Database Models
-
-**User Schema:**
-- clerkId, username, email
-- xp, wins, losses, rankPoints
-- walletAddress, walletBalance
-- badges[], onboardingCompleted
-
-**Battle Schema:**
-- matchId, topic, entryFee
-- player1, player2 (ref: User)
-- player1Wallet, player2Wallet
-- roast1, roast2 + CIDs
-- votesPlayer1, votesPlayer2
-- status (open/active/voting/ended/draw/cancelled)
-- winner, txHash, pot
-- chain (Soroban metadata), finance (escrow metadata)
-
-**Prediction Schema:**
-- battleId (ref: Battle)
-- predictor (ref: User)
-- selectedPlayer (ref: User)
-- amount, settled, won
-
-## Smart Contract Architecture
-
-### Contract: Roastellar
-
-**Contract ID (Testnet):** `CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`
-
-**Network:** Stellar Testnet
-
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA
-
-### Contract Functions
-
-| Function | Description |
-|----------|-------------|
-| `register_user` | Register new user with username |
-| `get_user` | Get user data |
-| `update_profile` | Update profile CID |
-| `create_match` | Create new battle (entry fee required) |
-| `get_match` | Get match data |
-| `join_match` | Join an open match |
-| `submit_roast` | Submit roast content CID |
-| `vote` | Cast vote for player |
-| `predict` | Place prediction bet |
-| `finalize_match` | End match, award winner |
-| `has_badge` | Check badge ownership |
-
-### Contract Storage
-
-```rust
-// DataKey enum for storage
-enum DataKey {
-    User(Address),
-    Match(u32),
-    UserBadge(Address, Badge),
-    Prediction(u32, Address),
-    MatchCount,
-    HasJoined(Address, u32),
-    HasVoted(Address, u32)
-}
-
-// MatchStatus enum
-enum MatchStatus {
-    Open,
-    Active,
-    Ended,
-    Draw
-}
-
-// Badge enum
-enum Badge {
-    FirstWin,   // Awarded on first win
-    FiveWins,   // Awarded on 5th win
-    TenMatches  // Awarded after 10 matches
-}
-```
-
-### Contract Lifecycle
-
-```
-create_match() → join_match() → submit_roast() (both) → vote() (spectators) → finalize_match()
-    │               │                │                      │
-    │               │                │                      ▼
-    │               │                └────────────────── Draw (if tied)
-    │               │
-    │               ▼
-    └──────────────► Active status
-                         │
-                         ▼
-                      Ended status
-                      (winner awarded)
-```
-
-## Battle Lifecycle
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                        BATTLE LIFECYCLE                          │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  1. CREATE         User creates battle with topic & entry fee    │
-│                    └─► Battle status: OPEN                       │
-│                    └─► Smart contract: create_match()           │
-│                                                                  │
-│  2. JOIN            Second player joins                         │
-│                    └─► Battle status: ACTIVE                     │
-│                    └─► Smart contract: join_match()            │
-│                    └─► 3-second countdown begins                 │
-│                                                                  │
-│  3. ROAST           Both players submit roasts                   │
-│                    └─► Roast text → IPFS → CID                  │
-│                    └─► Smart contract: submit_roast()           │
-│                    └─► Status → VOTING when both submitted      │
-│                                                                  │
-│  4. VOTE            Spectators cast votes                        │
-│                    └─► One vote per spectator                    │
-│                    └─��� Smart contract: vote()                  │
-│                    └─► Real-time vote count via Socket.IO       │
-│                                                                  │
-│  5. FINALIZE        Timer ends or manual finalize               │
-│                    └─► Compare votes                             │
-│                    └─► Ended (winner) or Draw (tied)           │
-│                    └─► Smart contract: finalize_match()        │
-│                    └─► Winner: +XP, +Rank, Badge check         │
-│                    └─► XLM payout from escrow                    │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-## Escrow & Financial Flow
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      ESCROW FLOW                                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Player 1 creates battle (entry fee: 10 XLM)                     │
-│  └─► 10 XLM debited from P1 wallet → Escrow wallet              │
-│                                                                  │
-│  Player 2 joins                                                  │
-│  └─► 10 XLM debited from P2 wallet → Escrow wallet              │
-│                                                                  │
-│  ┌─────────────┐      ┌─────────────┐      ┌─────────────┐     │
-│  │  P1 Wallet   │      │   Escrow    │      │  P2 Wallet  │     │
-│  │  -10 XLM    │      │  +20 XLM    │      │  -10 XLM   │     │
-│  └─────────────┘      └─────────────┘      └─────────────┘     │
-│                                                                  │
-│  Winner determined (P1 wins with 5 votes vs 3)                  │
-│  └─► 19.8 XLM sent to P1 (98%, 1% platform fee)                │
-│  └─► 0.2 XLM retained as platform fee                           │
-│                                                                  │
-│  ┌─────────────┐      ┌─────────────┐                          │
-│  │  P1 Wallet   │      │   Escrow    │                          │
-│  │  +19.8 XLM  │      │  -20 XLM    │                          │
-│  └─────────────┘      └─────────────┘                          │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Environment Variables
-
-### Backend (.env)
-
-```bash
-# Stellar
-STELLAR_NETWORK=testnet
-STELLAR_CONTRACT_ID=CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA
-STELLAR_BATTLE_SECRET=<deployer_secret>
-STELLAR_BATTLE_PUBLIC=GAYWZSX43WUBRHM3F2QCWBL6ZOYSH7V5EOQOYMG6SMTGMM24RFEFCMHC
-STELLAR_ESCROW_SECRET=<escrow_secret>
-STELLAR_ESCROW_PUBLIC=<escrow_public>
-STELLAR_RPC_URL=https://soroban-testnet.stellar.org
-
-# Battle Config
-BATTLE_ROAST_TIME_SECONDS=60
-BATTLE_VOTING_TIME_SECONDS=30
-BATTLE_VOTE_STAKE_XLM=0
-BATTLE_VOTING_FINALIZE_GRACE_SECONDS=8
-BATTLE_START_COUNTDOWN_SECONDS=3
-
-# App
-PORT=3001
-MONGODB_URI=mongodb+srv://...
-CLERK_PUBLISHABLE_KEY=<clerk_key>
-CLERK_SECRET_KEY=<clerk_secret>
-CLERK_WEBHOOK_SECRET=<webhook_secret>
-
-# Security
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-CLIENT_ORIGINS=https://roastellar.vercel.app
-```
-
-### Frontend (.env.local)
-
-```bash
-NEXT_PUBLIC_API_URL=https://roastellar.onrender.com
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<clerk_key>
-```
-
-## Data Flow Diagrams
-
-### User Onboarding Flow
-
-```
-┌──────────┐     ┌──────────────┐     ┌─────────────┐     ┌─��────────┐
-│  Clerk   │────▶│  Mini Game   │────▶│  Freighter  │────▶│ MongoDB  │
-│  Sign-in │     │  (Score > 5) │     │   Wallet     │     │  +User   │
-└──────────┘     └──────────────┘     └─────────────┘     └──────────┘
-                                              │
-                                              ▼
-                                    ┌─────────────────┐
-                                    │ Stellar Testnet │
-                                    │  Fund Account   │
-                                    └─────────────────┘
-```
-
-### Battle Creation Flow
-
-```
-Client                    Backend                     Blockchain
-  │                           │                            │
-  ├── create_battle(topic)───▶│                            │
-  │                           ├──Validate & Save──▶MongoDB  │
-  │                           │                            │
-  │                           ├──create_match()────────────▶│
-  │                           │◀───matchId──────────────────│
-  │◀──Response with matchId──┤                            │
-  │                           │                            │
-```
-
-### Real-time Voting Flow
-
-```
-┌─────────┐        ┌─────────┐        ┌─────────┐        ┌─────────┐
-│Player 1 │        │ Server  │        │MongoDB  │        │Soroban  │
-└────┬────┘        └────┬────┘        └────┬────┘        └────┬────┘
-     │                 │                 │                 │
-     │cast_vote(P1)────▶│                 │                 │
-     │                 │vote()────────────────────────────────▶│
-     │                 │◀───────────────vote recorded──────────│
-     │                 │                 │                 │
-     │                 │Update votes──▶MongoDB               │
-     │                 │                 │                 │
-     │◀─vote_update───│                 │                 │
-     │◀─vote_update───│                 │                 │
-┌─────────┐        ┌─────────┐        ┌─────────┐        ┌─────────┐
-│Player 2 │        │ Spect.1 │        │ Spect.2 │        │ Spect.N │
-└─────────┘        └─────────┘        └─────────┘        └─────────┘
-```
-
-## Security Considerations
-
-1. **Authentication:** Clerk JWT verification on all protected routes
-2. **CORS:** Allowlist-based origin checking
-3. **Rate Limiting:** 100 requests per 15 minutes per IP
-4. **Input Validation:** Request validation middleware
-5. **Wallet Security:** Secret keys only accessible via dedicated export endpoint with auth
-6. **Contract Auth:** Soroban `require_auth()` on all user actions
-7. **Vote Prevention:** One vote per address per match (on-chain + off-chain)
-
-## Deployment
-
-### Frontend (Vercel)
-- **URL:** https://roastellar.vercel.app
-- **Framework:** Next.js with Edge Runtime
-- **Build:** `npm run build`
-
-### Backend (Render)
-- **URL:** https://roastellar.onrender.com
-- **Runtime:** Node.js 20
-- **Database:** MongoDB Atlas
-- **Features:** Auto-deploy from GitHub
-
-### Smart Contract
-- **Network:** Stellar Testnet
-- **Deployed:** Via `stellar contract deploy`
-- **Contract ID:** `CBA5M4RLMEWHZ7CNKHA3P6HZ6WGXI7C7KY5TU7YMVZJH262FOAH6BBSA`
-
-## Future Architecture Considerations
-
-1. **Mainnet Migration:** Move from testnet to Stellar Public Network
-2. **Payment Token:** Introduce custom token (RST) for platform economy
-3. **NFT Badges:** Mint badges as Soroban tokens
-4. **Tournament Mode:** Multi-round bracket system
-5. **Spectator Betting:** Allow spectators to bet XLM on outcomes
-6. **AI Roast Generator:** AI-assisted roast suggestions
-7. **Leaderboard Persistence:** Cached leaderboard with periodic sync
+- [README](./README.md)

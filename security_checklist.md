@@ -1,209 +1,141 @@
-# Completed Security Checklist
+# Roastellar security checklist
 
-This document tracks required security controls for Roastellar and maps each control to implementation evidence in the current codebase.
+This checklist records security controls verified against the current source tree on **23 July 2026**. It is implementation evidence for the production testnet MVP; it is not a substitute for an independent security audit or a mainnet readiness review.
 
 ## Scope
 
-- Backend: `Backend/src/**`
-- Frontend: `Frontend/src/**`
-- Repository hygiene and secrets handling: root and app-level `.gitignore` files
+- API and Socket.IO backend: `Backend/src/**`
+- Web client: `Frontend/src/**`
+- Soroban contract: `contracts/roastellar/src/lib.rs`
+- Deployment/configuration hygiene: repository `.gitignore` files and environment templates
 
-## Checklist Status Summary
+## Current testnet controls
 
-| Control | Status | Notes |
+| Control | Status | Implementation evidence |
 |---|---|---|
-| auth protection | PASS | Protected API routes enforce bearer token auth (Clerk or wallet JWT). |
-| route protection | PASS | Backend route guards + frontend middleware protection pattern in place. |
-| validation | PASS | Request payload validation with `zod` and route-level validators on critical write endpoints. |
-| rate limiting | PASS | Global `/api` limiter plus tighter write/prediction limiters. |
-| env secrets | PASS | Secrets sourced from env vars; `.env` patterns are gitignored. |
-| duplicate vote prevention | PASS | App-level duplicate check plus DB unique compound index. |
-| input sanitization | PASS | Centralized sanitizer utility is applied across battle, prediction, wallet-auth, and profile update paths. |
-| wallet secret encryption | PASS | Managed wallet secrets encrypted at rest before persistence. |
+| Identity authentication | Implemented | Clerk tokens and signed wallet-session tokens are verified by `clerk.middleware.js`. |
+| Freighter wallet proof | Implemented | A random challenge nonce, short expiry, public-key validation, and signature verification protect `/api/auth/wallet/challenge` and `/api/auth/wallet/verify`. |
+| Authorization | Implemented | Sensitive routes use `protect`; administrative routes additionally use `requireAdmin`. |
+| Input validation and sanitisation | Implemented | Zod schemas and shared sanitisation are applied to battle, prediction, profile, and wallet-auth writes. |
+| Abuse controls | Implemented | Global API, battle-write, prediction, and avatar-upload rate limiters are present. |
+| HTTP edge controls | Implemented | Helmet, configured CORS origins, body-size limits, centralized errors, and proxy trust configuration are active. |
+| Live connection authentication | Implemented | Socket.IO verifies Clerk or wallet tokens before users can join lobby/battle rooms. |
+| Duplicate battle actions | Implemented | Service checks plus unique MongoDB indexes prevent duplicate votes and predictions. Soroban additionally maintains vote participation state. |
+| Protected reports and history | Implemented | Match history and battle reports require authenticated access and restrict access to eligible participants. |
+| Avatar upload validation | Implemented | Only PNG, JPEG, and WebP data URLs with verified file signatures and a 5 MB maximum are accepted. |
+| Managed wallet encryption | Implemented | Managed wallet secrets are encrypted before MongoDB persistence and require a configured encryption key to decrypt. |
+| Secret tracking hygiene | Implemented | `.env` and local environment variants are ignored; no environment file is currently tracked by Git. |
+| Monitoring and audit signals | Implemented | Health, aggregate analytics, and security-relevant server logs provide operational visibility. |
 
----
+## Authentication and authorization
 
-## 1) Auth Protection
+### Clerk sessions
 
-### Requirement
-Ensure protected backend actions require authenticated identity.
+`Backend/src/middlewares/clerk.middleware.js` is the active server-side enforcement point for protected API routes. It reads a bearer token (or `x-clerk-token`), verifies Clerk claims, resolves the associated user, and attaches the identity to `req.auth`.
 
-### Evidence
-- `Backend/src/middlewares/clerk.middleware.js`
-  - `protect` middleware enforces bearer token presence.
-  - Supports Clerk token verification and wallet JWT verification.
-  - Rejects missing/invalid tokens with unauthorized responses.
-- Protected routes use `protect`, including:
-  - `Backend/src/modules/battles/routes/battle.routes.js`
-  - `Backend/src/modules/wallet/wallet.routes.js`
-  - `Backend/src/modules/predictions/routes/prediction.routes.js`
-  - `Backend/src/modules/admin/routes/admin.routes.js`
-  - `Backend/src/modules/users/routes/user.routes.js` (for `/me` and profile update)
+- Battle writes, wallet operations, profile changes, avatar uploads, prediction placement, and protected reports use `protect`.
+- `Backend/src/modules/admin/routes/admin.routes.js` combines `protect` and `requireAdmin` for administrative endpoints.
+- Browser-side Clerk routing improves the user experience, but backend route protection is the security boundary.
 
-### Verdict
-PASS
+### Freighter wallet sessions
 
----
+The wallet-auth flow verifies possession of the address rather than trusting a client-submitted public key:
 
-## 2) Route Protection
+1. `/api/auth/wallet/challenge` validates the Stellar public key, creates a cryptographically random nonce, and sets a five-minute expiry.
+2. The wallet signs the challenge through Freighter-compatible signing.
+3. `/api/auth/wallet/verify` checks the signature against the supplied public key, rejects expired or mismatched nonces, clears the nonce after use, and issues a signed wallet session token.
+4. Wallet lookup checks `walletPublicKey` and `identityWalletAddress` before using a legacy `wallet:<address>` identity. This prevents a future Freighter sign-in from creating a duplicate account for a Google-managed wallet.
 
-### Requirement
-Ensure restricted functionality is guarded and not publicly reachable without auth.
+Socket.IO applies the same Clerk-or-wallet-token verification before admitting a connection.
 
-### Evidence
-- Backend:
-  - Route-level protection via `protect` middleware on sensitive operations (create/join/vote/finalize/cancel, wallet operations, prediction placement, admin ops).
-  - Admin-only authorization via `requireAdmin` in `Backend/src/middlewares/clerk.middleware.js`.
-- Frontend:
-  - Clerk middleware present in `Frontend/src/proxy.ts`.
-  - Non-public route pattern calls `auth.protect()`.
+## Request and data protection
 
-### Important Note
-- `Frontend/src/proxy.ts` currently marks many app routes as public (`/dashboard`, `/battles`, `/battle`, `/wallet`, `/profile`), while page-level code still checks auth client-side.
-- Backend protection remains the source of truth for security enforcement.
+### Validation, sanitisation, and uploads
 
-### Verdict
-PASS
+- `Backend/src/modules/battles/routes/battle.routes.js` applies Zod validation, size limits, and sanitisation to topic, roast, and vote input.
+- `Backend/src/modules/predictions/routes/prediction.routes.js` validates and sanitises prediction input.
+- `Backend/src/modules/users/routes/user.routes.js` validates profile edits and applies a dedicated avatar-upload limiter.
+- `Backend/src/utils/inputSanitizer.js` removes control characters, enforces length bounds, and constrains usernames, CIDs, and wallet address input.
+- `Backend/src/modules/users/controllers/user.controller.js` validates image MIME type, base64 form, file signature, and a 5 MB maximum before Pinata upload.
 
----
+### HTTP and real-time boundaries
 
-## 3) Validation
+- `Backend/src/app.js` uses Helmet, origin allow-list CORS, a 10 MB JSON/body limit, a configurable global API limiter, and centralized 404/error middleware.
+- `Backend/src/config/socket.js` applies the same origin allow-list to Socket.IO and rejects unauthenticated sockets.
+- Write-heavy battle and prediction routes have stricter endpoint-level limiters than the general API limit.
 
-### Requirement
-Validate user input before processing.
+### Duplicate and replay resistance
 
-### Evidence
-- `zod` is used for schema validation:
-  - `Backend/src/modules/battles/routes/battle.routes.js`
-    - `createSchema`, `roastSchema`, `voteSchema`
-    - `validateBody(schema)` wrapper
-  - `Backend/src/modules/predictions/routes/prediction.routes.js`
-    - `placePredictionSchema`
-    - `validateBody(schema)` wrapper
-- Wallet auth routes enforce required fields and key-format checks:
-  - `Backend/src/modules/auth/routes/wallet-auth.routes.js`
-  - Validates required fields (`walletAddress`, `nonce`, `signedMessage`) and Stellar key format.
+- `BattleVote` enforces unique `{ battleId, voter }` records.
+- `Prediction` enforces unique `{ battleId, predictor }` records.
+- Battle services check existing records before persistence; the database index remains the final concurrency guard.
+- The Soroban contract records `HasVoted` state by wallet and match ID.
+- Wallet authentication nonces expire and are cleared after a successful verification.
 
-### Verdict
-PASS
+## Wallet and Stellar controls
 
----
+### Managed wallet secrets
 
-## 4) Rate Limiting
+Managed wallet private keys are encrypted with `WALLET_ENCRYPTION_KEY` (or the configured encryption key alias) before being stored as `walletEncryptedSecret`. `Backend/src/modules/wallet/wallet.service.js` refuses to encrypt or decrypt if no key is configured.
 
-### Requirement
-Throttle abusive request patterns.
+- Decryption occurs only in backend flows that must execute a managed-wallet action, such as escrow handling.
+- Wallet public addresses are returned by normal wallet APIs; private keys are not included in standard wallet responses.
+- Testnet-only secret export for Freighter import is explicitly disabled when `STELLAR_NETWORK=mainnet`, and the event is logged.
 
-### Evidence
-- Global API limiter in `Backend/src/app.js`:
-  - `app.use('/api', limiter)` with env-tunable window/max.
-- High-risk write endpoints have tighter limiters:
-  - `Backend/src/modules/battles/routes/battle.routes.js` (`writeLimiter`)
-  - `Backend/src/modules/predictions/routes/prediction.routes.js` (`predictionLimiter`)
+### Chain action integrity
 
-### Verdict
-PASS
+- Contract functions require authorization from the relevant Stellar address.
+- Contract state records joins, votes, and predictions per match.
+- API reports retain stored transaction hashes so users can inspect available transactions with Stellar Expert.
 
----
+## Secrets and configuration
 
-## 5) Env Secrets
+Production secrets must be supplied through the deployment platform's environment configuration and must never be copied into source files, screenshots, issue comments, or the README.
 
-### Requirement
-Store sensitive values in environment variables and avoid committing secrets.
+| Secret/configuration | Required production treatment |
+|---|---|
+| `CLERK_SECRET_KEY`, `CLERK_JWT_KEY`, `CLERK_WEBHOOK_SECRET` | Keep server-only; configure authorized parties/origins for the real frontend domain. |
+| `MONGODB_URI` | Store only in the backend environment; use a least-privilege database user and network restrictions. |
+| `WALLET_ENCRYPTION_KEY` | Use a unique high-entropy production value; rotate through a controlled key-migration plan. |
+| `STELLAR_*_SECRET`, `TREASURY_SECRET` | Store only in the backend deployment environment; never expose to the browser or commit. |
+| `PINATA_JWT` | Keep backend-only and limit the token's Pinata permissions where possible. |
+| `CLIENT_URL` / `CLIENT_ORIGINS` | Set exact production origins rather than broad wildcards. |
 
-### Evidence
-- Secrets/config read from env in multiple modules, e.g.:
-  - `Backend/src/config/clerk.js` (`CLERK_SECRET_KEY`, JWT keys)
-  - `Backend/src/modules/wallet/wallet.service.js` (`WALLET_ENCRYPTION_KEY`)
-  - `Backend/src/modules/battles/services/battleChain.service.js` (`STELLAR_ESCROW_SECRET`, etc.)
-- `.gitignore` entries exclude env files:
-  - Root `.gitignore`
-  - `Backend/.gitignore`
-  - `Frontend/.gitignore`
-- `git ls-files` check shows no tracked `.env` files.
+The repository ignores `.env`, `.env.local`, `.env.*.local`, `*.pem`, `secret.txt`, and build artifacts. Environment templates are documentation only and must be replaced with deployment-specific values.
 
-### Verdict
-PASS
+## Mainnet release gates
 
----
+These items are deliberately not marked complete. They are required before moving from the current testnet MVP to a production mainnet custody/payment environment.
 
-## 6) Duplicate Vote Prevention
+| Gate | Required action |
+|---|---|
+| Independent review | Perform a smart-contract and backend security audit, then remediate findings before handling mainnet value. |
+| Wallet custody model | Reassess managed-wallet custody; use a dedicated key-management solution and document recovery, rotation, and incident procedures. |
+| Encryption fallback removal | Remove or fail closed on every legacy/default encryption-key fallback, including older service paths, before mainnet deployment. |
+| Secret export | Keep secret export permanently disabled on mainnet and require a deliberate, audited recovery process instead. |
+| Distributed rate limiting | Use a shared backing store for rate limits if the backend is deployed with multiple replicas. |
+| Network and CSP review | Lock CORS/Clerk origins to exact domains and review a strict Content Security Policy for all third-party assets. |
+| Security regression tests | Add automated tests for unauthorized access, invalid/expired wallet signatures, duplicate actions, report access, upload rejection, and rate-limit behavior. |
+| Monitoring and response | Add alerting, log retention, dependency/secret rotation schedules, and a documented incident-response runbook. |
 
-### Requirement
-A user must not be able to vote twice for the same battle.
+## Verification commands
 
-### Evidence
-- Service-level check in `Backend/src/modules/battles/services/battle.service.js`:
-  - `BattleVote.findOne({ battleId: battle._id, voter: user._id })`
-  - Throws `Vote already recorded` when found.
-- Database-enforced uniqueness in `Backend/src/modules/battles/models/battleVote.model.js`:
-  - `battleVoteSchema.index({ battleId: 1, voter: 1 }, { unique: true })`
+Run these from the repository root before a release:
 
-### Verdict
-PASS
+```powershell
+git ls-files | rg "(^|/)\.env($|\.)"
+git diff --check
+```
 
----
+Expected result: no tracked environment files and no whitespace errors. Continue with the normal frontend build, backend checks, contract tests, and a testnet smoke test.
 
-## 7) Input Sanitization
+## Final status
 
-### Requirement
-Sanitize free-form input to reduce unsafe payloads and malformed text.
+**Testnet MVP:** the controls in the current-testnet table are implemented in source and documented above.
 
-### Evidence
-- Shared sanitizer utility:
-  - `Backend/src/utils/inputSanitizer.js`
-  - Centralized helpers: `sanitizeText`, `sanitizeUsername`, `sanitizeCid`, `sanitizeWalletAddress`
-- Route-level sanitization with schema transforms:
-  - `Backend/src/modules/battles/routes/battle.routes.js`
-  - `Backend/src/modules/predictions/routes/prediction.routes.js`
-  - `Backend/src/modules/users/routes/user.routes.js`
-- Wallet-auth input sanitization:
-  - `Backend/src/modules/auth/routes/wallet-auth.routes.js`
-  - Sanitizes `walletAddress`, `signerAddress`, `nonce`, and optional `username`
-- Service/controller defensive sanitization:
-  - `Backend/src/modules/battles/services/battle.service.js`
-  - `Backend/src/modules/users/controllers/user.controller.js`
+**Mainnet:** not approved by this checklist alone; complete every mainnet release gate and obtain an independent review first.
 
-### Verdict
-PASS
+## Related documentation
 
----
-
-## 8) Wallet Secret Encryption
-
-### Requirement
-Persist managed wallet secrets only in encrypted form.
-
-### Evidence
-- `Backend/src/modules/wallet/wallet.service.js`
-  - `encryptSecret(secret)` uses AES with env-provided key.
-  - `decryptSecret(encrypted)` used when operationally required.
-  - Throws when encryption key is not configured.
-- Wallet creation flow stores encrypted secret:
-  - `Backend/src/modules/wallet/wallet.controller.js`
-  - `user.walletEncryptedSecret = encryptedSecret`
-- Battle escrow flows read secrets via decryption only at execution time:
-  - `Backend/src/modules/battles/services/battleEscrow.service.js`
-
-### Verdict
-PASS
-
----
-
-<!-- ## Additional Hardening Recommendations
-
-These are not blockers for the current checklist completion, but improve posture:
-
-1. Centralize sanitization and output-encoding rules across all text inputs, not only battle topic/roast.
-2. Consider stricter frontend route gate defaults in `Frontend/src/proxy.ts` to reduce accidental exposure of authenticated UX.
-3. Replace any development fallback secrets/default keys in production paths with fail-fast enforcement everywhere.
-4. Add automated security tests for duplicate-vote rejection, rate-limit behavior, and auth bypass attempts. -->
-
----
-
-## Final Checklist Result
-
-The required checklist is implemented and documented.
-
-- Passed: 8 controls
-- Partial pass: 0 controls
+- [Production architecture](./ARCHITECTURE.md)
+- [README](./README.md)

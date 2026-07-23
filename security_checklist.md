@@ -17,7 +17,7 @@ This checklist records security controls verified against the current source tre
 | Freighter wallet proof | Implemented | A random challenge nonce, short expiry, public-key validation, and signature verification protect `/api/auth/wallet/challenge` and `/api/auth/wallet/verify`. |
 | Authorization | Implemented | Sensitive routes use `protect`; administrative routes additionally use `requireAdmin`. |
 | Input validation and sanitisation | Implemented | Zod schemas and shared sanitisation are applied to battle, prediction, profile, and wallet-auth writes. |
-| Abuse controls | Implemented | Global API, battle-write, prediction, and avatar-upload rate limiters are present. |
+| Abuse controls | Implemented | Global API, wallet-auth, Clerk-webhook, battle-write, prediction, and avatar-upload rate limiters are present. |
 | HTTP edge controls | Implemented | Helmet, configured CORS origins, body-size limits, centralized errors, and proxy trust configuration are active. |
 | Live connection authentication | Implemented | Socket.IO verifies Clerk or wallet tokens before users can join lobby/battle rooms. |
 | Duplicate battle actions | Implemented | Service checks plus unique MongoDB indexes prevent duplicate votes and predictions. Soroban additionally maintains vote participation state. |
@@ -25,6 +25,7 @@ This checklist records security controls verified against the current source tre
 | Avatar upload validation | Implemented | Only PNG, JPEG, and WebP data URLs with verified file signatures and a 5 MB maximum are accepted. |
 | Managed wallet encryption | Implemented | Managed wallet secrets are encrypted before MongoDB persistence and require a configured encryption key to decrypt. |
 | Secret tracking hygiene | Implemented | `.env` and local environment variants are ignored; no environment file is currently tracked by Git. |
+| Dependency and CI hardening | Implemented | npm and pnpm lockfiles apply patched transitive-dependency overrides; workflow `GITHUB_TOKEN` permissions are limited to the minimum required. |
 | Monitoring and audit signals | Implemented | Health, aggregate analytics, and security-relevant server logs provide operational visibility. |
 
 ## Authentication and authorization
@@ -36,6 +37,7 @@ This checklist records security controls verified against the current source tre
 - Battle writes, wallet operations, profile changes, avatar uploads, prediction placement, and protected reports use `protect`.
 - `Backend/src/modules/admin/routes/admin.routes.js` combines `protect` and `requireAdmin` for administrative endpoints.
 - Browser-side Clerk routing improves the user experience, but backend route protection is the security boundary.
+- The development authentication fallback is disabled unless `ALLOW_DEV_AUTH_FALLBACK=true` outside production, and only accepts HTTPS issuers under `*.clerk.accounts.dev`.
 
 ### Freighter wallet sessions
 
@@ -61,6 +63,7 @@ Socket.IO applies the same Clerk-or-wallet-token verification before admitting a
 ### HTTP and real-time boundaries
 
 - `Backend/src/app.js` uses Helmet, origin allow-list CORS, a 10 MB JSON/body limit, a configurable global API limiter, and centralized 404/error middleware.
+- Wallet challenge/verification and Clerk webhook endpoints have dedicated rate limiters; the inactive admin and legacy auth routers also declare rate-limit middleware before their handlers.
 - `Backend/src/config/socket.js` applies the same origin allow-list to Socket.IO and rejects unauthenticated sockets.
 - Write-heavy battle and prediction routes have stricter endpoint-level limiters than the general API limit.
 
@@ -103,6 +106,14 @@ Production secrets must be supplied through the deployment platform's environmen
 
 The repository ignores `.env`, `.env.local`, `.env.*.local`, `*.pem`, `secret.txt`, and build artifacts. Environment templates are documentation only and must be replaced with deployment-specific values.
 
+## Dependency and CI security
+
+- `Backend/package.json` and `Frontend/package.json` use npm overrides to keep vulnerable transitive packages on patched versions.
+- `Frontend/pnpm-workspace.yaml` contains the equivalent pnpm v11 overrides; when either package manager is used, its lockfile must be regenerated and reviewed.
+- GitHub Actions workflows use read-only `contents` access for jobs that check out the repository. The Render deploy-hook job receives no `GITHUB_TOKEN` permissions.
+- Dependabot and CodeQL findings are release blockers unless they are explicitly triaged, documented, and accepted as a non-exploitable risk.
+- Audit results are point-in-time evidence: repeat them for every release because newly published advisories can change the result without a code change.
+
 ## Mainnet release gates
 
 These items are deliberately not marked complete. They are required before moving from the current testnet MVP to a production mainnet custody/payment environment.
@@ -125,9 +136,19 @@ Run these from the repository root before a release:
 ```powershell
 git ls-files | rg "(^|/)\.env($|\.)"
 git diff --check
+
+Push-Location Backend
+npm.cmd audit --package-lock-only --omit=dev
+Pop-Location
+
+Push-Location Frontend
+npm.cmd ci --dry-run --ignore-scripts
+npm.cmd audit --package-lock-only --omit=dev
+pnpm.cmd audit --prod
+Pop-Location
 ```
 
-Expected result: no tracked environment files and no whitespace errors. Continue with the normal frontend build, backend checks, contract tests, and a testnet smoke test.
+Expected result: no tracked environment files, no whitespace errors, reproducible lockfiles, and no known production dependency vulnerabilities. Before release, also confirm that GitHub CodeQL and Dependabot have no untriaged open alerts. Continue with the normal frontend build, backend checks, contract tests, and a testnet smoke test.
 
 ## Final status
 

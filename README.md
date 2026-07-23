@@ -22,9 +22,6 @@ Roastellar is a production-ready, on-chain roast-battle dApp on Stellar testnet.
 
 ## Quick navigation
 
-- [Quick setup, CI/CD, and contract deployment](./GettingStarted.md)
-- [Production architecture](./ARCHITECTURE.md)
-- [Security checklist](./security_checklist.md)
 - [Product, mobile, monitoring, and transaction screenshots](#evidence-screenshots)
 - [June Level 4 evidence](#june--level-4-evidence)
 - [July 50+ user proof](#july-users-onboarded)

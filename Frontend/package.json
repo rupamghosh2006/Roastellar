@@ -25,7 +25,7 @@
     "@react-three/fiber": "^8.17.10",
     "@react-three/postprocessing": "^2.16.3",
     "@stellar/freighter-api": "^6.0.1",
-    "axios": "^1.18.0",
+    "axios": "^1.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "face-api.js": "^0.22.2",
@@ -33,7 +33,7 @@
     "gsap": "^3.15.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.323.0",
-    "next": "16.3.5",
+    "next": "16.4.0",
     "ogl": "^1.0.11",
     "postprocessing": "^6.39.1",
     "react": "18.3.1",
@@ -51,8 +51,8 @@
     "@types/react-dom": "^18.2.18",
     "@types/three": "^0.184.0",
     "autoprefixer": "^10.4.17",
-    "postcss": "^8.5.28",
-    "tailwindcss": "^3.4.1",
+    "postcss": "^8.5.29",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.3.3"
   },
   "overrides": {
